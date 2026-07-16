@@ -1,0 +1,19 @@
+VisualElement {
+}
+
+.SBM_ItemBackground {
+    flex-grow: 1;
+    background-color: rgba(23, 20, 35, 0.9);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-left-color: rgba(164, 123, 164, 0.5);
+    border-right-color: rgba(164, 123, 164, 0.5);
+    border-top-color: rgba(164, 123, 164, 0.5);
+    border-bottom-color: rgba(164, 123, 164, 0.5);
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+}

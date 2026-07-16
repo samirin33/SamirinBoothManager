@@ -1,0 +1,17 @@
+.SBM_Text {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+    -unity-font: url("project://database/Assets/samirin33/SamirinBoothManager/Font/YasashisaGothicBold-V2.otf?fileID=12800000&guid=643885b1bd1d1c242a0dad8d01748860&type=3#YasashisaGothicBold-V2");
+    -unity-font-definition: initial;
+}

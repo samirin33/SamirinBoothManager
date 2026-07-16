@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style_Text.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style_Text" />
+    <ui:VisualElement name="HeaderBackGround" class="SBM_Text" style="right: 0; top: 0; left: 0; height: 120px; background-color: rgba(54, 45, 87, 0.65); border-left-color: rgb(17, 17, 40); border-right-color: rgb(17, 17, 40); border-top-color: rgb(17, 17, 40); border-bottom-color: rgb(17, 17, 40); border-top-width: 0; border-right-width: 0; border-bottom-width: 3px; border-left-width: 0; border-top-left-radius: 0; justify-content: space-around;">
+        <ui:VisualElement name="TopArea" style="width: 100%; height: 64px; align-items: center; justify-content: center;">
+            <ui:VisualElement name="LogoArea" style="top: 0; bottom: 0; width: 75px; height: 50px; align-self: center; position: relative;" />
+            <ui:VisualElement style="position: absolute; left: 0; top: 0; right: 0; bottom: 0;">
+                <samirin33.SamirinBoothManager.UI.Parts.SBM_Button text="Samirin33 Booth" text-scale="1" background-color="#DC4E70FF" name="Button_Booth" style="top: 5px; left: 8px; width: 100px; height: 30px; -unity-font-definition: initial;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="custom-label" style="color: rgba(202, 172, 171, 0.5); height: auto; background-color: rgba(140, 110, 110, 0.36); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+            <ui:Label tabindex="-1" text="セットアップしたいアバターをここにセット" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Label" style="-unity-text-align: upper-center; color: rgba(255, 255, 255, 0.5); -unity-font-style: bold; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 14px;" />
+            <uie:ObjectField type="VRC.SDK3.Avatars.Components.VRCAvatarDescriptor, VRCSDK3A" name="AvatarDescriptor" style="height: 25px; font-size: 35%; -unity-font-style: normal; -unity-text-align: middle-left; width: 80%; align-self: center;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

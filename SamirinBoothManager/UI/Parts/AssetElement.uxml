@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_ItemBackground.uss?fileID=7433441132597879392&amp;guid=d4e033628de4dd747bf49aa116d205bb&amp;type=3#SBM_ItemBackground" />
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Interactive.uss?fileID=7433441132597879392&amp;guid=9f0bc6e3f30607f40a7614b1f3571611&amp;type=3#SBM_Interactive" />
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style_Text.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style_Text" />
+    <ui:VisualElement name="AnimationParent" class="SBM_Button SBM_Text" style="flex-grow: 1;">
+        <ui:VisualElement name="Background" class="SBM_ItemBackground" style="overflow: hidden;">
+            <ui:VisualElement name="Images" style="width: 100%; height: 75%;">
+                <ui:VisualElement name="Scroll" style="flex-grow: 1; flex-direction: column; transition-duration: 0.1s; translate: 0 0; flex-shrink: 1; flex-wrap: wrap;">
+                    <ui:VisualElement name="Image" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sahket/shitanoko/Gimmicks/MininokoBattle/Texture/Icon/1v1.png?fileID=2800000&amp;guid=50ab2b2caf46c214dae64bfe0180014a&amp;type=3#1v1&quot;); -unity-background-scale-mode: scale-and-crop; width: 100%; height: 100%;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="Info" style="flex-grow: 1;">
+                <ui:Label tabindex="-1" text="タイトル" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Name" style="font-size: 20px; -unity-text-align: upper-left; width: 100%; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; position: relative;" />
+                <ui:VisualElement style="flex-grow: 1; flex-direction: column-reverse; position: relative; background-color: rgba(65, 47, 66, 0.4);">
+                    <ui:Label tabindex="-1" text="verX.X.X" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Vertion" style="font-size: 10px; -unity-text-align: upper-right; width: 100%; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; position: absolute;" />
+                    <ui:Label tabindex="-1" text="新しいバージョンがあります！" parse-escape-sequences="true" display-tooltip-when-elided="true" name="NewVertionRemind" style="font-size: 10px; -unity-text-align: upper-left; width: 100%; padding-top: 4px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; position: absolute; color: rgb(255, 132, 132); display: flex;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

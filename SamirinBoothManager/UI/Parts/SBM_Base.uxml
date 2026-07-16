@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style_Text.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style_Text" />
+    <ui:VisualElement style="flex-grow: 1; background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/SBM_Back.png?fileID=2800000&amp;guid=f1d8d219fd2fd4241993727b4fcc806e&amp;type=3#SBM_Back&quot;); -unity-background-scale-mode: stretch-to-fill; height: 424px;">
+        <ui:VisualElement name="Grid" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/SBM_Grid.png?fileID=2800000&amp;guid=b1618095bf4a42341bb54559a7013115&amp;type=3#SBM_Grid&quot;); -unity-background-scale-mode: scale-and-crop; -unity-background-image-tint-color: rgba(255, 255, 255, 0.2);" />
+    </ui:VisualElement>
+</ui:UXML>

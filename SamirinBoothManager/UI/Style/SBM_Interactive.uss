@@ -1,0 +1,14 @@
+.SBM_Button {
+    scale: 1 1;
+    transition-property: scale;
+    transition-duration: 0.06s;
+    transition-timing-function: ease-out-sine;
+}
+
+.SBM_Button:hover {
+    scale: 1.1 1.1;
+}
+
+.SBM_Button:active {
+    scale: 0.9 0.9;
+}
