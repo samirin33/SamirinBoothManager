@@ -17,7 +17,7 @@ MonoBehaviour:
   images:
   - {fileID: 21300000, guid: 5831f4007b6be474d8ae1dfe5d3de668, type: 3}
   majorVertion: 0
-  minorVertion: 1
+  minorVertion: 2
   patchVertion: 0
   releaseDate:
     year: 2026
@@ -27,10 +27,17 @@ MonoBehaviour:
     year: 2026
     month: 7
     day: 16
+  updateInfos: []
   url: 
-  howToUpload:
-    steps: []
-  howToUse:
-    steps: []
+  price: 0
+  youtubeUrl: 
+  additionalInfos: []
+  variations:
+  - variationName: "\u3089\u3058\u307A\u3063\u3068\uFF01\u30AF\u30EB\u30DE"
+    variationDescription: "\u30AF\u30EB\u30DE\u578B"
+    prefabPath: Assets/samirin33/RadiPet/RadiPet_SimpleCar.prefab
+  - variationName: "\u3089\u3058\u307A\u3063\u3068\uFF01\u30C1\u30E3\u30EA\u30AA\u30C3\u30C8"
+    variationDescription: "\u30C1\u30E3\u30EA\u30AA\u30C3\u30C8\u578B"
+    prefabPath: Assets/samirin33/RadiPet/RadiPet_Chariot.prefab
   relatedAssets: []
   folderName: RadiPet

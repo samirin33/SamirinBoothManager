@@ -1,15 +1,15 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_AssetElement.uss?fileID=7433441132597879392&amp;guid=dd1f883692ae8a54fb601dfa0bd0f70c&amp;type=3#SBM_AssetElement" />
-    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style_Text.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style_Text" />
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style" />
     <ui:VisualElement class="SBM_Text" style="flex-grow: 1;">
         <ui:VisualElement name="Header" style="background-color: rgba(0, 0, 0, 0.4); top: 0; position: relative; height: 40px; width: 100%; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; flex-direction: row-reverse;">
-            <samirin33.SamirinBoothManager.UI.Parts.SBM_Button text="再読み込み" text-scale="0.6" name="Button_Reload" background-color="#3E546AFF" style="width: 60px; height: 20px; display: flex; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
-            <ui:DropdownField index="0" choices="名前順,最新順,アップデート順" name="DropdownField" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; height: 20px; width: 120px;" />
+            <samirin33.SamirinBoothManager.UI.Parts.SBM_Button text="再読み込み" text-scale="1.5" name="ButtonReload" background-color="#3E546AFF" style="width: 60px; height: 20px; display: flex; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
+            <ui:DropdownField index="0" choices="名前順,最新順,アップデート順" name="SortDropdown" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; height: 20px; width: 120px;" />
         </ui:VisualElement>
-        <ui:ScrollView vertical-scroller-visibility="AlwaysVisible" horizontal-scroller-visibility="Hidden" style="flex-grow: 1;">
-            <ui:VisualElement style="flex-grow: 1; flex-wrap: wrap; flex-direction: row; align-items: stretch; justify-content: center; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;">
-                <samirin33.SamirinBoothManager.UI.Parts.AssetElement class="SBM_AssetElement" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 12px; margin-right: 12px; margin-bottom: 12px; margin-left: 12px;" />
-            </ui:VisualElement>
+        <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" style="flex-grow: 1;">
+            <ui:Label tabindex="-1" text="インポート済み" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px;" />
+            <ui:VisualElement name="ImportedContents" style="flex-grow: 1; flex-wrap: wrap; flex-direction: row; align-items: stretch; justify-content: center; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
+            <ui:Label tabindex="-1" text="未インポート&#10;" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 16px; border-left-color: rgba(167, 147, 176, 0.6); border-right-color: rgba(167, 147, 176, 0.6); border-top-color: rgba(167, 147, 176, 0.6); border-bottom-color: rgba(167, 147, 176, 0.6); border-top-width: 3px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;" />
+            <ui:VisualElement name="NotImportedContents" style="flex-grow: 1; flex-wrap: wrap; flex-direction: row; align-items: stretch; justify-content: center; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
         </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

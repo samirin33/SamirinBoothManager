@@ -3,32 +3,11 @@ using UnityEngine.UIElements;
 
 namespace samirin33.SamirinBoothManager.UI.Parts
 {
-    public class AssetElement : SBM_UxmlPartElement
-    {
-        public new class UxmlFactory : UxmlFactory<AssetElement, UxmlTraits> { }
-        public new class UxmlTraits : VisualElement.UxmlTraits { }
-        public AssetElement() : base(nameof(AssetElement)) { }
-    }
-
-    public class AssetList : SBM_UxmlPartElement
-    {
-        public new class UxmlFactory : UxmlFactory<AssetList, UxmlTraits> { }
-        public new class UxmlTraits : VisualElement.UxmlTraits { }
-        public AssetList() : base(nameof(AssetList)) { }
-    }
-
     public class SBM_Base : SBM_UxmlPartElement
     {
         public new class UxmlFactory : UxmlFactory<SBM_Base, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits { }
         public SBM_Base() : base(nameof(SBM_Base)) { }
-    }
-
-    public class SBM_Header : SBM_UxmlPartElement
-    {
-        public new class UxmlFactory : UxmlFactory<SBM_Header, UxmlTraits> { }
-        public new class UxmlTraits : VisualElement.UxmlTraits { }
-        public SBM_Header() : base(nameof(SBM_Header)) { }
     }
 
 }

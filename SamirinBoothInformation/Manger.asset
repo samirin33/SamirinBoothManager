@@ -15,6 +15,7 @@ MonoBehaviour:
   name: SamirinBoothManager
   description: 
   images: []
+  category: 1
   majorVertion: 0
   minorVertion: 1
   patchVertion: 0
@@ -26,10 +27,11 @@ MonoBehaviour:
     year: 2026
     month: 7
     day: 16
+  updateInfos: []
   url: 
-  howToUpload:
-    steps: []
-  howToUse:
-    steps: []
+  price: 0
+  youtubeUrl: 
+  additionalInfos: []
+  variations: []
   relatedAssets: []
   folderName: 

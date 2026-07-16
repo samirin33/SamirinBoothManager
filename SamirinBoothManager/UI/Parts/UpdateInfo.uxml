@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style" />
+    <ui:VisualElement class="SBM_Text" style="flex-grow: 1; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; flex-direction: row; border-left-color: rgba(63, 53, 64, 0.3); border-right-color: rgba(63, 53, 64, 0.3); border-top-color: rgba(63, 53, 64, 0.3); border-bottom-color: rgba(63, 53, 64, 0.3); border-top-width: 0;">
+        <ui:VisualElement style="flex-grow: 1; -unity-text-align: middle-center;">
+            <ui:Label tabindex="-1" text="見出し" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Title" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; -unity-text-align: middle-left; font-size: 20px;" />
+            <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Discription" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; -unity-text-align: upper-left; font-size: 15px;" />
+        </ui:VisualElement>
+        <ui:Label tabindex="-1" text="YYYY/MM/DD" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Date" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; flex-grow: 1; -unity-text-align: upper-right;" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -8,7 +8,7 @@ public class SBM_UIMain : EditorWindow
 
     SBM_GridScroll _gridScroll;
 
-    [MenuItem("samirin33/SamirinBoothManager")]
+    [MenuItem("samirin33/SamirinBoothManager", priority = -100)]
     public static void ShowWindow()
     {
         var window = GetWindow<SBM_UIMain>();

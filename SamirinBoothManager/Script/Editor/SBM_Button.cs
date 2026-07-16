@@ -145,8 +145,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             focusable = true;
             pickingMode = PickingMode.Position;
 
-            // 入れ子テンプレートが親サイズいっぱいに広がるようにする
-            style.overflow = Overflow.Hidden;
+            // ボタンの scale アニメーションが周囲でクリップされないようにする
+            style.overflow = Overflow.Visible;
             var buttonRoot = this.Q<VisualElement>("ButtonRoot");
             if (buttonRoot != null)
             {
@@ -297,7 +297,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                     _contents.style.flexDirection = FlexDirection.Row;
                     _contents.style.justifyContent = Justify.Center;
                     _contents.style.alignItems = Align.Center;
-                    _contents.style.overflow = Overflow.Hidden;
+                    _contents.style.overflow = Overflow.Visible;
                 }
 
                 if (_buttonIcon != null)

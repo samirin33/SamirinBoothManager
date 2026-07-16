@@ -12,25 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc0c32a0775ca814e942d5f75ea84cf7, type: 3}
   m_Name: B_Info
   m_EditorClassIdentifier: 
-  name: "\u3066\u3059\u3068A"
+  name: "\u3066\u3059\u3068B"
   description: "\u3066\u3059\u3066\u3059"
   images:
   - {fileID: 21300000, guid: affa096c1112af34e8fca1ee8f83198d, type: 3}
+  category: 0
   majorVertion: 1
   minorVertion: 0
   patchVertion: 0
   releaseDate:
     year: 2026
     month: 7
-    day: 16
+    day: 15
   updateDate:
     year: 2026
     month: 7
     day: 16
+  updateInfos: []
   url: 
-  howToUpload:
-    steps: []
-  howToUse:
-    steps: []
+  price: 0
+  youtubeUrl: 
+  additionalInfos: []
+  variations: []
   relatedAssets: []
   folderName: A
