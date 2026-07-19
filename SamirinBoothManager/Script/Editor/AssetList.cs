@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,8 +8,31 @@ using VRC.SDK3.Avatars.Components;
 namespace samirin33.SamirinBoothManager.UI.Parts
 {
     /// <summary>
+    /// アセット一覧のカテゴリフィルタ（複数選択可）。
+    /// </summary>
+    [Flags]
+    public enum AssetCategoryFilter
+    {
+        None = 0,
+        [InspectorName("アバター")]
+        Avatar = 1 << 0,
+        [InspectorName("アバターギミック")]
+        AvatarGimmick = 1 << 1,
+        [InspectorName("衣装・アクセサリー")]
+        AvatarAccessory = 1 << 2,
+        [InspectorName("ワールド")]
+        World = 1 << 3,
+        [InspectorName("ワールドギミック")]
+        WorldGimmick = 1 << 4,
+        [InspectorName("3Dモデル")]
+        _3DModel = 1 << 5,
+        [InspectorName("その他")]
+        Other = 1 << 6
+    }
+
+    /// <summary>
     /// SamirinBoothInformation 内の SamirinBoothAssetInfo を一覧表示する。
-    /// インポート済みは ImportedContents、未インポートは NotImportedContents に振り分ける。
+    /// Other は OtherContents、それ以外はインポート済み／未インポートに振り分ける。
     /// </summary>
     public class AssetList : SBM_UxmlPartElement
     {
@@ -20,14 +41,10 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         const string InformationFolder = "Assets/samirin33/SamirinBoothInformation";
 
-        const string SortByName = "名前順";
-        const string SortByRelease = "最新順";
-        const string SortByUpdate = "アップデート順";
-
+        readonly ListHeader _listHeader;
         readonly VisualElement _importedContents;
         readonly VisualElement _notImportedContents;
-        readonly DropdownField _sortDropdown;
-        readonly SBM_Button _reloadButton;
+        readonly VisualElement _otherContents;
 
         readonly List<SamirinBoothAssetInfo> _infos = new List<SamirinBoothAssetInfo>();
 
@@ -49,6 +66,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 body.style.width = Length.Percent(100);
             }
 
+            _listHeader = this.Q<ListHeader>();
+
             var scrollView = this.Q<ScrollView>();
             _importedContents = scrollView != null
                 ? scrollView.Q<VisualElement>("ImportedContents")
@@ -56,26 +75,23 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _notImportedContents = scrollView != null
                 ? scrollView.Q<VisualElement>("NotImportedContents")
                 : null;
-
-            _sortDropdown = this.Q<DropdownField>("SortDropdown");
-            _reloadButton = this.Q<SBM_Button>("ButtonReload");
+            _otherContents = scrollView != null
+                ? scrollView.Q<VisualElement>("OtherContents")
+                : null;
 
             if (_importedContents == null)
                 Debug.LogError("[AssetList] ScrollView/#ImportedContents が見つかりません。");
             if (_notImportedContents == null)
                 Debug.LogError("[AssetList] ScrollView/#NotImportedContents が見つかりません。");
+            if (_otherContents == null)
+                Debug.LogError("[AssetList] ScrollView/#OtherContents が見つかりません。");
 
-            if (_sortDropdown != null)
+            if (_listHeader != null)
             {
-                _sortDropdown.choices = new List<string> { SortByName, SortByRelease, SortByUpdate };
-                if (_sortDropdown.index < 0)
-                    _sortDropdown.index = 0;
-
-                _sortDropdown.RegisterValueChangedCallback(_ => RebuildElements());
+                _listHeader.SortChanged += RebuildElements;
+                _listHeader.FilterChanged += RebuildElements;
+                _listHeader.ReloadClicked += OnReloadClicked;
             }
-
-            if (_reloadButton != null)
-                _reloadButton.clicked += OnReloadClicked;
 
             RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
             RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
@@ -141,6 +157,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             RefreshAttachedInContainer(_importedContents, descriptor);
             RefreshAttachedInContainer(_notImportedContents, descriptor);
+            RefreshAttachedInContainer(_otherContents, descriptor);
         }
 
         static void RefreshAttachedInContainer(VisualElement container, VRCAvatarDescriptor descriptor)
@@ -174,93 +191,87 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         void RebuildElements()
         {
-            if (_importedContents == null && _notImportedContents == null)
+            if (_importedContents == null && _notImportedContents == null && _otherContents == null)
                 return;
 
             _importedContents?.Clear();
             _notImportedContents?.Clear();
+            _otherContents?.Clear();
 
             var sorted = new List<SamirinBoothAssetInfo>(_infos);
-            SortInfos(sorted, _sortDropdown != null ? _sortDropdown.value : SortByName);
+            SortInfos(sorted, _listHeader != null ? _listHeader.SortMode : ListHeader.SortByName);
 
             var avatar = SBM_Header.CurrentAvatarDescriptor;
             for (int i = 0; i < sorted.Count; i++)
             {
                 var info = sorted[i];
+                if (info == null || !PassesFilter(info.category))
+                    continue;
+
                 var element = new AssetElement();
                 element.AddToClassList("SBM_AssetElement");
                 element.Bind(info);
                 element.RefreshAttached(avatar);
                 element.clicked += OnAssetElementClicked;
 
-                var container = IsImported(info) ? _importedContents : _notImportedContents;
-                container?.Add(element);
+                ResolveContainer(info)?.Add(element);
             }
+        }
+
+        VisualElement ResolveContainer(SamirinBoothAssetInfo info)
+        {
+            if (IsOtherSection(info.category))
+                return _otherContents;
+
+            return IsImported(info) ? _importedContents : _notImportedContents;
+        }
+
+        bool PassesFilter(Category category)
+        {
+            var filterMask = _listHeader != null
+                ? _listHeader.FilterMask
+                : ListHeader.DefaultFilterMask;
+
+            if (filterMask == AssetCategoryFilter.None)
+                return false;
+
+            var flag = ToFilterFlag(category);
+            return (filterMask & flag) != 0;
+        }
+
+        static AssetCategoryFilter ToFilterFlag(Category category)
+        {
+            var index = (int)category;
+            if (index < 0 || index > 6)
+                return AssetCategoryFilter.Other;
+            return (AssetCategoryFilter)(1 << index);
+        }
+
+        static bool IsOtherSection(Category category)
+        {
+            return category == Category.Other;
         }
 
         static bool IsImported(SamirinBoothAssetInfo info)
         {
-            if (info == null || string.IsNullOrEmpty(info.folderName))
-                return false;
-
-            var packagePath = $"Assets/samirin33/{info.folderName}/PackageAssetInfo.json";
-            var absolutePath = ToAbsolutePath(packagePath);
-            if (!File.Exists(absolutePath))
-                return false;
-
-            return ReadPackageJsonVersion(absolutePath) != null;
-        }
-
-        static Version ReadPackageJsonVersion(string absolutePath)
-        {
-            try
-            {
-                var json = File.ReadAllText(absolutePath);
-                var match = Regex.Match(json, "\"version\"\\s*:\\s*\"([^\"]+)\"");
-                if (!match.Success)
-                    return null;
-
-                return ParseVersion(match.Groups[1].Value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        static Version ParseVersion(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return null;
-
-            var parts = text.Trim().Split('.');
-            int major = parts.Length > 0 && int.TryParse(parts[0], out var ma) ? ma : 0;
-            int minor = parts.Length > 1 && int.TryParse(parts[1], out var mi) ? mi : 0;
-            int patch = parts.Length > 2 && int.TryParse(parts[2], out var pa) ? pa : 0;
-            return new Version(major, minor, patch);
-        }
-
-        static string ToAbsolutePath(string assetPath)
-        {
-            var projectRoot = Path.GetDirectoryName(Application.dataPath);
-            return Path.GetFullPath(Path.Combine(projectRoot, assetPath.Replace('/', Path.DirectorySeparatorChar)));
+            return SamirinBoothImportUtil.IsImported(info);
         }
 
         static void SortInfos(List<SamirinBoothAssetInfo> infos, string sortMode)
         {
             switch (sortMode)
             {
-                case SortByRelease:
+                case ListHeader.SortByRelease:
                     infos.Sort((a, b) => CompareDateDesc(a?.releaseDate, b?.releaseDate)
                         .ThenByName(a, b));
                     break;
 
-                case SortByUpdate:
+                case ListHeader.SortByUpdate:
                     infos.Sort((a, b) => CompareDateDesc(a?.updateDate, b?.updateDate)
                         .ThenByName(a, b));
                     break;
 
-                case SortByName:
+                case ListHeader.SortByName:
                 default:
                     infos.Sort((a, b) => string.Compare(a?.name, b?.name, StringComparison.OrdinalIgnoreCase));
                     break;

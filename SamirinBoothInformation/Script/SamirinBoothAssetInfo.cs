@@ -39,6 +39,7 @@ public class Variation
     public string variationName;
     public string variationDescription;
     public string prefabPath;
+    public int id;
 }
 
 [System.Serializable]

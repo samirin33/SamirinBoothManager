@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -36,25 +34,6 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly VisualElement _attachedLabel;
         readonly VisualElement _hoverTarget;
 
-        static readonly string[] CategoryNames =
-        {
-            "アバター",
-            "アバターギミック",
-            "衣装・アクセサリー",
-            "ワールド",
-            "ワールドギミック",
-            "3Dモデル",
-            "その他"
-        };
-
-        static readonly float CategoryHueStart = 0f;       // 赤
-        static readonly float CategoryHueEnd = 270f / 360f; // 紫
-        static readonly float CategorySaturation = 0.75f;
-        static readonly float CategoryValue = 0.90f;
-        static readonly float CategoryAlpha = 0.4f;
-        const float CategoryFontMax = 12f;
-        const float CategoryFontMin = 6f;
-
         int _imageCount;
         int _pageIndex = -1;
         int _appliedPageIndex = -1;
@@ -86,10 +65,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             if (_categoryLabel != null)
             {
-                _categoryLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-                _categoryLabel.style.color = Color.white;
-                _categoryLabel.style.overflow = Overflow.Hidden;
-                _categoryLabel.style.whiteSpace = WhiteSpace.NoWrap;
+                SamirinBoothCategoryUtil.SetupLabel(_categoryLabel);
                 _categoryLabel.RegisterCallback<GeometryChangedEvent>(OnCategoryGeometryChanged);
             }
 
@@ -131,19 +107,18 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             BindCategory(info.category);
             BindImages(info.images);
-            BindVersionState(info);
+
+            var showVersionBanner = info.category != Category.Other;
+            SetDisplay(_vertionBanner, showVersionBanner);
+            if (showVersionBanner)
+                BindVersionState(info);
+
             RefreshAttached(SBM_Header.CurrentAvatarDescriptor);
         }
 
         void BindCategory(Category category)
         {
-            if (_categoryLabel == null)
-                return;
-
-            var index = Mathf.Clamp((int)category, 0, CategoryNames.Length - 1);
-            _categoryLabel.text = CategoryNames[index];
-            _categoryLabel.style.backgroundColor = GetCategoryColor(index);
-            FitCategoryFontSize();
+            SamirinBoothCategoryUtil.BindLabel(_categoryLabel, category);
         }
 
         void OnCategoryGeometryChanged(GeometryChangedEvent evt)
@@ -151,64 +126,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (Mathf.Abs(evt.newRect.width - evt.oldRect.width) < 0.5f
                 && Mathf.Abs(evt.newRect.height - evt.oldRect.height) < 0.5f)
                 return;
-            FitCategoryFontSize();
-        }
-
-        void FitCategoryFontSize()
-        {
-            if (_categoryLabel == null)
-                return;
-
-            var text = _categoryLabel.text;
-            if (string.IsNullOrEmpty(text))
-                return;
-
-            float width = _categoryLabel.layout.width;
-            float height = _categoryLabel.layout.height;
-            if (width <= 1f || height <= 1f)
-            {
-                width = _categoryLabel.resolvedStyle.width;
-                height = _categoryLabel.resolvedStyle.height;
-            }
-
-            if (float.IsNaN(width) || float.IsNaN(height) || width <= 1f || height <= 1f)
-            {
-                _categoryLabel.schedule.Execute(FitCategoryFontSize).StartingIn(1);
-                return;
-            }
-
-            // 余白を少し確保
-            float availW = Mathf.Max(1f, width - 4f);
-            float availH = Mathf.Max(1f, height - 2f);
-            float fontSize = Mathf.Min(CategoryFontMax, availH);
-
-            while (fontSize > CategoryFontMin)
-            {
-                _categoryLabel.style.fontSize = fontSize;
-                var size = _categoryLabel.MeasureTextSize(
-                    text,
-                    availW,
-                    VisualElement.MeasureMode.Undefined,
-                    availH,
-                    VisualElement.MeasureMode.Undefined);
-
-                if (size.x <= availW && size.y <= availH)
-                    break;
-
-                fontSize -= 0.5f;
-            }
-
-            _categoryLabel.style.fontSize = Mathf.Max(CategoryFontMin, fontSize);
-        }
-
-        static Color GetCategoryColor(int index)
-        {
-            int max = Mathf.Max(1, CategoryNames.Length - 1);
-            float t = Mathf.Clamp01(index / (float)max);
-            float hue = Mathf.Lerp(CategoryHueStart, CategoryHueEnd, t);
-            var color = Color.HSVToRGB(hue, CategorySaturation, CategoryValue);
-            color.a = CategoryAlpha;
-            return color;
+            SamirinBoothCategoryUtil.FitFontSize(_categoryLabel);
         }
 
         public void RefreshAttached(VRCAvatarDescriptor avatar)
@@ -391,27 +309,19 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         void BindVersionState(SamirinBoothAssetInfo info)
         {
-            var packagePath = $"Assets/samirin33/{info.folderName}/PackageAssetInfo.json";
-            var absolutePath = ToAbsolutePath(packagePath);
             var infoVersion = new Version(
                 Math.Max(0, info.majorVertion),
                 Math.Max(0, info.minorVertion),
                 Math.Max(0, info.patchVertion));
 
-            if (string.IsNullOrEmpty(info.folderName) || !File.Exists(absolutePath))
+            if (!SamirinBoothImportUtil.TryGetInstalledVersion(info, out var installed))
             {
                 ApplyPatternA();
                 return;
             }
 
-            var installed = ReadPackageJsonVersion(absolutePath);
-            if (installed == null)
-            {
-                ApplyPatternA();
-                return;
-            }
-
-            if (installed < infoVersion)
+            // バージョン不明、または最新より古い → 更新あり表示
+            if (installed == null || installed < infoVersion)
                 ApplyPatternC(installed);
             else
                 ApplyPatternB(installed);
@@ -428,7 +338,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         void ApplyPatternB(Version installed)
         {
             SetBannerColor(PatternBColor);
-            SetVertionText(FormatVersion(installed));
+            SetVertionText(SamirinBoothImportUtil.FormatInstalledVersion(installed));
             SetDisplay(_vertionLabel, true);
             SetDisplay(_newVertionRemind, false);
             SetDisplay(_notImported, false);
@@ -437,7 +347,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         void ApplyPatternC(Version installed)
         {
             SetBannerColor(PatternCColor);
-            SetVertionText(FormatVersion(installed));
+            SetVertionText(SamirinBoothImportUtil.FormatInstalledVersion(installed));
             SetDisplay(_vertionLabel, true);
             SetDisplay(_newVertionRemind, true);
             SetDisplay(_notImported, false);
@@ -477,50 +387,10 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             element.style.display = next;
         }
 
-        static string FormatVersion(Version version)
-        {
-            return $"ver{version.Major}.{version.Minor}.{version.Build}";
-        }
-
         static Texture2D LoadFallbackTexture()
         {
             var path = AssetDatabase.GUIDToAssetPath(FallbackImageGuid);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-        }
-
-        static Version ReadPackageJsonVersion(string absolutePath)
-        {
-            try
-            {
-                var json = File.ReadAllText(absolutePath);
-                var match = Regex.Match(json, "\"version\"\\s*:\\s*\"([^\"]+)\"");
-                if (!match.Success)
-                    return null;
-
-                return ParseVersion(match.Groups[1].Value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        static Version ParseVersion(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return null;
-
-            var parts = text.Trim().Split('.');
-            int major = parts.Length > 0 && int.TryParse(parts[0], out var ma) ? ma : 0;
-            int minor = parts.Length > 1 && int.TryParse(parts[1], out var mi) ? mi : 0;
-            int patch = parts.Length > 2 && int.TryParse(parts[2], out var pa) ? pa : 0;
-            return new Version(major, minor, patch);
-        }
-
-        static string ToAbsolutePath(string assetPath)
-        {
-            var projectRoot = Path.GetDirectoryName(Application.dataPath);
-            return Path.GetFullPath(Path.Combine(projectRoot, assetPath.Replace('/', Path.DirectorySeparatorChar)));
         }
 
         static Color Hex(string hex)

@@ -2,12 +2,6 @@
     <ui:Template name="SBM_Base" src="project://database/Assets/samirin33/SamirinBoothManager/UI/Parts/SBM_Base.uxml?fileID=9197481963319205126&amp;guid=52f6333cbff66884e8ed6001acbe6661&amp;type=3#SBM_Base" />
     <ui:Instance template="SBM_Base" name="SBM_Base" style="width: 100%; height: 100%; position: absolute;" />
     <ui:VisualElement style="flex-grow: 1; width: 100%; height: 100%; justify-content: flex-start;">
-        <samirin33.SamirinBoothManager.UI.Parts.SBM_Header name="SBM_Header">
-            <samirin33.SamirinBoothManager.UI.Parts.AvatarDiscriptor />
-        </samirin33.SamirinBoothManager.UI.Parts.SBM_Header>
-        <ui:VisualElement style="flex-grow: 1;">
-            <samirin33.SamirinBoothManager.UI.Parts.AssetList name="AssetList" style="height: 100%; position: absolute; width: 100%;" />
-            <samirin33.SamirinBoothManager.UI.Parts.AssetDetails name="AssetDetails" style="position: absolute; width: 100%; height: 100%;" />
-        </ui:VisualElement>
+        <samirin33.SamirinBoothManager.UI.Parts.UpdateAssetList name="UpdateAssetList" style="height: 100%; width: 100%;" />
     </ui:VisualElement>
 </ui:UXML>

@@ -8,51 +8,49 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 {
     /// <summary>
     /// AttachPanel.uxml を SamirinBoothAssetInfo のバリエーション情報で埋める。
-    /// Attached = 選択中バリエーションがセット済み（Detach）
-    /// Change   = 他バリエーションがセット済み（置き換え）
-    /// Detached = 未セット（Attach）
+    /// ButtonSetup の色と文字で状態を表す。
+    /// ・AvatarGimmick / AvatarAccessory + AvatarDescriptor あり → アバターへセット（Detach/Change あり）
+    /// ・それ以外（AvatarDescriptor None / 他カテゴリ）→ シーンへ直接配置（複数可・解除なし）
+    /// ・Other はパネル非表示
     /// </summary>
     public class AttachPanel : SBM_UxmlPartElement
     {
         public new class UxmlFactory : UxmlFactory<AttachPanel, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits { }
 
+        enum SetupState { Attach, Detach, Change }
+
+        static readonly Color AttachColor = Hex("#439796FF");
+        static readonly Color DetachColor = Hex("#CC5A66FF");
+        static readonly Color ChangeColor = Hex("#439753FF");
+
         readonly DropdownField _variationDropdown;
         readonly Label _variationDescription;
-        readonly VisualElement _attached;
-        readonly VisualElement _detached;
-        readonly VisualElement _change;
-        readonly SBM_Button _buttonAttach;
-        readonly SBM_Button _buttonDetach;
-        readonly SBM_Button _buttonChange;
+        readonly SBM_Button _buttonSetup;
 
         readonly List<Variation> _validVariations = new List<Variation>();
 
         SamirinBoothAssetInfo _info;
         bool _isImported;
+        SetupState _state = SetupState.Attach;
+        bool _useAvatarAttach;
+
+        /// <summary>
+        /// Bind 結果としてパネルを表示すべきか（display が Flex か）。
+        /// </summary>
+        public bool IsContentVisible { get; private set; }
 
         public AttachPanel() : base(nameof(AttachPanel))
         {
             _variationDropdown = this.Q<DropdownField>("VariationDropDown");
             _variationDescription = this.Q<Label>("VariationDiscription");
-            _attached = this.Q<VisualElement>("Attached");
-            _detached = this.Q<VisualElement>("Detached");
-            _change = this.Q<VisualElement>("Change");
-            _buttonAttach = this.Q<SBM_Button>("ButtonAttach");
-            _buttonDetach = this.Q<SBM_Button>("ButtonDetach");
-            _buttonChange = this.Q<SBM_Button>("ButtonChange");
+            _buttonSetup = this.Q<SBM_Button>("ButtonSetup");
 
             if (_variationDropdown != null)
                 _variationDropdown.RegisterValueChangedCallback(OnVariationChanged);
 
-            if (_buttonAttach != null)
-                _buttonAttach.clicked += OnAttachClicked;
-
-            if (_buttonDetach != null)
-                _buttonDetach.clicked += OnDetachClicked;
-
-            if (_buttonChange != null)
-                _buttonChange.clicked += OnChangeClicked;
+            if (_buttonSetup != null)
+                _buttonSetup.clicked += OnSetupClicked;
 
             RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
             RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
@@ -77,7 +75,10 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         public void Bind(SamirinBoothAssetInfo info, bool isImported)
         {
             _info = info;
-            _isImported = isImported;
+            // バージョン不明（フォルダのみ等）のときは AttachPanel を出さない
+            _isImported = isImported
+                && SamirinBoothImportUtil.TryGetInstalledVersion(info, out var installed)
+                && installed != null;
 
             _validVariations.Clear();
             var choices = new List<string>();
@@ -103,14 +104,6 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 _variationDropdown.index = choices.Count > 0 ? 0 : -1;
                 _variationDropdown.SetEnabled(choices.Count > 0);
             }
-
-            var assetName = info?.name ?? "商品";
-            if (_buttonAttach != null)
-                _buttonAttach.Text = $"{assetName}をアバターにセットする！";
-            if (_buttonChange != null)
-                _buttonChange.Text = $"{assetName}をこのバリエーションに切り替える！";
-            if (_buttonDetach != null)
-                _buttonDetach.Text = "セット済み！（クリックで解除）";
 
             ApplySelectedVariation();
             RefreshAttachedState(SBM_Header.CurrentAvatarDescriptor);
@@ -141,18 +134,42 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             return _validVariations[index];
         }
 
-        /// <summary>
-        /// このアセットのバリエーションのうち、選択中以外でアバターに付いているものを返す。
-        /// </summary>
-        Variation FindOtherAttachedVariation(VRCAvatarDescriptor avatar, Variation selected)
+        static bool IsAttachPanelCategory(Category category)
         {
-            if (avatar == null)
+            return category != Category.Other;
+        }
+
+        static bool IsAvatarBoundCategory(Category category)
+        {
+            return category == Category.AvatarGimmick
+                || category == Category.AvatarAccessory;
+        }
+
+        /// <summary>
+        /// アバターへセットするモードか。SDK/Descriptor が無い場合はシーン配置へフォールバック。
+        /// </summary>
+        static bool ShouldUseAvatarAttach(SamirinBoothAssetInfo info, VRCAvatarDescriptor avatar)
+        {
+            if (info == null || avatar == null)
+                return false;
+            return IsAvatarBoundCategory(info.category);
+        }
+
+        /// <summary>
+        /// 選択中と同じ ID で、選択中以外のバリエーションがアバターに付いているものを返す。
+        /// ID が違うバリエーションは共存対象なので無視する。
+        /// </summary>
+        Variation FindSameIdAttachedVariation(VRCAvatarDescriptor avatar, Variation selected)
+        {
+            if (avatar == null || selected == null)
                 return null;
 
             for (int i = 0; i < _validVariations.Count; i++)
             {
                 var variation = _validVariations[i];
                 if (variation == null || variation == selected)
+                    continue;
+                if (variation.id != selected.id)
                     continue;
                 if (string.IsNullOrEmpty(variation.prefabPath))
                     continue;
@@ -165,37 +182,116 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         void RefreshAttachedState(VRCAvatarDescriptor avatar)
         {
-            var canShow = _isImported && avatar != null && _validVariations.Count > 0;
+            var category = _info != null ? _info.category : Category.Other;
+            var canShow = _isImported
+                && IsAttachPanelCategory(category)
+                && _validVariations.Count > 0;
+            IsContentVisible = canShow;
             SetDisplay(this, canShow);
             if (!canShow)
                 return;
+
+            _useAvatarAttach = ShouldUseAvatarAttach(_info, avatar);
+
+            if (!_useAvatarAttach)
+            {
+                // シーン配置: 複数可のため常に Attach（解除モードなし）
+                _state = SetupState.Attach;
+                ApplyButtonState();
+                return;
+            }
 
             var selected = GetSelectedVariation();
             var selectedAttached = selected != null
                 && !string.IsNullOrEmpty(selected.prefabPath)
                 && SBM_Header.AvatarContainsPrefab(avatar, selected.prefabPath);
-            var otherAttached = FindOtherAttachedVariation(avatar, selected);
+            var sameIdAttached = FindSameIdAttachedVariation(avatar, selected);
 
             // 選択中がセット済み → Detach
-            // 他バリエーションがセット済み → Change
-            // 未セット → Attach
-            SetDisplay(_attached, selectedAttached);
-            SetDisplay(_change, !selectedAttached && otherAttached != null);
-            SetDisplay(_detached, !selectedAttached && otherAttached == null);
+            // 同じ ID の他バリエーションがセット済み → Change
+            // 未セット（異なる ID の共存は可）→ Attach
+            if (selectedAttached)
+                _state = SetupState.Detach;
+            else if (sameIdAttached != null)
+                _state = SetupState.Change;
+            else
+                _state = SetupState.Attach;
+
+            ApplyButtonState();
+        }
+
+        void ApplyButtonState()
+        {
+            if (_buttonSetup == null)
+                return;
+
+            var assetName = _info?.name ?? "商品";
+            switch (_state)
+            {
+                case SetupState.Detach:
+                    _buttonSetup.BackgroundColor = DetachColor;
+                    _buttonSetup.Text = "セット済み！（クリックで解除）";
+                    break;
+
+                case SetupState.Change:
+                    _buttonSetup.BackgroundColor = ChangeColor;
+                    _buttonSetup.Text = $"{assetName}をこのバリエーションに切り替える！";
+                    break;
+
+                case SetupState.Attach:
+                default:
+                    _buttonSetup.BackgroundColor = AttachColor;
+                    _buttonSetup.Text = _useAvatarAttach
+                        ? $"{assetName}をアバターにセットする！"
+                        : $"{assetName}をシーンに配置する！";
+                    break;
+            }
+        }
+
+        void OnSetupClicked()
+        {
+            switch (_state)
+            {
+                case SetupState.Detach:
+                    OnDetachClicked();
+                    break;
+                case SetupState.Change:
+                    OnChangeClicked();
+                    break;
+                case SetupState.Attach:
+                default:
+                    OnAttachClicked();
+                    break;
+            }
         }
 
         void OnAttachClicked()
         {
-            var avatar = SBM_Header.CurrentAvatarDescriptor;
             var selected = GetSelectedVariation();
-            if (avatar == null || selected == null || string.IsNullOrEmpty(selected.prefabPath))
+            if (selected == null || string.IsNullOrEmpty(selected.prefabPath))
                 return;
 
-            var instance = SBM_Header.AttachPrefabToAvatar(avatar, selected.prefabPath);
+            var avatar = SBM_Header.CurrentAvatarDescriptor;
+            GameObject instance;
+
+            if (ShouldUseAvatarAttach(_info, avatar))
+            {
+                // 同じ ID が既にあれば置き換え、なければ追加（異なる ID は共存）
+                var sameId = FindSameIdAttachedVariation(avatar, selected);
+                instance = sameId != null
+                    ? SBM_Header.ReplacePrefabOnAvatar(avatar, sameId.prefabPath, selected.prefabPath)
+                    : SBM_Header.AttachPrefabToAvatar(avatar, selected.prefabPath);
+            }
+            else
+            {
+                // AvatarDescriptor None / 非アバター向けカテゴリ / SDK 未使用時はシーンへ
+                instance = SBM_Header.InstantiatePrefabInScene(selected.prefabPath);
+            }
+
             if (instance == null)
                 return;
 
-            AfterHierarchyChanged(avatar);
+            AfterHierarchyChanged(avatar, instance);
         }
 
         void OnDetachClicked()
@@ -208,7 +304,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (!SBM_Header.DetachPrefabFromAvatar(avatar, selected.prefabPath))
                 return;
 
-            AfterHierarchyChanged(avatar);
+            AfterHierarchyChanged(avatar, null);
         }
 
         void OnChangeClicked()
@@ -218,18 +314,23 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (avatar == null || selected == null || string.IsNullOrEmpty(selected.prefabPath))
                 return;
 
-            var other = FindOtherAttachedVariation(avatar, selected);
-            var oldPath = other?.prefabPath;
+            var sameId = FindSameIdAttachedVariation(avatar, selected);
+            var oldPath = sameId?.prefabPath;
             var instance = SBM_Header.ReplacePrefabOnAvatar(avatar, oldPath, selected.prefabPath);
             if (instance == null)
                 return;
 
-            AfterHierarchyChanged(avatar);
+            AfterHierarchyChanged(avatar, instance);
         }
 
-        void AfterHierarchyChanged(VRCAvatarDescriptor avatar)
+        void AfterHierarchyChanged(VRCAvatarDescriptor avatar, GameObject instance)
         {
-            EditorUtility.SetDirty(avatar.gameObject);
+            if (avatar != null)
+                EditorUtility.SetDirty(avatar.gameObject);
+
+            if (instance != null)
+                Selection.activeGameObject = instance;
+
             RefreshAttachedState(avatar);
             RefreshAssetListLabels(avatar);
             RefreshAdditionalInfoFocusButtons();
@@ -259,6 +360,12 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (element == null)
                 return;
             element.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        static Color Hex(string hex)
+        {
+            ColorUtility.TryParseHtmlString(hex, out var color);
+            return color;
         }
     }
 }

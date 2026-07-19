@@ -1,15 +1,14 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style" />
     <ui:VisualElement class="SBM_Text" style="flex-grow: 1;">
-        <ui:VisualElement name="Header" style="background-color: rgba(0, 0, 0, 0.4); top: 0; position: relative; height: 40px; width: 100%; padding-top: 4px; padding-right: 4px; padding-bottom: 4px; padding-left: 4px; flex-direction: row-reverse;">
-            <samirin33.SamirinBoothManager.UI.Parts.SBM_Button text="再読み込み" text-scale="1.5" name="ButtonReload" background-color="#3E546AFF" style="width: 60px; height: 20px; display: flex; margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px;" />
-            <ui:DropdownField index="0" choices="名前順,最新順,アップデート順" name="SortDropdown" style="margin-top: 5px; margin-right: 5px; margin-bottom: 5px; margin-left: 5px; height: 20px; width: 120px;" />
-        </ui:VisualElement>
+        <samirin33.SamirinBoothManager.UI.Parts.ListHeader />
         <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" style="flex-grow: 1;">
-            <ui:Label tabindex="-1" text="インポート済み" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px;" />
+            <ui:Label tabindex="-1" text="インポート済み" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px; flex-grow: 1;" />
             <ui:VisualElement name="ImportedContents" style="flex-grow: 1; flex-wrap: wrap; flex-direction: row; align-items: stretch; justify-content: center; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
-            <ui:Label tabindex="-1" text="未インポート&#10;" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 16px; border-left-color: rgba(167, 147, 176, 0.6); border-right-color: rgba(167, 147, 176, 0.6); border-top-color: rgba(167, 147, 176, 0.6); border-bottom-color: rgba(167, 147, 176, 0.6); border-top-width: 3px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;" />
+            <ui:Label tabindex="-1" text="未インポート" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px; flex-grow: 1;" />
             <ui:VisualElement name="NotImportedContents" style="flex-grow: 1; flex-wrap: wrap; flex-direction: row; align-items: stretch; justify-content: center; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
+            <ui:Label tabindex="-1" text="その他" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Label" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 16px; flex-grow: 1;" />
+            <ui:VisualElement name="OtherContents" style="flex-grow: 1; flex-wrap: wrap; flex-direction: row; align-items: stretch; justify-content: center; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
         </ui:ScrollView>
     </ui:VisualElement>
 </ui:UXML>

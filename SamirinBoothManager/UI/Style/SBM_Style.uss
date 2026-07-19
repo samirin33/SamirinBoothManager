@@ -112,13 +112,13 @@
 .BackArea_Enable {
     opacity: 1;
     transition-duration: 0.2s;
+    transition-property: opacity;
 }
 
 .DtailGroup_Disable {
     translate: 0 100%;
-    transition-property: translate, height;
-    transition-duration: 0.5s, 0.75s;
-    transition-timing-function: ease-out-cubic, ease-in-out-cubic;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out-cubic;
 }
 
 .DtailGroup_Enable {
@@ -126,4 +126,12 @@
     height: 100%;
     transition-duration: 0.5s;
     transition-timing-function: ease-out-cubic;
+}
+
+.ListHeader {
+    height: 20px;
+    margin-top: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
 }

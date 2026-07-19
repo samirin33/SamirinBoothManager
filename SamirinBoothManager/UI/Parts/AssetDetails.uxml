@@ -6,13 +6,14 @@
             <ui:ScrollView>
                 <ui:VisualElement name="Background" class="SBM_ItemBackground" style="flex-grow: 1; padding-top: 25px; padding-right: 25px; padding-bottom: 25px; padding-left: 25px; overflow: hidden; margin-bottom: 220px;">
                     <ui:VisualElement style="height: 50px; flex-direction: row;">
-                        <samirin33.SamirinBoothManager.UI.Parts.SBM_Button name="ButtonBooth" background-color="#DC4E70FF" text="この商品をBoothで開く" style="height: 50px; width: 200px; align-self: flex-start; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px; left: 0; position: relative;" />
+                        <samirin33.SamirinBoothManager.UI.Parts.SBM_Button name="ButtonBooth" background-color="#DC4E70FF" text="この商品をサイトで開く" style="height: 50px; width: 200px; align-self: flex-start; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px; left: 0; position: relative;" />
                         <ui:Label tabindex="-1" text="価格: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Price" style="-unity-text-align: upper-left; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 15px; margin-left: 5px;" />
                         <samirin33.SamirinBoothManager.UI.Parts.SBM_Button background-color="#CC424BFF" text="とじる" name="ButtonClose" style="height: 50px; width: 75px; align-self: flex-end; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px; right: 0; position: absolute;" />
                     </ui:VisualElement>
                     <ui:VisualElement name="Header" class="DetailPanel">
                         <ui:Label tabindex="-1" text="商品名" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Name" style="font-size: 30px; -unity-font-style: bold; position: relative; flex-grow: 1;" />
                         <ui:Label tabindex="-1" text="説明欄" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Discription" style="margin-top: 12px; margin-right: 50px; margin-bottom: 12px; margin-left: 50px; font-size: 15px; flex-grow: 1;" />
+                        <ui:Label tabindex="-1" text="カテゴリ" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CategoryLabel" style="position: absolute; top: 5px; right: 5px; width: 100px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(20, 23, 35, 0.4); height: 20px; font-size: 12px;" />
                     </ui:VisualElement>
                     <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
                         <ui:ScrollView mode="Horizontal" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Auto" name="PRImages" style="height: 280px; background-color: rgba(26, 26, 30, 0.6);">
@@ -25,12 +26,12 @@
                             <ui:Label tabindex="-1" text="https://www.youtube.com/" parse-escape-sequences="true" display-tooltip-when-elided="true" name="YoutubeLink" style="flex-grow: 1; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: middle-left; font-size: 14px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
+                    <ui:VisualElement name="VersionInfo" class="DetailPanel" style="flex-grow: 1;">
                         <ui:VisualElement style="flex-grow: 1; flex-direction: row-reverse;">
                             <ui:Label tabindex="-1" text="最終更新日 YYYY/MM/DD" parse-escape-sequences="true" display-tooltip-when-elided="true" name="UpdateDate" style="font-size: 12px;" />
                             <ui:Label tabindex="-1" text="公開日 YYYY/MM/DD" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ReleaseDate" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 12px;" />
                         </ui:VisualElement>
-                        <ui:VisualElement name="VersionInfo" style="height: 74px; width: 100%; overflow: hidden; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; flex-direction: row;">
+                        <ui:VisualElement style="height: 74px; width: 100%; overflow: hidden; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; flex-direction: row;">
                             <ui:VisualElement name="HasImopertedGroup" style="flex-grow: 1; flex-direction: row; background-color: rgb(61, 86, 104); width: 50%;">
                                 <ui:Label tabindex="-1" text="インポート済み！" parse-escape-sequences="true" display-tooltip-when-elided="true" name="HasImported" class="VersionText" style="flex-grow: 1; font-size: 20px;" />
                             </ui:VisualElement>
@@ -45,7 +46,7 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:Label tabindex="-1" text="新しいバージョンが公開されています！Boothサイトから最新版のダウンロード&amp;インポートをオススメします！" parse-escape-sequences="true" display-tooltip-when-elided="true" name="NewVertionRemind" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; color: rgb(220, 78, 112); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 12px;" />
+                        <ui:Label tabindex="-1" text="新しいバージョンが公開されています！サイトから最新版のダウンロード&amp;インポートをオススメします！" parse-escape-sequences="true" display-tooltip-when-elided="true" name="NewVertionRemind" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; color: rgb(220, 78, 112); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 12px;" />
                     </ui:VisualElement>
                     <ui:VisualElement name="AdditionalInfomations" class="DetailPanel" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
                         <samirin33.SamirinBoothManager.UI.Parts.AdditionalInfo />
@@ -65,6 +66,6 @@
                 </ui:VisualElement>
             </ui:ScrollView>
         </ui:VisualElement>
-        <samirin33.SamirinBoothManager.UI.Parts.AttachPanel name="AttachPanel" class="DtailGroup_Disable" style="position: absolute; bottom: 0; width: 100%; height: 190px; display: flex;" />
     </ui:VisualElement>
+    <samirin33.SamirinBoothManager.UI.Parts.AttachPanel name="AttachPanel" class="DtailGroup_Disable" style="position: absolute; bottom: 0; width: 100%; height: 190px; display: flex;" />
 </ui:UXML>

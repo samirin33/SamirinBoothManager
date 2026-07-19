@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -9,60 +8,62 @@ using VRC.SDK3.Avatars.Components;
 namespace samirin33.SamirinBoothManager.UI.Parts
 {
     /// <summary>
-    /// ヘッダー。シーン上の有効な VRCAvatarDescriptor をドロップダウンで選択する。
+    /// ヘッダー。Booth リンクと AvatarDiscriptor（アバター選択）を含む。
     /// </summary>
     public class SBM_Header : SBM_UxmlPartElement
     {
         public new class UxmlFactory : UxmlFactory<SBM_Header, UxmlTraits> { }
         public new class UxmlTraits : VisualElement.UxmlTraits { }
 
-        const string NoneLabel = "None";
         const string BoothUrl = "https://samirin33-vrc.booth.pm/";
+        const string XUrl = "https://x.com/samirin33_VRC";
+        const string MainXUrl = "https://x.com/samirin33";
 
-        public static event Action<VRCAvatarDescriptor> AvatarDescriptorChanged;
+        /// <summary>互換用。実体は AvatarDiscriptor。</summary>
+        public static event Action<VRCAvatarDescriptor> AvatarDescriptorChanged
+        {
+            add => AvatarDiscriptor.AvatarDescriptorChanged += value;
+            remove => AvatarDiscriptor.AvatarDescriptorChanged -= value;
+        }
 
-        public static VRCAvatarDescriptor CurrentAvatarDescriptor { get; private set; }
+        /// <summary>互換用。実体は AvatarDiscriptor。</summary>
+        public static VRCAvatarDescriptor CurrentAvatarDescriptor =>
+            AvatarDiscriptor.CurrentAvatarDescriptor;
 
-        readonly DropdownField _avatarDropdown;
+        readonly VisualElement _headerBackGround;
         readonly VisualElement _logoArea;
         readonly SBM_Button _boothButton;
-        readonly List<VRCAvatarDescriptor> _avatars = new List<VRCAvatarDescriptor>();
-        readonly List<string> _choices = new List<string>();
+        readonly SBM_Button _xButton;
 
-        bool _suppressNotify;
-        bool _hierarchyHooked;
+        /// <summary>
+        /// 親 UXML で SBM_Header に置いた子要素は HeaderBackGround 配下に入る。
+        /// </summary>
+        public override VisualElement contentContainer =>
+            _headerBackGround ?? this;
 
         public SBM_Header() : base(nameof(SBM_Header))
         {
-            _avatarDropdown = this.Q<DropdownField>("AvatarDescriptor");
+            _headerBackGround = this.Q<VisualElement>("HeaderBackGround");
             _logoArea = this.Q<VisualElement>("LogoArea");
             _boothButton = this.Q<SBM_Button>("Button_Booth");
+            _xButton = this.Q<SBM_Button>("Button_X");
 
             if (_logoArea != null)
             {
                 _logoArea.pickingMode = PickingMode.Position;
-                _logoArea.RegisterCallback<ClickEvent>(OnBoothClicked);
+                _logoArea.RegisterCallback<ClickEvent>(OnLogoClicked);
             }
 
             if (_boothButton != null)
                 _boothButton.clicked += OpenBoothPage;
 
-            if (_avatarDropdown != null)
-            {
-                _avatarDropdown.RegisterValueChangedCallback(OnAvatarDropdownChanged);
-                // 開く直前に最新のシーン状態へ更新
-                _avatarDropdown.RegisterCallback<PointerDownEvent>(
-                    _ => RefreshAvatarChoices(keepSelection: true),
-                    TrickleDown.TrickleDown);
-            }
-
-            RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
-            RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
+            if (_xButton != null)
+                _xButton.clicked += OpenXPage;
         }
 
-        void OnBoothClicked(ClickEvent evt)
+        void OnLogoClicked(ClickEvent evt)
         {
-            OpenBoothPage();
+            OpenMainXPage();
             evt.StopPropagation();
         }
 
@@ -71,176 +72,14 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             Application.OpenURL(BoothUrl);
         }
 
-        void OnAttachToPanel(AttachToPanelEvent evt)
+        static void OpenXPage()
         {
-            if (!_hierarchyHooked)
-            {
-                EditorApplication.hierarchyChanged += OnHierarchyChanged;
-                _hierarchyHooked = true;
-            }
-
-            RefreshAvatarChoices(keepSelection: false);
+            Application.OpenURL(XUrl);
         }
 
-        void OnDetachFromPanel(DetachFromPanelEvent evt)
+        static void OpenMainXPage()
         {
-            if (!_hierarchyHooked)
-                return;
-
-            EditorApplication.hierarchyChanged -= OnHierarchyChanged;
-            _hierarchyHooked = false;
-        }
-
-        void OnHierarchyChanged()
-        {
-            if (panel == null)
-                return;
-
-            RefreshAvatarChoices(keepSelection: true);
-        }
-
-        void OnAvatarDropdownChanged(ChangeEvent<string> evt)
-        {
-            if (_suppressNotify)
-                return;
-
-            NotifyAvatarChanged(ResolveSelectedAvatar());
-        }
-
-        void RefreshAvatarChoices(bool keepSelection)
-        {
-            if (_avatarDropdown == null)
-                return;
-
-            var previous = keepSelection ? CurrentAvatarDescriptor : null;
-            CollectEnabledAvatars(_avatars);
-            BuildChoices(_avatars, _choices);
-
-            var nextIndex = 0;
-            if (previous != null)
-            {
-                var found = _avatars.IndexOf(previous);
-                if (found >= 0)
-                    nextIndex = found + 1; // +1 = None の分
-            }
-            else if (!keepSelection && _avatars.Count > 0)
-            {
-                // 既定: Hierarchy 上で最も上の有効アバター
-                nextIndex = 1;
-            }
-
-            _suppressNotify = true;
-            try
-            {
-                _avatarDropdown.choices = new List<string>(_choices);
-                if (nextIndex >= 0 && nextIndex < _choices.Count)
-                    _avatarDropdown.SetValueWithoutNotify(_choices[nextIndex]);
-                else
-                    _avatarDropdown.SetValueWithoutNotify(NoneLabel);
-            }
-            finally
-            {
-                _suppressNotify = false;
-            }
-
-            var selected = ResolveSelectedAvatar();
-            if (selected != CurrentAvatarDescriptor)
-                NotifyAvatarChanged(selected);
-        }
-
-        VRCAvatarDescriptor ResolveSelectedAvatar()
-        {
-            if (_avatarDropdown == null)
-                return null;
-
-            var index = _choices.IndexOf(_avatarDropdown.value);
-            if (index <= 0 || index > _avatars.Count)
-                return null;
-
-            return _avatars[index - 1];
-        }
-
-        static void BuildChoices(List<VRCAvatarDescriptor> avatars, List<string> choices)
-        {
-            choices.Clear();
-            choices.Add(NoneLabel);
-
-            var nameCounts = new Dictionary<string, int>();
-            for (int i = 0; i < avatars.Count; i++)
-            {
-                var name = avatars[i] != null ? avatars[i].gameObject.name : "Missing";
-                nameCounts.TryGetValue(name, out var count);
-                nameCounts[name] = count + 1;
-            }
-
-            var nameSeen = new Dictionary<string, int>();
-            for (int i = 0; i < avatars.Count; i++)
-            {
-                var avatar = avatars[i];
-                if (avatar == null)
-                {
-                    choices.Add($"Missing ({i})");
-                    continue;
-                }
-
-                var name = avatar.gameObject.name;
-                if (nameCounts[name] <= 1)
-                {
-                    choices.Add(name);
-                    continue;
-                }
-
-                nameSeen.TryGetValue(name, out var seen);
-                nameSeen[name] = seen + 1;
-                choices.Add($"{name} ({GetHierarchyPath(avatar.transform)})");
-            }
-        }
-
-        static string GetHierarchyPath(Transform transform)
-        {
-            if (transform.parent == null)
-                return transform.name;
-
-            var path = transform.name;
-            var current = transform.parent;
-            while (current != null && current.parent != null)
-            {
-                path = current.name + "/" + path;
-                current = current.parent;
-            }
-
-            return path;
-        }
-
-        static void CollectEnabledAvatars(List<VRCAvatarDescriptor> results)
-        {
-            results.Clear();
-
-            for (int s = 0; s < SceneManager.sceneCount; s++)
-            {
-                var scene = SceneManager.GetSceneAt(s);
-                if (!scene.IsValid() || !scene.isLoaded)
-                    continue;
-
-                var roots = scene.GetRootGameObjects();
-                for (int i = 0; i < roots.Length; i++)
-                    CollectEnabledAvatarsDepthFirst(roots[i].transform, results);
-            }
-        }
-
-        static void CollectEnabledAvatarsDepthFirst(Transform root, List<VRCAvatarDescriptor> results)
-        {
-            if (root == null)
-                return;
-
-            var descriptor = root.GetComponent<VRCAvatarDescriptor>();
-            if (descriptor != null
-                && descriptor.enabled
-                && root.gameObject.activeInHierarchy)
-                results.Add(descriptor);
-
-            for (int i = 0; i < root.childCount; i++)
-                CollectEnabledAvatarsDepthFirst(root.GetChild(i), results);
+            Application.OpenURL(MainXUrl);
         }
 
         /// <summary>
@@ -248,15 +87,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         /// </summary>
         public static VRCAvatarDescriptor FindTopmostEnabledAvatarDescriptor()
         {
-            var list = new List<VRCAvatarDescriptor>();
-            CollectEnabledAvatars(list);
-            return list.Count > 0 ? list[0] : null;
-        }
-
-        static void NotifyAvatarChanged(VRCAvatarDescriptor descriptor)
-        {
-            CurrentAvatarDescriptor = descriptor;
-            AvatarDescriptorChanged?.Invoke(descriptor);
+            return AvatarDiscriptor.FindTopmostEnabledAvatarDescriptor();
         }
 
         /// <summary>
@@ -375,6 +206,36 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (instance != null && siblingIndex >= 0)
                 instance.transform.SetSiblingIndex(siblingIndex);
 
+            return instance;
+        }
+
+        /// <summary>
+        /// アクティブシーンのルートに prefabPath のプレハブを配置する（複数配置可）。
+        /// </summary>
+        public static GameObject InstantiatePrefabInScene(string prefabPath)
+        {
+            if (string.IsNullOrEmpty(prefabPath))
+                return null;
+
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"[SBM] Prefab not found: {prefabPath}");
+                return null;
+            }
+
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || !scene.isLoaded)
+            {
+                Debug.LogError("[SBM] Active scene is not available.");
+                return null;
+            }
+
+            var instance = PrefabUtility.InstantiatePrefab(prefab, scene) as GameObject;
+            if (instance == null)
+                return null;
+
+            Undo.RegisterCreatedObjectUndo(instance, "Place Prefab In Scene");
             return instance;
         }
     }

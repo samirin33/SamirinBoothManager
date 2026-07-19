@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -24,6 +22,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         readonly VisualElement _backArea;
         readonly VisualElement _informationsGroup;
+        readonly VisualElement _dtailGroup;
         readonly AttachPanel _attachPanel;
         readonly SBM_Button _buttonClose;
         readonly SBM_Button _buttonBooth;
@@ -31,11 +30,13 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly Label _price;
         readonly Label _name;
         readonly Label _description;
+        readonly Label _categoryLabel;
         readonly VisualElement _imageContents;
         readonly VisualElement _prMovie;
         readonly Label _youtubeLink;
         readonly Label _updateDate;
         readonly Label _releaseDate;
+        readonly VisualElement _versionInfo;
         readonly VisualElement _hasImportedGroup;
         readonly Label _hasImportedLabel;
         readonly Label _currentVertionLabel;
@@ -68,6 +69,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             _backArea = this.Q<VisualElement>("BackArea");
             _informationsGroup = this.Q<VisualElement>("InformationsGroup");
+            _dtailGroup = this.Q<VisualElement>("DtailGroup");
             _attachPanel = this.Q<AttachPanel>("AttachPanel");
             _buttonClose = this.Q<SBM_Button>("ButtonClose");
             _buttonBooth = this.Q<SBM_Button>("ButtonBooth");
@@ -75,11 +77,14 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _price = this.Q<Label>("Price");
             _name = this.Q<Label>("Name");
             _description = this.Q<Label>("Discription");
+            _categoryLabel = this.Q<Label>("CategoryLabel");
+            SamirinBoothCategoryUtil.SetupLabel(_categoryLabel);
             _imageContents = this.Q<VisualElement>("ImageContents");
             _prMovie = this.Q<VisualElement>("PRMovie");
             _youtubeLink = this.Q<Label>("YoutubeLink");
             _updateDate = this.Q<Label>("UpdateDate");
             _releaseDate = this.Q<Label>("ReleaseDate");
+            _versionInfo = this.Q<VisualElement>("VersionInfo");
             _hasImportedGroup = this.Q<VisualElement>("HasImopertedGroup");
             _hasImportedLabel = this.Q<Label>("HasImported");
             _currentVertionLabel = this.Q<Label>("CurrentVertion");
@@ -117,12 +122,21 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         public void Show(SamirinBoothAssetInfo info)
         {
             BoundInfo = info;
+
+            // 読み込み完了まで詳細本体を隠し、AttachPanel の Enable も保留する
+            SetDtailGroupVisible(false);
+            SetClassPair(_attachPanel, DtailGroupEnable, DtailGroupDisable, false);
+
             Bind(info);
 
             if (!IsOpen)
             {
                 IsOpen = true;
                 OpenAnimated();
+            }
+            else
+            {
+                ScheduleRevealAfterLoad();
             }
 
             Shown?.Invoke(info);
@@ -153,6 +167,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (_description != null)
                 _description.text = info.description ?? string.Empty;
 
+            SamirinBoothCategoryUtil.BindLabel(_categoryLabel, info.category);
+
             if (_price != null)
             {
                 var price = string.IsNullOrWhiteSpace(info.price) ? "-" : info.price;
@@ -167,6 +183,10 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             BindImages(info.images);
             BindYoutube(info.youtubeUrl);
+
+            var showVersionInfo = info.category != Category.Other;
+            SetDisplay(_versionInfo, showVersionInfo);
+
             var isImported = BindVersionState(info);
             BindAdditionalInfos(info.additionalInfos);
             BindUpdateInfos(info.updateInfos);
@@ -264,30 +284,22 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (_latestVertionLabel != null)
                 _latestVertionLabel.text = latestText;
 
-            var packagePath = $"Assets/samirin33/{info.folderName}/PackageAssetInfo.json";
-            var absolutePath = ToAbsolutePath(packagePath);
-
-            if (string.IsNullOrEmpty(info.folderName) || !File.Exists(absolutePath))
+            if (!SamirinBoothImportUtil.TryGetInstalledVersion(info, out var installed))
             {
                 ApplyNotImported();
                 return false;
             }
 
-            var installed = ReadPackageJsonVersion(absolutePath);
-            if (installed == null)
-            {
-                ApplyNotImported();
-                return false;
-            }
+            var installedText = SamirinBoothImportUtil.FormatInstalledVersion(installed);
 
             if (_installedVertionLabel != null)
-                _installedVertionLabel.text = FormatVersion(installed);
+                _installedVertionLabel.text = installedText;
 
             if (_hasImportedLabel != null)
                 _hasImportedLabel.text = "インポート済み！";
 
             if (_currentVertionLabel != null)
-                _currentVertionLabel.text = FormatVersion(installed);
+                _currentVertionLabel.text = installedText;
 
             if (_hasImportedGroup != null)
                 _hasImportedGroup.style.backgroundColor = HasImportedColor;
@@ -297,7 +309,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             SetDisplay(_currentVertionLabel, false);
             SetDisplay(_currentVersionGroup, true);
             SetDisplay(_latestVersionGroup, true);
-            SetDisplay(_newVertionRemind, installed < latest);
+            // 不明バージョンは比較不能のため更新あり扱い
+            SetDisplay(_newVertionRemind, installed == null || installed < latest);
             return true;
         }
 
@@ -435,6 +448,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             CancelPending();
             SetEnabledState(false);
+            SetDtailGroupVisible(false);
             style.display = DisplayStyle.None;
             SetPicking(false);
         }
@@ -443,13 +457,22 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             CancelPending();
             SetEnabledState(false);
+            SetDtailGroupVisible(false);
             style.display = DisplayStyle.Flex;
             SetPicking(true);
+            ScheduleRevealAfterLoad();
+        }
 
+        void ScheduleRevealAfterLoad()
+        {
+            CancelPending();
             _pending = schedule.Execute(() =>
             {
                 if (!IsOpen)
                     return;
+
+                // 内部 Bind 完了後に DtailGroup を出し、AttachPanel へ Enable を付与する
+                SetDtailGroupVisible(true);
                 SetEnabledState(true);
             }).StartingIn(16);
         }
@@ -465,6 +488,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 {
                     if (IsOpen)
                         return;
+                    SetDtailGroupVisible(false);
                     style.display = DisplayStyle.None;
                 })
                 .StartingIn(HideTransitionMs);
@@ -474,7 +498,25 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             SetClassPair(_backArea, BackAreaEnable, BackAreaDisable, enabled);
             SetClassPair(_informationsGroup, DtailGroupEnable, DtailGroupDisable, enabled);
-            SetClassPair(_attachPanel, DtailGroupEnable, DtailGroupDisable, enabled);
+            SetAttachPanelEnabled(enabled);
+        }
+
+        /// <summary>
+        /// AttachPanel が display:none のまま Enable すると Transition がスキップされ、
+        /// 次回表示時のスライドが短く／速く見えるため、表示可能なときだけ Enable する。
+        /// </summary>
+        void SetAttachPanelEnabled(bool enabled)
+        {
+            if (_attachPanel == null)
+                return;
+
+            var shouldEnable = enabled && _attachPanel.IsContentVisible;
+            SetClassPair(_attachPanel, DtailGroupEnable, DtailGroupDisable, shouldEnable);
+        }
+
+        void SetDtailGroupVisible(bool visible)
+        {
+            SetDisplay(_dtailGroup, visible);
         }
 
         static void SetClassPair(VisualElement element, string enableClass, string disableClass, bool enabled)
@@ -521,40 +563,6 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             var path = AssetDatabase.GUIDToAssetPath(FallbackImageGuid);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-        }
-
-        static Version ReadPackageJsonVersion(string absolutePath)
-        {
-            try
-            {
-                var json = File.ReadAllText(absolutePath);
-                var match = Regex.Match(json, "\"version\"\\s*:\\s*\"([^\"]+)\"");
-                if (!match.Success)
-                    return null;
-                return ParseVersion(match.Groups[1].Value);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        static Version ParseVersion(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return null;
-
-            var parts = text.Trim().Split('.');
-            int major = parts.Length > 0 && int.TryParse(parts[0], out var ma) ? ma : 0;
-            int minor = parts.Length > 1 && int.TryParse(parts[1], out var mi) ? mi : 0;
-            int patch = parts.Length > 2 && int.TryParse(parts[2], out var pa) ? pa : 0;
-            return new Version(major, minor, patch);
-        }
-
-        static string ToAbsolutePath(string assetPath)
-        {
-            var projectRoot = Path.GetDirectoryName(Application.dataPath);
-            return Path.GetFullPath(Path.Combine(projectRoot, assetPath.Replace('/', Path.DirectorySeparatorChar)));
         }
     }
 }

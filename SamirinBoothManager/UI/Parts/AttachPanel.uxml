@@ -8,15 +8,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="SetupGroup" style="position: relative; width: 100%; height: 100px; bottom: 0;">
-            <ui:VisualElement name="Attached" style="position: absolute; width: 100%; height: 100%; display: flex;">
-                <samirin33.SamirinBoothManager.UI.Parts.SBM_Button background-color="#CC5A66FF" name="ButtonDetach" text="セット済み！" class="SetupButton" />
-            </ui:VisualElement>
-            <ui:VisualElement name="Detached" style="width: 100%; height: 100%; position: absolute;">
-                <samirin33.SamirinBoothManager.UI.Parts.SBM_Button background-color="#439796FF" name="ButtonAttach" text="{商品名}をアバターにセットする！" class="SetupButton" />
-            </ui:VisualElement>
-            <ui:VisualElement name="Change" style="width: 100%; height: 100%; position: absolute;">
-                <samirin33.SamirinBoothManager.UI.Parts.SBM_Button background-color="#439753FF" name="ButtonChange" text="バリエーションを変える！" class="SetupButton" />
-            </ui:VisualElement>
+            <samirin33.SamirinBoothManager.UI.Parts.SBM_Button background-color="#439796FF" name="ButtonSetup" text="{商品名}をアバターにセットする！" class="SetupButton" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

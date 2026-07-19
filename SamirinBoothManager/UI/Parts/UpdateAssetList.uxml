@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style" />
+    <ui:VisualElement class="SBM_Text" style="flex-grow: 1;">
+        <samirin33.SamirinBoothManager.UI.Parts.SBM_Header>
+            <ui:VisualElement name="UpdateFound" style="background-color: rgba(0, 0, 0, 0.4); top: 0; position: relative; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; display: flex;">
+                <ui:Label tabindex="-1" text="アップデートが見つかりました！" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; font-size: 20px; flex-grow: 1; display: flex;" />
+                <ui:Toggle label="このバージョンを無視する" name="IgnoreToggle" style="margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; align-self: flex-end; display: flex;" />
+            </ui:VisualElement>
+        </samirin33.SamirinBoothManager.UI.Parts.SBM_Header>
+        <samirin33.SamirinBoothManager.UI.Parts.ListHeader />
+        <ui:VisualElement class="SBM_Text" style="flex-grow: 1;">
+            <ui:ScrollView vertical-scroller-visibility="Auto" horizontal-scroller-visibility="Hidden" style="flex-grow: 1;">
+                <ui:Label tabindex="-1" text="すべて最新版です。&#10;スバラシイ" parse-escape-sequences="true" display-tooltip-when-elided="true" name="UpdateNotFound" style="margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 10px; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; font-size: 30px; flex-grow: 1;" />
+                <ui:VisualElement name="UpdateContents" style="flex-grow: 1; flex-wrap: wrap; flex-direction: row; align-items: stretch; justify-content: center; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px;" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:Label tabindex="-1" text="アップデート情報の受付可否は設定から行えます。" parse-escape-sequences="true" display-tooltip-when-elided="true" name="UpdateCheckConfig" style="font-size: 13px; flex-grow: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 10px; margin-right: 10px; margin-bottom: 10px; margin-left: 10px; -unity-text-align: middle-center; align-self: center;" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc0c32a0775ca814e942d5f75ea84cf7, type: 3}
+  m_Name: A_Info
+  m_EditorClassIdentifier: 
+  name: "\u307F\u307F\u307F\u3055\u3044\u308B"
+  description: "\u307F\u307F\u306E\u3053\u306E\u8033\u304C\u3082\u3052\u305F\u3089\u305D\u306E\u307E\u307E\u307F\u3055\u3044\u308B\u306B\u306A\u3063\u3066\u81EA\u52D5\u3067\u53CD\u6483\u3057\u3066\u304F\u308C\u307E\u3059\uFF01"
+  images:
+  - {fileID: 21300000, guid: fc71b2657b1868641b1d3d7afd67fd97, type: 3}
+  - {fileID: 21300000, guid: 0485fb15eb0b7784b8157d54127ecb66, type: 3}
+  - {fileID: 21300000, guid: ee5d7b4ecad46434d96b8685fd954891, type: 3}
+  - {fileID: 21300000, guid: 5f1c4a7f76f998e40a89a640ee0bfe75, type: 3}
+  category: 1
+  majorVertion: 1
+  minorVertion: 3
+  patchVertion: 6
+  releaseDate:
+    year: 2025
+    month: 2
+    day: 2
+  updateDate:
+    year: 2026
+    month: 7
+    day: 18
+  updateInfos:
+  - updateName: ver1.0.0
+    updateDescription: "\u516C\u958B\u958B\u59CB"
+    updateDate:
+      year: 2026
+      month: 2
+      day: 2
+  - updateName: ver1.1.2
+    updateDescription: Samirin's Items Center
+    updateDate:
+      year: 2026
+      month: 2
+      day: 2
+  url: https://samirin33-vrc.booth.pm/items/6552786
+  price: "\u7121\u6599\uFF01"
+  youtubeUrl: https://youtu.be/BrCINaswmdE?si=maVTHw2wVcxqNezD
+  additionalInfos: []
+  variations: []
+  relatedAssets: []
+  folderName: MiMiMissile
