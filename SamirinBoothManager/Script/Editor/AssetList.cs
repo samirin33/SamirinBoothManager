@@ -137,7 +137,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             try
             {
-                await InfomationChecker.RunManually();
+                await InformationChecker.RunManually();
             }
             catch (Exception e)
             {

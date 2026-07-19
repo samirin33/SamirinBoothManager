@@ -13,7 +13,7 @@ using UnityEngine.Networking;
 /// GitHub から Booth 情報 / Manager を取得し、必要に応じて更新する Editor ユーティリティ。
 /// </summary>
 [InitializeOnLoad]
-public static class InfomationChecker
+public static class InformationChecker
 {
     const string RepoOwner = "samirin33";
     const string RepoName = "SamirinBoothManager";
@@ -25,8 +25,8 @@ public static class InfomationChecker
     const string PackageAssetInfoPath = ManagerAssetPath + "/PackageAssetInfo.json";
     const string ManagerAssetInfoPath = InformationAssetPath + "/Manger.asset";
 
-    const string PrefsAutoCheckKey = "samirin33.InfomationChecker.AutoCheckEnabled";
-    const string PrefsSessionCheckedKey = "samirin33.InfomationChecker.SessionChecked";
+    const string PrefsAutoCheckKey = "samirin33.InformationChecker.AutoCheckEnabled";
+    public const string PrefsSessionCheckedKey = "samirin33.InformationChecker.SessionChecked";
 
     static bool _isRunning;
 
@@ -38,7 +38,15 @@ public static class InfomationChecker
         set => EditorPrefs.SetBool(PrefsAutoCheckKey, value);
     }
 
-    static InfomationChecker()
+    /// <summary>
+    /// 同一セッション内の自動チェック／二重ダウンロードを抑止する。
+    /// </summary>
+    public static void MarkSessionChecked()
+    {
+        SessionState.SetBool(PrefsSessionCheckedKey, true);
+    }
+
+    static InformationChecker()
     {
         EditorApplication.delayCall += OnEditorReady;
     }
@@ -57,22 +65,35 @@ public static class InfomationChecker
     }
 
     /// <summary>
+    /// Information / Manager をバージョン判定なしで強制取得する（初回インストール向け）。
+    /// </summary>
+    public static Task<bool> ForceInstallAsync(bool showDialogs = false)
+    {
+        return RunUpdateAsync(showDialogs, showRemindWindow: false, forceManagerUpdate: true);
+    }
+
+    /// <summary>
     /// 情報アセットの取得 → バージョン比較 → 必要なら Manager 更新。
     /// </summary>
     /// <param name="showRemindWindow">完了後にアップデート一覧を自動表示するか。</param>
-    public static async Task RunUpdateAsync(bool showDialogs, bool showRemindWindow = true)
+    /// <param name="forceManagerUpdate">true のとき Manager も必ず上書きする。</param>
+    public static async Task<bool> RunUpdateAsync(
+        bool showDialogs,
+        bool showRemindWindow = true,
+        bool forceManagerUpdate = false)
     {
         if (_isRunning)
         {
             if (showDialogs)
-                EditorUtility.DisplayDialog("InfomationChecker", "更新処理は既に実行中です。", "OK");
-            return;
+                EditorUtility.DisplayDialog("InformationChecker", "更新処理は既に実行中です。", "OK");
+            return false;
         }
 
         _isRunning = true;
+        var success = false;
         try
         {
-            EditorUtility.DisplayProgressBar("InfomationChecker", "リポジトリをダウンロード中...", 0.1f);
+            EditorUtility.DisplayProgressBar("InformationChecker", "リポジトリをダウンロード中...", 0.1f);
 
             string tempRoot = Path.Combine(Path.GetTempPath(), "SamirinBoothManager_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempRoot);
@@ -85,11 +106,11 @@ public static class InfomationChecker
                 {
                     LogError("GitHub からのダウンロードに失敗しました: " + ZipUrl);
                     if (showDialogs)
-                        EditorUtility.DisplayDialog("InfomationChecker", "ダウンロードに失敗しました。\nネットワーク接続を確認してください。", "OK");
-                    return;
+                        EditorUtility.DisplayDialog("InformationChecker", "ダウンロードに失敗しました。\nネットワーク接続を確認してください。", "OK");
+                    return false;
                 }
 
-                EditorUtility.DisplayProgressBar("InfomationChecker", "情報アセットを展開中...", 0.4f);
+                EditorUtility.DisplayProgressBar("InformationChecker", "情報アセットを展開中...", 0.4f);
 
                 string extractRoot = Path.Combine(tempRoot, "extract");
                 ZipFile.ExtractToDirectory(zipPath, extractRoot);
@@ -99,8 +120,8 @@ public static class InfomationChecker
                 {
                     LogError("zip 内にリポジトリルートが見つかりませんでした。");
                     if (showDialogs)
-                        EditorUtility.DisplayDialog("InfomationChecker", "アーカイブの解析に失敗しました。", "OK");
-                    return;
+                        EditorUtility.DisplayDialog("InformationChecker", "アーカイブの解析に失敗しました。", "OK");
+                    return false;
                 }
 
                 string remoteInformation = Path.Combine(repoRoot, "SamirinBoothInformation");
@@ -109,32 +130,35 @@ public static class InfomationChecker
                 if (!Directory.Exists(remoteInformation))
                 {
                     LogError("リモートに SamirinBoothInformation フォルダがありません。");
-                    return;
+                    return false;
                 }
 
                 CopyDirectoryContents(remoteInformation, ToAbsolutePath(InformationAssetPath));
                 AssetDatabase.Refresh();
 
-                EditorUtility.DisplayProgressBar("InfomationChecker", "バージョンを確認中...", 0.7f);
+                EditorUtility.DisplayProgressBar("InformationChecker", "バージョンを確認中...", 0.7f);
 
-                bool shouldUpdateManager = ShouldUpdateManager();
+                bool shouldUpdateManager = forceManagerUpdate || ShouldUpdateManager();
                 if (shouldUpdateManager)
                 {
                     if (!Directory.Exists(remoteManager))
                     {
                         LogError("リモートに SamirinBoothManager フォルダがありません。");
-                        return;
+                        return false;
                     }
 
-                    EditorUtility.DisplayProgressBar("InfomationChecker", "Manager を更新中...", 0.85f);
+                    EditorUtility.DisplayProgressBar("InformationChecker", "Manager を更新中...", 0.85f);
                     CopyDirectoryContents(remoteManager, ToAbsolutePath(ManagerAssetPath));
                     AssetDatabase.Refresh();
-                    Debug.Log("[InfomationChecker] SamirinBoothManager を更新しました。");
+                    Debug.Log("[InformationChecker] SamirinBoothManager を更新しました。");
                 }
                 else
                 {
-                    Debug.Log("[InfomationChecker] SamirinBoothManager は最新です。スキップしました。");
+                    Debug.Log("[InformationChecker] SamirinBoothManager は最新です。スキップしました。");
                 }
+
+                success = true;
+                MarkSessionChecked();
 
                 if (showRemindWindow)
                 {
@@ -151,7 +175,7 @@ public static class InfomationChecker
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning("[InfomationChecker] 一時フォルダの削除に失敗: " + e.Message);
+                    Debug.LogWarning("[InformationChecker] 一時フォルダの削除に失敗: " + e.Message);
                 }
             }
         }
@@ -159,13 +183,16 @@ public static class InfomationChecker
         {
             LogError("更新処理中に例外が発生しました: " + e);
             if (showDialogs)
-                EditorUtility.DisplayDialog("InfomationChecker", "更新処理に失敗しました。\n" + e.Message, "OK");
+                EditorUtility.DisplayDialog("InformationChecker", "更新処理に失敗しました。\n" + e.Message, "OK");
+            return false;
         }
         finally
         {
             _isRunning = false;
             EditorUtility.ClearProgressBar();
         }
+
+        return success;
     }
 
     static bool ShouldUpdateManager()
@@ -173,7 +200,7 @@ public static class InfomationChecker
         string packageInfoAbs = ToAbsolutePath(PackageAssetInfoPath);
         if (!File.Exists(packageInfoAbs))
         {
-            Debug.Log("[InfomationChecker] PackageAssetInfo.json が存在しないため Manager を取得します。");
+            Debug.Log("[InformationChecker] PackageAssetInfo.json が存在しないため Manager を取得します。");
             return true;
         }
 
@@ -182,19 +209,19 @@ public static class InfomationChecker
 
         if (remoteVersion == null)
         {
-            Debug.LogWarning("[InfomationChecker] Manger.asset のバージョンを読み取れませんでした。Manager 更新をスキップします。");
+            Debug.LogWarning("[InformationChecker] Manger.asset のバージョンを読み取れませんでした。Manager 更新をスキップします。");
             return false;
         }
 
         if (localVersion == null)
         {
-            Debug.Log("[InfomationChecker] PackageAssetInfo.json のバージョンを読み取れないため Manager を取得します。");
+            Debug.Log("[InformationChecker] PackageAssetInfo.json のバージョンを読み取れないため Manager を取得します。");
             return true;
         }
 
         // Manger.asset（取得した情報）が PackageAssetInfo より新しい場合に更新
         bool newer = remoteVersion > localVersion;
-        Debug.Log($"[InfomationChecker] バージョン比較: PackageAssetInfo={localVersion}, Manger.asset={remoteVersion}, update={newer}");
+        Debug.Log($"[InformationChecker] バージョン比較: PackageAssetInfo={localVersion}, Manger.asset={remoteVersion}, update={newer}");
         return newer;
     }
 
@@ -211,7 +238,7 @@ public static class InfomationChecker
         }
         catch (Exception e)
         {
-            Debug.LogWarning("[InfomationChecker] PackageAssetInfo.json の読み込みに失敗: " + e.Message);
+            Debug.LogWarning("[InformationChecker] PackageAssetInfo.json の読み込みに失敗: " + e.Message);
             return null;
         }
     }
@@ -222,7 +249,7 @@ public static class InfomationChecker
         {
             if (!File.Exists(absolutePath))
             {
-                Debug.LogWarning("[InfomationChecker] Manger.asset が見つかりません: " + absolutePath);
+                Debug.LogWarning("[InformationChecker] Manger.asset が見つかりません: " + absolutePath);
                 return null;
             }
 
@@ -234,7 +261,7 @@ public static class InfomationChecker
         }
         catch (Exception e)
         {
-            Debug.LogWarning("[InfomationChecker] Manger.asset の読み込みに失敗: " + e.Message);
+            Debug.LogWarning("[InformationChecker] Manger.asset の読み込みに失敗: " + e.Message);
             return null;
         }
     }
@@ -276,7 +303,7 @@ public static class InfomationChecker
             if (request.isNetworkError || request.isHttpError)
 #endif
             {
-                Debug.LogError("[InfomationChecker] Download error: " + request.error);
+                Debug.LogError("[InformationChecker] Download error: " + request.error);
                 return false;
             }
 
@@ -333,7 +360,7 @@ public static class InfomationChecker
 
     static void LogError(string message)
     {
-        Debug.LogError("[InfomationChecker] " + message);
+        Debug.LogError("[InformationChecker] " + message);
     }
 
     internal static void ScheduleAutoCheckIfNeeded()
@@ -355,9 +382,9 @@ public static class InfomationChecker
 }
 
 /// <summary>
-/// 初回インポート時（InfomationChecker / InformationImporter が追加・再インポートされたとき）にチェックする。
+/// 初回インポート時（InformationChecker / SamirinBoothManager が追加・再インポートされたとき）にチェックする。
 /// </summary>
-class InfomationCheckerImportTrigger : AssetPostprocessor
+class InformationCheckerImportTrigger : AssetPostprocessor
 {
     static void OnPostprocessAllAssets(
         string[] importedAssets,
@@ -368,10 +395,9 @@ class InfomationCheckerImportTrigger : AssetPostprocessor
         for (int i = 0; i < importedAssets.Length; i++)
         {
             string path = importedAssets[i].Replace('\\', '/');
-            if (path.EndsWith("InfomationChecker.cs", StringComparison.OrdinalIgnoreCase) ||
-                path.IndexOf("/InformationImporter/", StringComparison.OrdinalIgnoreCase) >= 0)
+            if (path.EndsWith("InformationChecker.cs", StringComparison.OrdinalIgnoreCase))
             {
-                InfomationChecker.ScheduleAutoCheckIfNeeded();
+                InformationChecker.ScheduleAutoCheckIfNeeded();
                 return;
             }
         }
@@ -381,34 +407,34 @@ class InfomationCheckerImportTrigger : AssetPostprocessor
 /// <summary>
 /// Preferences に自動更新の ON/OFF を追加する。
 /// </summary>
-static class InfomationCheckerPreferences
+static class InformationCheckerPreferences
 {
-    public const string PreferencesPath = "Preferences/samirin33 Information Importer";
+    public const string PreferencesPath = "Preferences/samirin33 SamirinBoothManager";
 
     [SettingsProvider]
     public static SettingsProvider CreatePreferencesProvider()
     {
         var provider = new SettingsProvider(PreferencesPath, SettingsScope.User)
         {
-            label = "samirin33 Information Importer",
+            label = "samirin33 SamirinBoothManager",
             guiHandler = _ =>
             {
                 EditorGUILayout.Space();
                 EditorGUILayout.LabelField("Booth Information / Manager 自動取得", EditorStyles.boldLabel);
                 EditorGUILayout.HelpBox(
-                    "有効時: Unity 起動時・InformationImporter の初回インポート時に GitHub から情報を取得し、必要なら Manager を更新します。",
+                    "有効時: Unity 起動時・SamirinBoothManager の初回インポート時に GitHub から情報を取得し、必要なら Manager を更新します。",
                     MessageType.Info);
 
-                bool enabled = InfomationChecker.AutoCheckEnabled;
+                bool enabled = InformationChecker.AutoCheckEnabled;
                 bool next = EditorGUILayout.ToggleLeft("起動時 / インポート時に自動チェックする", enabled);
                 if (next != enabled)
-                    InfomationChecker.AutoCheckEnabled = next;
+                    InformationChecker.AutoCheckEnabled = next;
 
                 EditorGUILayout.Space();
-                using (new EditorGUI.DisabledScope(InfomationChecker.IsRunning))
+                using (new EditorGUI.DisabledScope(InformationChecker.IsRunning))
                 {
                     if (GUILayout.Button("今すぐチェックを実行", GUILayout.Height(28)))
-                        InfomationChecker.RunManually();
+                        InformationChecker.RunManually();
                 }
 
                 EditorGUILayout.Space(12);

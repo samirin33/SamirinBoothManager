@@ -58,7 +58,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement name="RelatedItems" class="DetailPanel" style="flex-grow: 1; font-size: 20px;">
-                        <ui:Label tabindex="-1" text="関連商品" parse-escape-sequences="true" display-tooltip-when-elided="true" />
+                        <ui:Label tabindex="-1" text="関連アイテム" parse-escape-sequences="true" display-tooltip-when-elided="true" />
                         <ui:VisualElement name="Items" style="flex-grow: 1; flex-direction: row; flex-wrap: wrap; justify-content: space-around;">
                             <samirin33.SamirinBoothManager.UI.Parts.AssetElement class="SBM_AssetElement" />
                         </ui:VisualElement>

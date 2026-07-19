@@ -6,9 +6,26 @@ using samirin33.SamirinBoothManager.UI.Parts;
 public class SBM_UIMain : EditorWindow
 {
     const string MainUxmlPath = "Assets/samirin33/SamirinBoothManager/UI/SBM_Main.uxml";
+    /// <summary>SamirinBoothManagerInstaller がインストール完了後にウィンドウを開くためのフラグ。</summary>
+    public const string PrefsOpenAfterInstallKey = "samirin33.SamirinBoothManagerInstaller.OpenWindow";
 
     SBM_GridScroll _gridScroll;
     SamirinBoothAssetInfo _pendingFocus;
+
+    [InitializeOnLoadMethod]
+    static void OpenAfterInstallIfRequested()
+    {
+        if (!EditorPrefs.GetBool(PrefsOpenAfterInstallKey, false))
+            return;
+
+        EditorApplication.delayCall += () =>
+        {
+            if (!EditorPrefs.GetBool(PrefsOpenAfterInstallKey, false))
+                return;
+            EditorPrefs.DeleteKey(PrefsOpenAfterInstallKey);
+            ShowWindow();
+        };
+    }
 
     [MenuItem("samirin33/Samirin's Item Center", false, 500)]
     public static void ShowWindow()

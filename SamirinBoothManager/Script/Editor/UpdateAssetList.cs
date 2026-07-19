@@ -96,7 +96,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         void OnUpdateCheckConfigClicked(ClickEvent evt)
         {
-            SettingsService.OpenUserPreferences(InfomationCheckerPreferences.PreferencesPath);
+            SettingsService.OpenUserPreferences(InformationCheckerPreferences.PreferencesPath);
             evt.StopPropagation();
         }
 
@@ -122,12 +122,12 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         async System.Threading.Tasks.Task ReloadAsync()
         {
-            if (InfomationChecker.IsRunning)
+            if (InformationChecker.IsRunning)
                 return;
 
             try
             {
-                await InfomationChecker.RunUpdateAsync(showDialogs: false, showRemindWindow: false);
+                await InformationChecker.RunUpdateAsync(showDialogs: false, showRemindWindow: false);
             }
             catch (Exception e)
             {

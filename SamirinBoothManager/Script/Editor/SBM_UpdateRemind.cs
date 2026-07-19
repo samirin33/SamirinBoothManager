@@ -24,7 +24,7 @@ public class SBM_UpdateRemind : EditorWindow
 
         try
         {
-            await InfomationChecker.RunUpdateAsync(showDialogs: false, showRemindWindow: false);
+            await InformationChecker.RunUpdateAsync(showDialogs: false, showRemindWindow: false);
         }
         catch (Exception e)
         {
