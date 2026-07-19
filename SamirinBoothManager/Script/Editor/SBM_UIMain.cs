@@ -10,7 +10,7 @@ public class SBM_UIMain : EditorWindow
     SBM_GridScroll _gridScroll;
     SamirinBoothAssetInfo _pendingFocus;
 
-    [MenuItem("samirin33/Samirin's Item Center", priority = -100)]
+    [MenuItem("samirin33/Samirin's Item Center", false, 500)]
     public static void ShowWindow()
     {
         ShowWindowAndFocus(null);

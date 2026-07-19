@@ -16,7 +16,7 @@ public class SBM_UpdateRemind : EditorWindow
     UpdateAssetList _updateList;
     List<SamirinBoothAssetInfo> _pendingInfos;
 
-    [MenuItem("samirin33/アップデートの確認", priority = -99)]
+    [MenuItem("samirin33/アップデートの確認", false, 501)]
     public static async void ShowFromMenu()
     {
         // まず現在の情報で開き、続けて最新情報を取得して一覧を更新する
