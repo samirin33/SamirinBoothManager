@@ -14,20 +14,24 @@ public class SamirinBoothAssetInfoEditor : Editor
     SerializedProperty _patchVertion;
     SerializedProperty _releaseDate;
     SerializedProperty _updateDate;
+    SerializedProperty _updateRemind;
     SerializedProperty _updateInfos;
     SerializedProperty _url;
     SerializedProperty _price;
     SerializedProperty _youtubeUrl;
     SerializedProperty _additionalInfos;
+    SerializedProperty _howToSetupInfos;
     SerializedProperty _variations;
     SerializedProperty _relatedAssets;
     SerializedProperty _folderName;
+    SerializedProperty _rootAsset;
 
     ReorderableList _imagesList;
     ReorderableList _updateInfosList;
     ReorderableList _variationsList;
     ReorderableList _relatedAssetsList;
     ReorderableList _additionalInfosList;
+    ReorderableList _howToSetupInfosList;
 
     bool _foldBasic = true;
     bool _foldVersion = true;
@@ -35,6 +39,7 @@ public class SamirinBoothAssetInfoEditor : Editor
     bool _foldImages = true;
     bool _foldUpdates = true;
     bool _foldAdditional = true;
+    bool _foldHowToSetup = true;
     bool _foldVariations = true;
     bool _foldRelated = true;
 
@@ -49,20 +54,24 @@ public class SamirinBoothAssetInfoEditor : Editor
         _patchVertion = serializedObject.FindProperty("patchVertion");
         _releaseDate = serializedObject.FindProperty("releaseDate");
         _updateDate = serializedObject.FindProperty("updateDate");
+        _updateRemind = serializedObject.FindProperty("updateRemind");
         _updateInfos = serializedObject.FindProperty("updateInfos");
         _url = serializedObject.FindProperty("url");
         _price = serializedObject.FindProperty("price");
         _youtubeUrl = serializedObject.FindProperty("youtubeUrl");
         _additionalInfos = serializedObject.FindProperty("additionalInfos");
+        _howToSetupInfos = serializedObject.FindProperty("howToSetupInfos");
         _variations = serializedObject.FindProperty("variations");
         _relatedAssets = serializedObject.FindProperty("relatedAssets");
         _folderName = serializedObject.FindProperty("folderName");
+        _rootAsset = serializedObject.FindProperty("rootAsset");
 
         _imagesList = CreateSpriteList(_images, "画像一覧");
         _updateInfosList = CreateUpdateInfoList(_updateInfos);
         _variationsList = CreateVariationList(_variations);
         _relatedAssetsList = CreateRelatedAssetsList(_relatedAssets);
         _additionalInfosList = CreateAdditionalInfoList(_additionalInfos);
+        _howToSetupInfosList = CreateAdditionalInfoList(_howToSetupInfos, "セットアップ・改変一覧");
     }
 
     public override void OnInspectorGUI()
@@ -75,6 +84,7 @@ public class SamirinBoothAssetInfoEditor : Editor
         DrawImagesSection();
         DrawUpdateInfosSection();
         DrawAdditionalInfosSection();
+        DrawHowToSetupInfosSection();
         DrawVariationsSection();
         DrawRelatedSection();
 
@@ -99,6 +109,11 @@ public class SamirinBoothAssetInfoEditor : Editor
         {
             EditorGUILayout.PropertyField(_name, new GUIContent("アセット名"));
             EditorGUILayout.PropertyField(_folderName, new GUIContent("フォルダ名"));
+            EditorGUILayout.PropertyField(
+                _rootAsset,
+                new GUIContent(
+                    "ルートアセット",
+                    "配置時に自動で一緒に置くアセット。解除時は残し、ルート側を解除すると依存アセットも解除します。"));
 
             if (_category != null)
             {
@@ -146,6 +161,12 @@ public class SamirinBoothAssetInfoEditor : Editor
             _patchVertion.intValue = Mathf.Max(0, EditorGUILayout.IntField(_patchVertion.intValue));
             EditorGUILayout.EndHorizontal();
 
+            EditorGUILayout.PropertyField(
+                _updateRemind,
+                new GUIContent(
+                    "更新通知",
+                    "オフにすると Items Center の更新リマインドと NewVertionRemind 表示を行いません。"));
+
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Major +1"))
             {
@@ -166,9 +187,6 @@ public class SamirinBoothAssetInfoEditor : Editor
                 SetDateToToday(_updateDate);
             }
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.HelpBox(
-                "Major / Minor / Patch は直接入力できます。「直接入力」は 1.2.3 形式。+1 ボタンは更新日を今日にします。",
-                MessageType.None);
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUILayout.Space(4);
@@ -239,6 +257,18 @@ public class SamirinBoothAssetInfoEditor : Editor
             _foldAdditional, $"追加情報 ({_additionalInfos.arraySize})");
         if (_foldAdditional)
             _additionalInfosList.DoLayoutList();
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        EditorGUILayout.Space(4);
+    }
+
+    void DrawHowToSetupInfosSection()
+    {
+        _foldHowToSetup = EditorGUILayout.BeginFoldoutHeaderGroup(
+            _foldHowToSetup, $"セットアップ・改変 ({_howToSetupInfos.arraySize})");
+        if (_foldHowToSetup)
+        {
+            _howToSetupInfosList.DoLayoutList();
+        }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUILayout.Space(4);
     }
@@ -426,7 +456,7 @@ public class SamirinBoothAssetInfoEditor : Editor
         return list;
     }
 
-    ReorderableList CreateAdditionalInfoList(SerializedProperty property)
+    ReorderableList CreateAdditionalInfoList(SerializedProperty property, string header = "追加情報一覧")
     {
         const float previewSize = 56f;
         const float topPadding = 2f;
@@ -434,7 +464,7 @@ public class SamirinBoothAssetInfoEditor : Editor
         const float spacing = 2f;
 
         var list = new ReorderableList(serializedObject, property, true, true, true, true);
-        list.drawHeaderCallback = rect => EditorGUI.LabelField(rect, "追加情報一覧");
+        list.drawHeaderCallback = rect => EditorGUI.LabelField(rect, header);
         list.elementHeightCallback = index =>
         {
             var element = property.GetArrayElementAtIndex(index);

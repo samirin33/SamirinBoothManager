@@ -272,9 +272,13 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 return;
 
             var avatar = SBM_Header.CurrentAvatarDescriptor;
-            GameObject instance;
+            var useAvatar = ShouldUseAvatarAttach(_info, avatar);
 
-            if (ShouldUseAvatarAttach(_info, avatar))
+            // rootAsset が未配置なら、その1つ目のバリエーションで自動配置
+            EnsureRootAssetPlaced(avatar, useAvatar);
+
+            GameObject instance;
+            if (useAvatar)
             {
                 // 同じ ID が既にあれば置き換え、なければ追加（異なる ID は共存）
                 var sameId = FindSameIdAttachedVariation(avatar, selected);
@@ -298,11 +302,25 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             var avatar = SBM_Header.CurrentAvatarDescriptor;
             var selected = GetSelectedVariation();
-            if (avatar == null || selected == null || string.IsNullOrEmpty(selected.prefabPath))
+            if (selected == null || string.IsNullOrEmpty(selected.prefabPath))
                 return;
 
-            if (!SBM_Header.DetachPrefabFromAvatar(avatar, selected.prefabPath))
-                return;
+            var useAvatar = ShouldUseAvatarAttach(_info, avatar);
+            if (useAvatar)
+            {
+                if (avatar == null)
+                    return;
+                if (!SBM_Header.DetachPrefabFromAvatar(avatar, selected.prefabPath))
+                    return;
+            }
+            else
+            {
+                if (!SBM_Header.DetachPrefabFromScene(selected.prefabPath))
+                    return;
+            }
+
+            // このアセットを rootAsset としている依存アセットも解除（自身の rootAsset は残す）
+            DetachAssetsThatReferenceAsRoot(_info, avatar, useAvatar);
 
             AfterHierarchyChanged(avatar, null);
         }
@@ -314,6 +332,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (avatar == null || selected == null || string.IsNullOrEmpty(selected.prefabPath))
                 return;
 
+            EnsureRootAssetPlaced(avatar, useAvatarAttach: true);
+
             var sameId = FindSameIdAttachedVariation(avatar, selected);
             var oldPath = sameId?.prefabPath;
             var instance = SBM_Header.ReplacePrefabOnAvatar(avatar, oldPath, selected.prefabPath);
@@ -321,6 +341,143 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 return;
 
             AfterHierarchyChanged(avatar, instance);
+        }
+
+        /// <summary>
+        /// rootAsset が未配置なら、1つ目の有効バリエーションで配置する。既にあれば何もしない。
+        /// </summary>
+        void EnsureRootAssetPlaced(VRCAvatarDescriptor avatar, bool useAvatarAttach)
+        {
+            var root = _info?.rootAsset;
+            if (root == null || root == _info)
+                return;
+
+            if (IsAssetAnyVariationPlaced(root, avatar, useAvatarAttach))
+                return;
+
+            var first = GetFirstValidVariation(root);
+            if (first == null || string.IsNullOrEmpty(first.prefabPath))
+                return;
+
+            if (useAvatarAttach)
+                SBM_Header.AttachPrefabToAvatar(avatar, first.prefabPath);
+            else
+                SBM_Header.InstantiatePrefabInScene(first.prefabPath);
+        }
+
+        /// <summary>
+        /// このアセットを rootAsset として参照しているアセットの、配置済みバリエーションをすべて解除する。
+        /// </summary>
+        static void DetachAssetsThatReferenceAsRoot(
+            SamirinBoothAssetInfo rootInfo,
+            VRCAvatarDescriptor avatar,
+            bool useAvatarAttach)
+        {
+            if (rootInfo == null)
+                return;
+
+            var dependents = FindAssetsThatReferenceRoot(rootInfo);
+            for (int i = 0; i < dependents.Count; i++)
+            {
+                var dependent = dependents[i];
+                if (dependent == null || dependent == rootInfo)
+                    continue;
+
+                DetachAllPlacedVariations(dependent, avatar, useAvatarAttach);
+            }
+        }
+
+        static List<SamirinBoothAssetInfo> FindAssetsThatReferenceRoot(SamirinBoothAssetInfo rootInfo)
+        {
+            var results = new List<SamirinBoothAssetInfo>();
+            if (rootInfo == null)
+                return results;
+
+            var guids = AssetDatabase.FindAssets(
+                "t:SamirinBoothAssetInfo",
+                new[] { "Assets/samirin33/SamirinBoothInformation" });
+            for (int i = 0; i < guids.Length; i++)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guids[i]);
+                var info = AssetDatabase.LoadAssetAtPath<SamirinBoothAssetInfo>(path);
+                if (info == null || info.rootAsset != rootInfo)
+                    continue;
+                results.Add(info);
+            }
+
+            return results;
+        }
+
+        static void DetachAllPlacedVariations(
+            SamirinBoothAssetInfo info,
+            VRCAvatarDescriptor avatar,
+            bool useAvatarAttach)
+        {
+            var variations = info?.variations;
+            if (variations == null)
+                return;
+
+            for (int i = 0; i < variations.Length; i++)
+            {
+                var variation = variations[i];
+                if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
+                    continue;
+
+                if (useAvatarAttach)
+                {
+                    if (avatar != null && SBM_Header.AvatarContainsPrefab(avatar, variation.prefabPath))
+                        SBM_Header.DetachPrefabFromAvatar(avatar, variation.prefabPath);
+                }
+                else if (SBM_Header.SceneContainsPrefab(variation.prefabPath))
+                {
+                    SBM_Header.DetachPrefabFromScene(variation.prefabPath);
+                }
+            }
+        }
+
+        static bool IsAssetAnyVariationPlaced(
+            SamirinBoothAssetInfo info,
+            VRCAvatarDescriptor avatar,
+            bool useAvatarAttach)
+        {
+            var variations = info?.variations;
+            if (variations == null)
+                return false;
+
+            for (int i = 0; i < variations.Length; i++)
+            {
+                var variation = variations[i];
+                if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
+                    continue;
+
+                if (useAvatarAttach)
+                {
+                    if (avatar != null && SBM_Header.AvatarContainsPrefab(avatar, variation.prefabPath))
+                        return true;
+                }
+                else if (SBM_Header.SceneContainsPrefab(variation.prefabPath))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        static Variation GetFirstValidVariation(SamirinBoothAssetInfo info)
+        {
+            var variations = info?.variations;
+            if (variations == null)
+                return null;
+
+            for (int i = 0; i < variations.Length; i++)
+            {
+                var variation = variations[i];
+                if (variation != null && !string.IsNullOrEmpty(variation.prefabPath))
+                    return variation;
+            }
+
+            return null;
         }
 
         void AfterHierarchyChanged(VRCAvatarDescriptor avatar, GameObject instance)

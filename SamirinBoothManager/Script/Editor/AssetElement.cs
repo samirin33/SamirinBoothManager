@@ -322,7 +322,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             // バージョン不明、または最新より古い → 更新あり表示
             if (installed == null || installed < infoVersion)
-                ApplyPatternC(installed);
+                ApplyPatternC(installed, info.updateRemind);
             else
                 ApplyPatternB(installed);
         }
@@ -344,12 +344,12 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             SetDisplay(_notImported, false);
         }
 
-        void ApplyPatternC(Version installed)
+        void ApplyPatternC(Version installed, bool showUpdateRemind)
         {
             SetBannerColor(PatternCColor);
             SetVertionText(SamirinBoothImportUtil.FormatInstalledVersion(installed));
             SetDisplay(_vertionLabel, true);
-            SetDisplay(_newVertionRemind, true);
+            SetDisplay(_newVertionRemind, showUpdateRemind);
             SetDisplay(_notImported, false);
         }
 

@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc0c32a0775ca814e942d5f75ea84cf7, type: 3}
+  m_Name: Info_DeskPen
+  m_EditorClassIdentifier: 
+  name: DeskPen
+  description: "\u3079\u3093\u308A\u30A2\u30D0\u30BF\u30FC\u30DA\u30F3"
+  images: []
+  category: 1
+  majorVertion: 0
+  minorVertion: 1
+  patchVertion: 0
+  releaseDate:
+    year: 2026
+    month: 7
+    day: 16
+  updateDate:
+    year: 2026
+    month: 7
+    day: 16
+  updateRemind: 1
+  updateInfos:
+  - updateName: v0.1.0
+    updateDescription: "\u516C\u958B\u3057\u305F\u3088\u3093\u60C5\u5831"
+    updateDate:
+      year: 2026
+      month: 7
+      day: 17
+  url: 
+  price: 0
+  youtubeUrl: 
+  additionalInfos:
+  - title: "\u4FBF\u5229\u306A\u30A2\u30D0\u30BF\u30FC\u30DA\u30F3\uFF01"
+    description: "\u76F4\u611F\u7684\u306A\u64CD\u4F5C\u304C\u3067\u304D\u307E\u3059\uFF01"
+    image: {fileID: 21300000, guid: 0d5410bfb289d0c4eb0715b862f89a3d, type: 3}
+    paths: []
+  - title: "\u6539\u5909\u3059\u308B\u3068\u304D\u306F\u3053\u3053\u3092\u3069\u3046\u305E"
+    description: "\u30DC\u30BF\u30F3\u3092\u62BC\u3059\u3068\u305D\u306E\u30AA\u30D6\u30B8\u30A7\u30AF\u30C8\u3092\u9078\u3093\u3067\u304F\u308C\u308B\u3088"
+    image: {fileID: 0}
+    paths:
+    - "\u8ABF\u6574\u30AA\u30D6\u30B8\u30A7\u30AF\u30C8"
+  - title: 
+    description: 
+    image: {fileID: 0}
+    paths:
+    - "\u8ABF\u6574\u30AA\u30D6\u30B8\u30A7\u30AF\u30C8/\u8ABF\u6574\u30AA\u30D6\u30B8\u30A7\u30AF\u30C8_01"
+  variations:
+  - variationName: "DeskPen\u672C\u4F53"
+    variationDescription: 
+    prefabPath: Assets/samirin33/DeskPen/DeskPen.prefab
+    id: 0
+  relatedAssets:
+  - {fileID: 11400000, guid: 6ac1f9218f13d4c4390423efc5da51a5, type: 2}
+  folderName: DeskPen
+  rootAsset: {fileID: 0}

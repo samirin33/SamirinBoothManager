@@ -12,14 +12,17 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public int patchVertion;
     public DateTime releaseDate;
     public DateTime updateDate;
+    public bool updateRemind = true;
     public UpdateInfo[] updateInfos;
     public string url;
     public string price;
     public string youtubeUrl;
     public AdditionalInfo[] additionalInfos;
+    public AdditionalInfo[] howToSetupInfos;
     public Variation[] variations;
     public SamirinBoothAssetInfo[] relatedAssets;
     public string folderName;
+    public SamirinBoothAssetInfo rootAsset;
 }
 
 public enum Category

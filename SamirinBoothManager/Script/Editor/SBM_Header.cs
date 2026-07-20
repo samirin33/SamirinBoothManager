@@ -210,6 +210,59 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         }
 
         /// <summary>
+        /// アクティブシーンに prefabPath のプレハブインスタンスがあるか。
+        /// </summary>
+        public static bool SceneContainsPrefab(string prefabPath)
+        {
+            return FindPrefabInstanceInScene(prefabPath) != null;
+        }
+
+        /// <summary>
+        /// アクティブシーン内の、指定 prefabPath に対応するプレハブインスタンスを返す。
+        /// </summary>
+        public static GameObject FindPrefabInstanceInScene(string prefabPath)
+        {
+            if (string.IsNullOrEmpty(prefabPath))
+                return null;
+
+            var normalized = prefabPath.Replace('\\', '/');
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || !scene.isLoaded)
+                return null;
+
+            var roots = scene.GetRootGameObjects();
+            for (int r = 0; r < roots.Length; r++)
+            {
+                var transforms = roots[r].GetComponentsInChildren<Transform>(true);
+                for (int i = 0; i < transforms.Length; i++)
+                {
+                    var go = transforms[i].gameObject;
+                    var nearestPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(go);
+                    if (!string.IsNullOrEmpty(nearestPath)
+                        && string.Equals(nearestPath.Replace('\\', '/'), normalized, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var root = PrefabUtility.GetNearestPrefabInstanceRoot(go);
+                        return root != null ? root : go;
+                    }
+
+                    var source = PrefabUtility.GetCorrespondingObjectFromSource(go);
+                    if (source == null)
+                        continue;
+
+                    var sourcePath = AssetDatabase.GetAssetPath(source);
+                    if (!string.IsNullOrEmpty(sourcePath)
+                        && string.Equals(sourcePath.Replace('\\', '/'), normalized, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var root = PrefabUtility.GetNearestPrefabInstanceRoot(go);
+                        return root != null ? root : go;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// アクティブシーンのルートに prefabPath のプレハブを配置する（複数配置可）。
         /// </summary>
         public static GameObject InstantiatePrefabInScene(string prefabPath)
@@ -237,6 +290,19 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             Undo.RegisterCreatedObjectUndo(instance, "Place Prefab In Scene");
             return instance;
+        }
+
+        /// <summary>
+        /// シーン上の prefabPath インスタンスを削除する。
+        /// </summary>
+        public static bool DetachPrefabFromScene(string prefabPath)
+        {
+            var instance = FindPrefabInstanceInScene(prefabPath);
+            if (instance == null)
+                return false;
+
+            Undo.DestroyObjectImmediate(instance);
+            return true;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -46,7 +47,12 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly Label _latestVertionLabel;
         readonly Label _newVertionRemind;
         readonly VisualElement _additionalInfomations;
-        readonly VisualElement _updateInfomations;
+        readonly VisualElement _howToSetupInfomations;
+        readonly Foldout _pastVersionFoldout;
+        readonly VisualElement _pastVersionFoldoutParent;
+        int _pastVersionFoldoutIndex = -1;
+        readonly VisualElement _pastUpdateInfomations;
+        readonly VisualElement _latestUpdateInfomations;
         readonly VisualElement _relatedItems;
         readonly VisualElement _relatedItemsContainer;
 
@@ -94,9 +100,22 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _latestVertionLabel = _latestVersionGroup?.Q<Label>("LatestVertion");
             _newVertionRemind = this.Q<Label>("NewVertionRemind");
             _additionalInfomations = this.Q<VisualElement>("AdditionalInfomations");
-            _updateInfomations = this.Q<VisualElement>("UpdateInfomations");
+            _howToSetupInfomations = this.Q<VisualElement>("HowToSetupInfomations");
+            _pastVersionFoldout = this.Q<Foldout>("PastVarsion");
+            _pastVersionFoldoutParent = _pastVersionFoldout?.parent;
+            _pastVersionFoldoutIndex = _pastVersionFoldoutParent != null && _pastVersionFoldout != null
+                ? _pastVersionFoldoutParent.IndexOf(_pastVersionFoldout)
+                : -1;
+            _pastUpdateInfomations = this.Q<VisualElement>("PastUpdateInfomations");
+            _latestUpdateInfomations = this.Q<VisualElement>("LatestUpdateInfomations");
             _relatedItems = this.Q<VisualElement>("RelatedItems");
             _relatedItemsContainer = this.Q<VisualElement>("Items");
+
+            if (_pastVersionFoldout != null)
+            {
+                _pastVersionFoldout.RegisterValueChangedCallback(OnPastVersionFoldoutChanged);
+                SetPastUpdateInfomationsVisible(_pastVersionFoldout.value);
+            }
 
             if (_informationsGroup != null)
                 _informationsGroup.pickingMode = PickingMode.Ignore;
@@ -189,6 +208,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             var isImported = BindVersionState(info);
             BindAdditionalInfos(info.additionalInfos);
+            BindHowToSetupInfos(info.howToSetupInfos);
             BindUpdateInfos(info.updateInfos);
             BindRelatedAssets(info.relatedAssets);
 
@@ -309,8 +329,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             SetDisplay(_currentVertionLabel, false);
             SetDisplay(_currentVersionGroup, true);
             SetDisplay(_latestVersionGroup, true);
-            // 不明バージョンは比較不能のため更新あり扱い
-            SetDisplay(_newVertionRemind, installed == null || installed < latest);
+            // 不明バージョンは比較不能のため更新あり扱い（updateRemind がオフなら非表示）
+            SetDisplay(_newVertionRemind,
+                info.updateRemind && (installed == null || installed < latest));
             return true;
         }
 
@@ -361,30 +382,136 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             }
         }
 
-        void BindUpdateInfos(global::UpdateInfo[] infos)
+        void BindHowToSetupInfos(global::AdditionalInfo[] infos)
         {
-            if (_updateInfomations == null)
+            if (_howToSetupInfomations == null)
                 return;
 
-            _updateInfomations.Clear();
+            _howToSetupInfomations.Clear();
+            var panel = _howToSetupInfomations.parent;
 
-            var parent = _updateInfomations.parent;
             if (infos == null || infos.Length == 0)
             {
-                SetDisplay(parent, false);
+                SetDisplay(panel, false);
                 return;
             }
 
-            SetDisplay(parent, true);
+            var added = 0;
             for (int i = 0; i < infos.Length; i++)
             {
                 if (infos[i] == null)
                     continue;
 
-                var element = new UpdateInfo();
-                element.Bind(infos[i]);
-                _updateInfomations.Add(element);
+                var element = new AdditionalInfo();
+                element.Bind(infos[i], BoundInfo);
+                _howToSetupInfomations.Add(element);
+                added++;
             }
+
+            if (added == 0)
+            {
+                SetDisplay(panel, false);
+                return;
+            }
+
+            SetDisplay(panel, true);
+            SetDisplay(_howToSetupInfomations, true);
+        }
+
+        void BindUpdateInfos(global::UpdateInfo[] infos)
+        {
+            if (_latestUpdateInfomations == null)
+                return;
+
+            _latestUpdateInfomations.Clear();
+            _pastUpdateInfomations?.Clear();
+
+            var valid = CollectValidUpdateInfos(infos);
+            var historyPanel = _latestUpdateInfomations.parent;
+
+            if (valid.Count == 0)
+            {
+                SetDisplay(historyPanel, false);
+                return;
+            }
+
+            SetDisplay(historyPanel, true);
+            AddUpdateInfoElement(_latestUpdateInfomations, valid[valid.Count - 1]);
+
+            if (valid.Count <= 1)
+            {
+                SetPastVersionFoldoutVisible(false);
+                SetPastUpdateInfomationsVisible(false);
+                return;
+            }
+
+            if (_pastVersionFoldout != null)
+            {
+                _pastVersionFoldout.SetValueWithoutNotify(false);
+                SetPastVersionFoldoutVisible(true);
+            }
+
+            SetPastUpdateInfomationsVisible(false);
+
+            for (int i = 0; i < valid.Count - 1; i++)
+                AddUpdateInfoElement(_pastUpdateInfomations, valid[i]);
+        }
+
+        void SetPastVersionFoldoutVisible(bool visible)
+        {
+            if (_pastVersionFoldout == null || _pastVersionFoldoutParent == null)
+                return;
+
+            var inHierarchy = _pastVersionFoldout.parent != null;
+            if (visible)
+            {
+                if (!inHierarchy)
+                {
+                    var index = Mathf.Clamp(_pastVersionFoldoutIndex, 0, _pastVersionFoldoutParent.childCount);
+                    _pastVersionFoldoutParent.Insert(index, _pastVersionFoldout);
+                }
+            }
+            else if (inHierarchy)
+            {
+                _pastVersionFoldoutIndex = _pastVersionFoldoutParent.IndexOf(_pastVersionFoldout);
+                _pastVersionFoldout.RemoveFromHierarchy();
+                SetPastUpdateInfomationsVisible(false);
+            }
+        }
+
+        void SetPastUpdateInfomationsVisible(bool visible)
+        {
+            SetDisplay(_pastUpdateInfomations, visible);
+        }
+
+        static List<global::UpdateInfo> CollectValidUpdateInfos(global::UpdateInfo[] infos)
+        {
+            var list = new List<global::UpdateInfo>();
+            if (infos == null)
+                return list;
+
+            for (int i = 0; i < infos.Length; i++)
+            {
+                if (infos[i] != null)
+                    list.Add(infos[i]);
+            }
+
+            return list;
+        }
+
+        void AddUpdateInfoElement(VisualElement container, global::UpdateInfo info)
+        {
+            if (container == null || info == null)
+                return;
+
+            var element = new UpdateInfo();
+            element.Bind(info);
+            container.Add(element);
+        }
+
+        void OnPastVersionFoldoutChanged(ChangeEvent<bool> evt)
+        {
+            SetPastUpdateInfomationsVisible(evt.newValue);
         }
 
         void BindRelatedAssets(SamirinBoothAssetInfo[] related)
@@ -544,7 +671,15 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             if (element == null)
                 return;
-            element.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+
+            var next = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            var current = element.style.display;
+            if (current.keyword != StyleKeyword.Null
+                && current.keyword != StyleKeyword.Initial
+                && current.value == next)
+                return;
+
+            element.style.display = next;
         }
 
         static string FormatDate(global::DateTime date)

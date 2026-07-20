@@ -31,6 +31,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 if (!HasUpdatableCategory(info.category))
                     continue;
 
+                if (!info.updateRemind)
+                    continue;
+
                 if (!TryGetLatestVersion(info, out var latest))
                     continue;
 

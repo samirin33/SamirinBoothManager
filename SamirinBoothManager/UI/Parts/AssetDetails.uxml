@@ -12,7 +12,7 @@
                     </ui:VisualElement>
                     <ui:VisualElement name="Header" class="DetailPanel">
                         <ui:Label tabindex="-1" text="商品名" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Name" style="font-size: 30px; -unity-font-style: bold; position: relative; flex-grow: 1;" />
-                        <ui:Label tabindex="-1" text="説明欄" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Discription" style="margin-top: 12px; margin-right: 50px; margin-bottom: 12px; margin-left: 50px; font-size: 15px; flex-grow: 1;" />
+                        <ui:Label tabindex="-1" text="説明欄" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Discription" style="margin-top: 12px; margin-right: 50px; margin-bottom: 12px; margin-left: 50px; font-size: 15px; flex-grow: 1; white-space: normal;" />
                         <ui:Label tabindex="-1" text="カテゴリ" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CategoryLabel" style="position: absolute; top: 5px; right: 5px; width: 100px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(20, 23, 35, 0.4); height: 20px; font-size: 12px;" />
                     </ui:VisualElement>
                     <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
@@ -48,12 +48,24 @@
                         </ui:VisualElement>
                         <ui:Label tabindex="-1" text="新しいバージョンが公開されています！サイトから最新版のダウンロード&amp;インポートをオススメします！" parse-escape-sequences="true" display-tooltip-when-elided="true" name="NewVertionRemind" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; color: rgb(220, 78, 112); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 12px;" />
                     </ui:VisualElement>
-                    <ui:VisualElement name="AdditionalInfomations" class="DetailPanel" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
-                        <samirin33.SamirinBoothManager.UI.Parts.AdditionalInfo />
+                    <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
+                        <ui:VisualElement name="AdditionalInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                            <samirin33.SamirinBoothManager.UI.Parts.AdditionalInfo />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
+                        <ui:Label tabindex="-1" text="セットアップ・改変" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 18px;" />
+                        <ui:VisualElement name="HowToSetupInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                            <samirin33.SamirinBoothManager.UI.Parts.AdditionalInfo />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
                         <ui:Label tabindex="-1" text="アップデート履歴" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 18px;" />
-                        <ui:VisualElement name="UpdateInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                        <ui:Foldout text="過去のバージョン" value="false" name="PastVarsion" style="align-items: center; font-size: 12px;" />
+                        <ui:VisualElement name="PastUpdateInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                            <samirin33.SamirinBoothManager.UI.Parts.UpdateInfo />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="LatestUpdateInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
                             <samirin33.SamirinBoothManager.UI.Parts.UpdateInfo />
                         </ui:VisualElement>
                     </ui:VisualElement>
