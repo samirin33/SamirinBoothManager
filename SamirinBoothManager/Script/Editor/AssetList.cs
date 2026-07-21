@@ -184,7 +184,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                     continue;
 
                 var info = AssetDatabase.LoadAssetAtPath<SamirinBoothAssetInfo>(path);
-                if (info != null)
+                if (info != null && info.visible)
                     _infos.Add(info);
             }
         }

@@ -25,6 +25,7 @@ public class SamirinBoothAssetInfoEditor : Editor
     SerializedProperty _relatedAssets;
     SerializedProperty _folderName;
     SerializedProperty _rootAsset;
+    SerializedProperty _visible;
 
     ReorderableList _imagesList;
     ReorderableList _updateInfosList;
@@ -65,7 +66,7 @@ public class SamirinBoothAssetInfoEditor : Editor
         _relatedAssets = serializedObject.FindProperty("relatedAssets");
         _folderName = serializedObject.FindProperty("folderName");
         _rootAsset = serializedObject.FindProperty("rootAsset");
-
+        _visible = serializedObject.FindProperty("visible");
         _imagesList = CreateSpriteList(_images, "画像一覧");
         _updateInfosList = CreateUpdateInfoList(_updateInfos);
         _variationsList = CreateVariationList(_variations);
@@ -128,6 +129,7 @@ public class SamirinBoothAssetInfoEditor : Editor
             EditorGUILayout.PropertyField(_price, new GUIContent("価格"));
             DrawUrlField(_url, "Booth URL");
             DrawUrlField(_youtubeUrl, "YouTube URL");
+            EditorGUILayout.PropertyField(_visible, new GUIContent("一覧表示"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUILayout.Space(4);

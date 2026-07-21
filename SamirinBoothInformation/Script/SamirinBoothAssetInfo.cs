@@ -23,6 +23,7 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public SamirinBoothAssetInfo[] relatedAssets;
     public string folderName;
     public SamirinBoothAssetInfo rootAsset;
+    public bool visible = true;
 }
 
 public enum Category

@@ -28,6 +28,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 if (info == null)
                     continue;
 
+                if (!info.visible)
+                    continue;
+
                 if (!HasUpdatableCategory(info.category))
                     continue;
 

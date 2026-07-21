@@ -9,7 +9,6 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 {
     /// <summary>
     /// AssetElement.uxml を SamirinBoothAssetInfo の内容で埋める要素。
-    /// ホバー中は 2 秒ごとに画像を 100% 単位でスライドする。
     /// </summary>
     public class AssetElement : SBM_UxmlPartElement
     {
@@ -17,7 +16,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         public new class UxmlTraits : VisualElement.UxmlTraits { }
 
         const string FallbackImageGuid = "37a679a53a99c9842a4510b6e49ceec5";
-        const long HoverSlideIntervalMs = 2000;
+        const long HoverSlideIntervalMs = 1000;
 
         static readonly Color PatternAColor = Hex("#383838");
         static readonly Color PatternBColor = Hex("#255B7F");
