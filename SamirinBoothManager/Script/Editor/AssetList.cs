@@ -278,12 +278,12 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             }
         }
 
-        static int CompareDateDesc(global::DateTime a, global::DateTime b)
+        static int CompareDateDesc(SamirinBoothDate a, SamirinBoothDate b)
         {
             return ToDateKey(b).CompareTo(ToDateKey(a));
         }
 
-        static int ToDateKey(global::DateTime date)
+        static int ToDateKey(SamirinBoothDate date)
         {
             if (date == null)
                 return 0;

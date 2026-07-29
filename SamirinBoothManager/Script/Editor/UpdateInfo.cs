@@ -36,7 +36,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 _date.text = FormatDate(info.updateDate);
         }
 
-        static string FormatDate(global::DateTime date)
+        static string FormatDate(SamirinBoothDate date)
         {
             if (date == null || date.year <= 0)
                 return "----/--/--";

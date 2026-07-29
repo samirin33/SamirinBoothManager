@@ -10,8 +10,8 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public int majorVertion;
     public int minorVertion;
     public int patchVertion;
-    public DateTime releaseDate;
-    public DateTime updateDate;
+    public SamirinBoothDate releaseDate;
+    public SamirinBoothDate updateDate;
     public bool updateRemind = true;
     public UpdateInfo[] updateInfos;
     public string url;
@@ -47,7 +47,7 @@ public class Variation
 }
 
 [System.Serializable]
-public class DateTime
+public class SamirinBoothDate
 {
     public int year;
     public int month;
@@ -59,7 +59,7 @@ public class UpdateInfo
 {
     public string updateName;
     public string updateDescription;
-    public DateTime updateDate;
+    public SamirinBoothDate updateDate;
 }
 
 [System.Serializable]
