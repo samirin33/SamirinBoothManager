@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -27,6 +28,11 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly List<SBM_Button> _extraFocusButtons = new List<SBM_Button>();
 
         SamirinBoothAssetInfo _assetInfo;
+        Background _imageBackground;
+        bool _hasImage;
+
+        /// <summary>Image がクリックされたとき（表示中の画像背景を渡す）。</summary>
+        public event Action<Background> ImageClicked;
 
         public AdditionalInfo() : base(nameof(AdditionalInfo))
         {
@@ -35,6 +41,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _image = this.Q<VisualElement>("Image");
             _focusButton = this.Q<SBM_Button>("ButtonObjectFocus");
             _focusButtonParent = _focusButton?.parent;
+
+            if (_image != null)
+                _image.RegisterCallback<ClickEvent>(OnImageClicked);
 
             RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
             RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
@@ -71,21 +80,40 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 _description.text = info.description ?? string.Empty;
 
             BindPaths(info.paths);
-
-            if (_image != null)
-            {
-                if (info.image != null)
-                {
-                    _image.style.backgroundImage = Background.FromSprite(info.image);
-                    _image.style.display = DisplayStyle.Flex;
-                }
-                else
-                {
-                    _image.style.display = DisplayStyle.None;
-                }
-            }
-
+            BindImage(info.image);
             RefreshFocusButtonState();
+        }
+
+        void BindImage(Sprite sprite)
+        {
+            _hasImage = false;
+            _imageBackground = default;
+
+            if (_image == null)
+                return;
+
+            if (sprite != null)
+            {
+                _imageBackground = Background.FromSprite(sprite);
+                _image.style.backgroundImage = _imageBackground;
+                _image.style.display = DisplayStyle.Flex;
+                _image.pickingMode = PickingMode.Position;
+                _hasImage = true;
+            }
+            else
+            {
+                _image.style.display = DisplayStyle.None;
+                _image.pickingMode = PickingMode.Ignore;
+            }
+        }
+
+        void OnImageClicked(ClickEvent evt)
+        {
+            if (!_hasImage)
+                return;
+
+            ImageClicked?.Invoke(_imageBackground);
+            evt.StopPropagation();
         }
 
         void BindPaths(string[] paths)

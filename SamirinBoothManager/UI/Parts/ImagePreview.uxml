@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/samirin33/SamirinBoothManager/UI/Style/SBM_Style.uss?fileID=7433441132597879392&amp;guid=a6b07b6544dc39342827d960de9bb6d2&amp;type=3#SBM_Style" />
+    <ui:VisualElement name="ImagePreviewBackArea" class="BackArea_Disable" style="position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); opacity: 1; transition-duration: 0s;">
+        <ui:VisualElement name="IgnorePointer" style="flex-grow: 1; margin-top: 60px; margin-right: 60px; margin-bottom: 60px; margin-left: 60px;">
+            <ui:VisualElement name="IgnorePointer" style="position: absolute; width: 100%; height: 100%; padding-top: 20px; padding-right: 20px; padding-bottom: 20px; padding-left: 20px;">
+                <ui:VisualElement name="MainImage" style="background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/NoImage.png?fileID=2800000&amp;guid=37a679a53a99c9842a4510b6e49ceec5&amp;type=3#NoImage&quot;); -unity-background-scale-mode: scale-to-fit; flex-grow: 1;" />
+            </ui:VisualElement>
+            <ui:VisualElement name="IgnorePointer" style="flex-grow: 1; flex-direction: row; align-items: center; justify-content: space-between;">
+                <samirin33.SamirinBoothManager.UI.Parts.SBM_Button name="ButtomBack" text="＜" text-scale="2.5" background-color="#15152380" style="width: 40px; height: 60px;" />
+                <samirin33.SamirinBoothManager.UI.Parts.SBM_Button name="ButtomNext" text="&gt;" text-scale="2.5" background-color="#15152380" style="width: 40px; height: 60px;" />
+            </ui:VisualElement>
+            <samirin33.SamirinBoothManager.UI.Parts.SBM_Button name="ButtomImageClose" text="とじる" text-scale="1.2" background-color="#CC424BFF" style="top: 8px; width: 80px; height: 40px; position: absolute; right: 10px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

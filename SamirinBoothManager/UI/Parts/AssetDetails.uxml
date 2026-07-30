@@ -80,4 +80,5 @@
         </ui:VisualElement>
     </ui:VisualElement>
     <samirin33.SamirinBoothManager.UI.Parts.AttachPanel name="AttachPanel" class="DtailGroup_Disable" style="position: absolute; bottom: 0; width: 100%; height: 190px; display: flex;" />
+    <samirin33.SamirinBoothManager.UI.Parts.ImagePreview name="ImagePreview" style="position: absolute; width: 100%; height: 100%;" />
 </ui:UXML>

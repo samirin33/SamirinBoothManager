@@ -25,6 +25,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly VisualElement _informationsGroup;
         readonly VisualElement _dtailGroup;
         readonly AttachPanel _attachPanel;
+        readonly ImagePreview _imagePreview;
         readonly SBM_Button _buttonClose;
         readonly SBM_Button _buttonBooth;
 
@@ -77,6 +78,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _informationsGroup = this.Q<VisualElement>("InformationsGroup");
             _dtailGroup = this.Q<VisualElement>("DtailGroup");
             _attachPanel = this.Q<AttachPanel>("AttachPanel");
+            _imagePreview = this.Q<ImagePreview>("ImagePreview");
             _buttonClose = this.Q<SBM_Button>("ButtonClose");
             _buttonBooth = this.Q<SBM_Button>("ButtonBooth");
 
@@ -167,6 +169,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 return;
 
             IsOpen = false;
+            _imagePreview?.Hide();
             CloseAnimated();
             Hidden?.Invoke();
         }
@@ -223,8 +226,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 return;
 
             _imageContents.Clear();
+            _imagePreview?.Hide();
 
-            var added = 0;
+            var backgrounds = new List<Background>();
             if (images != null)
             {
                 for (int i = 0; i < images.Length; i++)
@@ -232,31 +236,25 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                     if (images[i] == null)
                         continue;
 
-                    _imageContents.Add(CreateDetailImage(images[i]));
-                    added++;
+                    var background = Background.FromSprite(images[i]);
+                    var index = backgrounds.Count;
+                    backgrounds.Add(background);
+                    _imageContents.Add(CreateDetailImage(background, GetSpriteAspectRatio(images[i]), index));
                 }
             }
 
-            if (added == 0)
+            if (backgrounds.Count == 0)
             {
                 var fallback = LoadFallbackTexture();
-                _imageContents.Add(CreateDetailImage(fallback));
+                var background = Background.FromTexture2D(fallback);
+                backgrounds.Add(background);
+                _imageContents.Add(CreateDetailImage(background, GetTextureAspectRatio(fallback), 0));
             }
+
+            _imagePreview?.SetImages(backgrounds);
         }
 
-        static VisualElement CreateDetailImage(Sprite sprite)
-        {
-            var aspect = GetSpriteAspectRatio(sprite);
-            return CreateDetailImage(Background.FromSprite(sprite), aspect);
-        }
-
-        static VisualElement CreateDetailImage(Texture2D texture)
-        {
-            var aspect = GetTextureAspectRatio(texture);
-            return CreateDetailImage(Background.FromTexture2D(texture), aspect);
-        }
-
-        static VisualElement CreateDetailImage(Background background, float aspectRatio)
+        VisualElement CreateDetailImage(Background background, float aspectRatio, int index)
         {
             var image = new VisualElement { name = "Image" };
             image.AddToClassList("DtailImages");
@@ -265,7 +263,14 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             image.style.flexShrink = 0;
             image.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
             image.style.backgroundImage = background;
+            image.RegisterCallback<ClickEvent>(evt => OnDetailImageClicked(index, evt));
             return image;
+        }
+
+        void OnDetailImageClicked(int index, ClickEvent evt)
+        {
+            _imagePreview?.Show(index);
+            evt.StopPropagation();
         }
 
         static float GetSpriteAspectRatio(Sprite sprite)
@@ -376,9 +381,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 if (infos[i] == null)
                     continue;
 
-                var element = new AdditionalInfo();
-                element.Bind(infos[i], BoundInfo);
-                _additionalInfomations.Add(element);
+                _additionalInfomations.Add(CreateAdditionalInfoElement(infos[i]));
             }
         }
 
@@ -402,9 +405,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 if (infos[i] == null)
                     continue;
 
-                var element = new AdditionalInfo();
-                element.Bind(infos[i], BoundInfo);
-                _howToSetupInfomations.Add(element);
+                _howToSetupInfomations.Add(CreateAdditionalInfoElement(infos[i]));
                 added++;
             }
 
@@ -416,6 +417,19 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             SetDisplay(panel, true);
             SetDisplay(_howToSetupInfomations, true);
+        }
+
+        AdditionalInfo CreateAdditionalInfoElement(global::AdditionalInfo info)
+        {
+            var element = new AdditionalInfo();
+            element.Bind(info, BoundInfo);
+            element.ImageClicked += OnAdditionalInfoImageClicked;
+            return element;
+        }
+
+        void OnAdditionalInfoImageClicked(Background background)
+        {
+            _imagePreview?.Show(background);
         }
 
         void BindUpdateInfos(global::UpdateInfo[] infos)
