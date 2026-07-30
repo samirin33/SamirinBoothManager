@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using VRC.SDK3.Avatars.Components;
+using Samirin33.NDMF.Components.Editor;
 
 namespace samirin33.SamirinBoothManager.UI.Parts
 {
@@ -39,6 +41,11 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         /// Bind 結果としてパネルを表示すべきか（display が Flex か）。
         /// </summary>
         public bool IsContentVisible { get; private set; }
+
+        /// <summary>
+        /// プレハブがシーン／アバターへ新規配置（または差し替え）されたときに発火する。
+        /// </summary>
+        public event Action<GameObject> PrefabInstancePlaced;
 
         public AttachPanel() : base(nameof(AttachPanel))
         {
@@ -359,10 +366,17 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (first == null || string.IsNullOrEmpty(first.prefabPath))
                 return;
 
+            GameObject rootInstance;
             if (useAvatarAttach)
-                SBM_Header.AttachPrefabToAvatar(avatar, first.prefabPath);
+                rootInstance = SBM_Header.AttachPrefabToAvatar(avatar, first.prefabPath);
             else
-                SBM_Header.InstantiatePrefabInScene(first.prefabPath);
+                rootInstance = SBM_Header.InstantiatePrefabInScene(first.prefabPath);
+
+            if (rootInstance != null)
+            {
+                PrefabInstancePlaced?.Invoke(rootInstance);
+                PackageVersionCheckerService.CheckPlacedHierarchy(rootInstance);
+            }
         }
 
         /// <summary>
@@ -486,7 +500,11 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 EditorUtility.SetDirty(avatar.gameObject);
 
             if (instance != null)
+            {
                 Selection.activeGameObject = instance;
+                PrefabInstancePlaced?.Invoke(instance);
+                PackageVersionCheckerService.CheckPlacedHierarchy(instance);
+            }
 
             RefreshAttachedState(avatar);
             RefreshAssetListLabels(avatar);

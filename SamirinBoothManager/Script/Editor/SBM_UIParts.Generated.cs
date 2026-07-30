@@ -3,11 +3,4 @@ using UnityEngine.UIElements;
 
 namespace samirin33.SamirinBoothManager.UI.Parts
 {
-    public class SBM_Base : SBM_UxmlPartElement
-    {
-        public new class UxmlFactory : UxmlFactory<SBM_Base, UxmlTraits> { }
-        public new class UxmlTraits : VisualElement.UxmlTraits { }
-        public SBM_Base() : base(nameof(SBM_Base)) { }
-    }
-
 }
