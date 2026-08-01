@@ -6,27 +6,29 @@ using UnityEngine.UIElements;
 
 /// <summary>
 /// UI Toolkit 用 FontAsset の生成・適用。
-/// -unity-font (Font/OTF) 直指定だと内部で FontAsset 化し、
-/// DropdownField 等で m_AtlasTextures の MissingReferenceException が出るため、
-/// 永続化された FontAsset を -unity-font-definition 相当で使う。
+/// SDF ではなく Dynamic（必要文字を都度追加）+ SMOOTH_HINTED で表示する。
+/// -unity-font (Font/OTF) 直指定は DropdownField 等で Atlas Missing になりやすいため、
+/// 永続化された Dynamic FontAsset を unityFontDefinition で使う。
 /// </summary>
 public static class SamirinBoothFontUtil
 {
     public const string SourceFontPath =
         "Assets/samirin33/SamirinBoothManager/Font/YasashisaGothicBold-V2.otf";
     public const string FontAssetPath =
+        "Assets/samirin33/SamirinBoothManager/Font/YasashisaGothicBold-V2 Dynamic.asset";
+    const string LegacySdfFontAssetPath =
         "Assets/samirin33/SamirinBoothManager/Font/YasashisaGothicBold-V2 SDF.asset";
 
     /// <summary>生成設定を変えたら上げる。不一致なら自動再生成する。</summary>
-    const int SettingsVersion = 2;
+    const int SettingsVersion = 3;
     const string SettingsVersionKey = "samirin33.SamirinBoothManager.FontAssetSettingsVersion";
 
-    // 小さめ UI 文字でもキレが出るよう、ヒント付き SDF + やや高めのサンプリング
-    const int SamplingPointSize = 120;
-    const int AtlasPadding = 12; // 1:10 比率
+    // Dynamic ビットマップ系。UI の 12〜30px 程度を想定したサンプリング
+    const int SamplingPointSize = 64;
+    const int AtlasPadding = 5;
     const int AtlasWidth = 2048;
     const int AtlasHeight = 2048;
-    const GlyphRenderMode RenderMode = GlyphRenderMode.SDFAA_HINTED;
+    const GlyphRenderMode RenderMode = GlyphRenderMode.SMOOTH_HINTED;
 
     static FontAsset _cached;
 
@@ -35,14 +37,14 @@ public static class SamirinBoothFontUtil
     {
         _cached = null;
         EditorPrefs.DeleteKey(SettingsVersionKey);
-        if (AssetDatabase.LoadAssetAtPath<FontAsset>(FontAssetPath) != null)
-            AssetDatabase.DeleteAsset(FontAssetPath);
+        DeleteAssetIfExists(FontAssetPath);
+        DeleteAssetIfExists(LegacySdfFontAssetPath);
 
         var created = EnsureFontAsset(forceCreate: true);
         EditorUtility.DisplayDialog(
             "Samirin Booth Font",
             created != null
-                ? $"FontAsset をシャープ設定で再生成しました:\n{FontAssetPath}\n\nRender: SDFAA_HINTED / Sample: {SamplingPointSize}"
+                ? $"Dynamic FontAsset を生成しました:\n{FontAssetPath}\n\nMode: Dynamic / SMOOTH_HINTED / Sample: {SamplingPointSize}"
                 : "FontAsset の生成に失敗しました。ソースフォントを確認してください。",
             "OK");
     }
@@ -58,10 +60,11 @@ public static class SamirinBoothFontUtil
                 return _cached;
 
             _cached = AssetDatabase.LoadAssetAtPath<FontAsset>(FontAssetPath);
-            if (_cached != null && HasValidAtlas(_cached))
+            if (_cached != null && HasValidAtlas(_cached) && IsDynamicBitmapAsset(_cached))
                 return _cached;
 
             _cached = null;
+            forceCreate = true;
         }
 
         var sourceFont = AssetDatabase.LoadAssetAtPath<Font>(SourceFontPath);
@@ -71,8 +74,8 @@ public static class SamirinBoothFontUtil
             return null;
         }
 
-        if (AssetDatabase.LoadAssetAtPath<FontAsset>(FontAssetPath) != null)
-            AssetDatabase.DeleteAsset(FontAssetPath);
+        DeleteAssetIfExists(FontAssetPath);
+        DeleteAssetIfExists(LegacySdfFontAssetPath);
 
         var fontAsset = FontAsset.CreateFontAsset(
             sourceFont,
@@ -90,9 +93,7 @@ public static class SamirinBoothFontUtil
             return null;
         }
 
-        fontAsset.name = "YasashisaGothicBold-V2 SDF";
-        TuneMaterialForSharpUi(fontAsset);
-
+        fontAsset.name = "YasashisaGothicBold-V2 Dynamic";
         AssetDatabase.CreateAsset(fontAsset, FontAssetPath);
 
         if (fontAsset.material != null)
@@ -109,7 +110,6 @@ public static class SamirinBoothFontUtil
                 if (tex == null)
                     continue;
                 tex.name = fontAsset.name + " Atlas " + i;
-                // 拡大時の滲みを抑える
                 tex.filterMode = FilterMode.Bilinear;
                 tex.anisoLevel = 0;
                 AssetDatabase.AddObjectToAsset(tex, fontAsset);
@@ -126,24 +126,7 @@ public static class SamirinBoothFontUtil
     }
 
     /// <summary>
-    /// SDF マテリアルのソフトネス系を抑え、UI 文字のキレを優先する。
-    /// </summary>
-    static void TuneMaterialForSharpUi(FontAsset fontAsset)
-    {
-        var material = fontAsset != null ? fontAsset.material : null;
-        if (material == null)
-            return;
-
-        if (material.HasProperty("_OutlineSoftness"))
-            material.SetFloat("_OutlineSoftness", 0f);
-        if (material.HasProperty("_FaceDilate"))
-            material.SetFloat("_FaceDilate", 0f);
-        if (material.HasProperty("_ScaleRatioA"))
-            material.SetFloat("_ScaleRatioA", 1f);
-    }
-
-    /// <summary>
-    /// SBM_Text クラス要素へ FontAsset を適用し、レガシー Font 指定を消す。
+    /// SBM_Text クラス要素へ Dynamic FontAsset を適用し、レガシー Font 指定を消す。
     /// </summary>
     public static void ApplySbmTextFonts(VisualElement root)
     {
@@ -162,6 +145,19 @@ public static class SamirinBoothFontUtil
         });
     }
 
+    static bool IsDynamicBitmapAsset(FontAsset fontAsset)
+    {
+        if (fontAsset == null)
+            return false;
+
+        // 旧 SDF アセットを誤って使い続けない
+        if (fontAsset.atlasPopulationMode != AtlasPopulationMode.Dynamic)
+            return false;
+
+        var path = AssetDatabase.GetAssetPath(fontAsset);
+        return string.Equals(path, FontAssetPath, System.StringComparison.OrdinalIgnoreCase);
+    }
+
     static bool HasValidAtlas(FontAsset fontAsset)
     {
         if (fontAsset == null || fontAsset.atlasTextures == null || fontAsset.atlasTextures.Length == 0)
@@ -174,5 +170,11 @@ public static class SamirinBoothFontUtil
         }
 
         return true;
+    }
+
+    static void DeleteAssetIfExists(string assetPath)
+    {
+        if (AssetDatabase.LoadAssetAtPath<Object>(assetPath) != null)
+            AssetDatabase.DeleteAsset(assetPath);
     }
 }
