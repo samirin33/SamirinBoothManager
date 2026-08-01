@@ -179,7 +179,7 @@
     if (params.product || params.file || params.url) {
       await showLicense(manifest, params);
     } else {
-      await showNotFound(manifest);
+      await showIndex(manifest);
     }
   }
 
