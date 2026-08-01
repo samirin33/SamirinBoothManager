@@ -19,7 +19,7 @@
   function statusBadge(status) {
     const kind = status?.kind || "other";
     const label = status?.label || "—";
-    return `<span class="status status-${kind}">${escapeHtml(label)}</span>`;
+    return `<span class="status status-${kind}" role="status">${escapeHtml(label)}</span>`;
   }
 
   function metaValue(value) {
@@ -56,7 +56,7 @@
 
         return `
           <section class="summary-group">
-            <h3><span class="group-num">${group.id}.</span> ${escapeHtml(group.title)}</h3>
+            <h3 class="md-title-md"><span class="group-num">${group.id}.</span> ${escapeHtml(group.title)}</h3>
             <table class="summary-table">
               <tbody>${body}</tbody>
             </table>
@@ -113,18 +113,27 @@
           </p>
         </header>
 
-        <section class="panel">
-          <h2>許諾範囲の簡易一覧</h2>
+        <section class="md-section">
+          <h2 class="md-section__title">
+            <span class="material-symbols-outlined" aria-hidden="true">checklist</span>
+            許諾範囲の簡易一覧
+          </h2>
           ${renderSummaryTable(license)}
         </section>
 
-        <section class="panel">
-          <h2>権利者情報・表記</h2>
+        <section class="md-section">
+          <h2 class="md-section__title">
+            <span class="material-symbols-outlined" aria-hidden="true">badge</span>
+            権利者情報・表記
+          </h2>
           ${renderMetaPanel(license)}
         </section>
 
-        <section class="panel">
-          <h2>利用規約本文（収録テキスト）</h2>
+        <section class="md-section">
+          <h2 class="md-section__title">
+            <span class="material-symbols-outlined" aria-hidden="true">description</span>
+            利用規約本文（収録テキスト）
+          </h2>
           <p class="doc-note">
             本データは VN3ライセンス（Ver.${escapeHtml(license.version || "1.10")}）に準拠します。
             基本条項（語の定義、免責、禁止行為、準拠法等）の詳細は
@@ -140,7 +149,8 @@
 
   function renderIndex(licenses) {
     if (!licenses.length) {
-      return `<div class="empty-state">
+      return `<div class="md-empty empty-state">
+        <p class="eyebrow">License Viewer</p>
         <h1>ライセンス一覧</h1>
         <p>表示できるライセンスファイルがありません。<code>sync-licenses.ps1</code> を実行するか、SamirinBoothInformation 配下にライセンステキストを配置してください。</p>
       </div>`;
@@ -163,7 +173,7 @@
         <header class="index-header">
           <p class="eyebrow">Samirin Booth License Viewer</p>
           <h1>ライセンス一覧</h1>
-          <p>SamirinBoothInformation 内のライセンスファイルを自動取得して表示します。各カード、または <code>?product=製品名</code> のリンクから個別ページを開けます。</p>
+          <p class="md-body-md">SamirinBoothInformation 内のライセンスファイルを自動取得して表示します。各カード、または <code>?product=製品名</code> のリンクから個別ページを開けます。</p>
         </header>
         <div class="license-grid">${cards}</div>
       </section>`;
@@ -171,7 +181,8 @@
 
   function renderError(message, detail) {
     return `
-      <div class="empty-state error-state">
+      <div class="md-empty empty-state error-state">
+        <p class="eyebrow">Error</p>
         <h1>読み込みに失敗しました</h1>
         <p>${escapeHtml(message)}</p>
         ${detail ? `<pre class="raw-license">${escapeHtml(detail)}</pre>` : ""}
