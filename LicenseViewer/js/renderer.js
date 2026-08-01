@@ -107,11 +107,6 @@
         <header class="doc-header">
           <p class="eyebrow">VN3 License based terms</p>
           <h1>${productName}</h1>
-          <p class="doc-sub">利用規約による許諾範囲の簡易一覧</p>
-          <p class="doc-note">必ず利用規約本文を併せてご確認ください。本ページは
-            <a href="${escapeHtml(config.documentReferenceUrl)}" target="_blank" rel="noopener noreferrer">VN3ライセンス公開書式</a>
-            を参考にした表示です。
-          </p>
         </header>
 
         <section class="md-section">
