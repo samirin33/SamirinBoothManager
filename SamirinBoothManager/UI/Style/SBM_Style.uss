@@ -12,8 +12,7 @@
     white-space: nowrap;
     text-overflow: clip;
     overflow: hidden;
-    -unity-font: url("project://database/Assets/samirin33/SamirinBoothManager/Font/YasashisaGothicBold-V2.otf?fileID=12800000&guid=643885b1bd1d1c242a0dad8d01748860&type=3#YasashisaGothicBold-V2");
-    -unity-font-definition: initial;
+    /* Font は SamirinBoothFontUtil が FontAsset として適用する（-unity-font 直指定は Dropdown で Atlas Missing の原因になる） */
     text-shadow: 0.5px 0.5px 3px rgb(20, 19, 37);
 }
 

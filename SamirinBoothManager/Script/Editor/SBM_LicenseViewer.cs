@@ -60,9 +60,13 @@ public class SBM_LicenseViewer : EditorWindow
     {
         rootVisualElement.Clear();
 
+        var fontAsset = SamirinBoothFontUtil.EnsureFontAsset();
+
         var root = new VisualElement();
         root.AddToClassList("lv-root");
         root.style.flexGrow = 1;
+        if (fontAsset != null)
+            root.style.unityFontDefinition = new StyleFontDefinition(fontAsset);
         rootVisualElement.Add(root);
 
         var style = AssetDatabase.LoadAssetAtPath<StyleSheet>(StylePath);

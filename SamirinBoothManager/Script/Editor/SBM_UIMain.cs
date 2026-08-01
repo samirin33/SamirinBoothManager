@@ -49,6 +49,8 @@ public class SBM_UIMain : EditorWindow
         _gridScroll?.Stop();
         _gridScroll = null;
 
+        SamirinBoothFontUtil.EnsureFontAsset();
+
         var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(MainUxmlPath);
         if (visualTree == null)
         {
@@ -57,6 +59,7 @@ public class SBM_UIMain : EditorWindow
         }
 
         visualTree.CloneTree(rootVisualElement);
+        SamirinBoothFontUtil.ApplySbmTextFonts(rootVisualElement);
 
         _gridScroll = SBM_GridScroll.Attach(rootVisualElement);
         _gridScroll?.Start();

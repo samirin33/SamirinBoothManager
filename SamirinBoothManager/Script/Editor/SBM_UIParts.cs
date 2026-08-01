@@ -98,9 +98,11 @@ namespace samirin33.SamirinBoothManager.UI.Parts
     {
         protected SBM_UxmlPartElement(string partName)
         {
+            SamirinBoothFontUtil.EnsureFontAsset();
             var path = $"{SBM_UIParts.PartsAssetFolder}/{partName}.uxml";
             var template = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(path);
             template?.CloneTree(this);
+            SamirinBoothFontUtil.ApplySbmTextFonts(this);
         }
     }
 

@@ -70,6 +70,8 @@ public class SBM_UpdateRemind : EditorWindow
         _gridScroll = null;
         rootVisualElement.Clear();
 
+        SamirinBoothFontUtil.EnsureFontAsset();
+
         var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(UxmlPath);
         if (visualTree == null)
         {
@@ -78,6 +80,7 @@ public class SBM_UpdateRemind : EditorWindow
         }
 
         visualTree.CloneTree(rootVisualElement);
+        SamirinBoothFontUtil.ApplySbmTextFonts(rootVisualElement);
         _updateList = rootVisualElement.Q<UpdateAssetList>();
         _gridScroll = SBM_GridScroll.Attach(rootVisualElement);
         _gridScroll?.Start();
