@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using VRC.SDK3.Avatars.Components;
-using Samirin33.NDMF.Components.Editor;
 
 namespace samirin33.SamirinBoothManager.UI.Parts
 {
@@ -375,7 +375,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (rootInstance != null)
             {
                 PrefabInstancePlaced?.Invoke(rootInstance);
-                PackageVersionCheckerService.CheckPlacedHierarchy(rootInstance);
+                TryCheckPlacedHierarchy(rootInstance);
             }
         }
 
@@ -503,7 +503,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             {
                 Selection.activeGameObject = instance;
                 PrefabInstancePlaced?.Invoke(instance);
-                PackageVersionCheckerService.CheckPlacedHierarchy(instance);
+                TryCheckPlacedHierarchy(instance);
             }
 
             RefreshAttachedState(avatar);
@@ -541,6 +541,39 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             ColorUtility.TryParseHtmlString(hex, out var color);
             return color;
+        }
+
+        /// <summary>
+        /// PackageVersionCheckerService が無い環境でもコンパイル・実行できるよう、リフレクションで呼ぶ。
+        /// </summary>
+        static void TryCheckPlacedHierarchy(GameObject root)
+        {
+            if (root == null)
+                return;
+
+            const string typeName = "Samirin33.NDMF.Components.Editor.PackageVersionCheckerService";
+            Type type = null;
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            for (int i = 0; i < assemblies.Length; i++)
+            {
+                type = assemblies[i].GetType(typeName);
+                if (type != null)
+                    break;
+            }
+
+            if (type == null)
+                return;
+
+            var method = type.GetMethod(
+                "CheckPlacedHierarchy",
+                BindingFlags.Public | BindingFlags.Static,
+                null,
+                new[] { typeof(GameObject) },
+                null);
+            if (method == null)
+                return;
+
+            method.Invoke(null, new object[] { root });
         }
     }
 }
