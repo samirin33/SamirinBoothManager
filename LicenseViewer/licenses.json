@@ -1,0 +1,15 @@
+{
+    "generatedAt":  "2026-08-01T21:58:35+09:00",
+    "sourceRoot":  "../SamirinBoothInformation",
+    "licenses":  [
+                     {
+                         "id":  "DeskPen",
+                         "product":  "DeskPen",
+                         "fileName":  "VN3License.txt",
+                         "relativePath":  "DeskPen/VN3License.txt",
+                         "localPath":  "licenses/DeskPen/VN3License.txt",
+                         "sourcePath":  "../SamirinBoothInformation/DeskPen/VN3License.txt",
+                         "title":  "DeskPen"
+                     }
+                 ]
+}
