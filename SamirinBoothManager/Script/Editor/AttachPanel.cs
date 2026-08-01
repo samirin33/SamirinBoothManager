@@ -281,9 +281,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             var avatar = SBM_Header.CurrentAvatarDescriptor;
             var useAvatar = ShouldUseAvatarAttach(_info, avatar);
 
-            // rootAsset が未配置なら自動配置（rootAssetReplace 時は root を置かず自身のみ）
-            if (!ShouldReplaceRootAsset(selected))
-                EnsureRootAssetPlaced(avatar, useAvatar);
+            // rootAsset が未配置なら、その1つ目のバリエーションで自動配置
+            EnsureRootAssetPlaced(avatar, useAvatar);
 
             GameObject instance;
             if (useAvatar)
@@ -340,8 +339,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (avatar == null || selected == null || string.IsNullOrEmpty(selected.prefabPath))
                 return;
 
-            if (!ShouldReplaceRootAsset(selected))
-                EnsureRootAssetPlaced(avatar, useAvatarAttach: true);
+            EnsureRootAssetPlaced(avatar, useAvatarAttach: true);
 
             var sameId = FindSameIdAttachedVariation(avatar, selected);
             var oldPath = sameId?.prefabPath;
@@ -350,18 +348,6 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 return;
 
             AfterHierarchyChanged(avatar, instance);
-        }
-
-        /// <summary>
-        /// rootAssetReplace が有効かつ rootAsset が指定されているとき、
-        /// root と併置せず自身の prefabPath のみを配置する。
-        /// </summary>
-        bool ShouldReplaceRootAsset(Variation selected)
-        {
-            return selected != null
-                && selected.rootAssetReplace
-                && _info?.rootAsset != null
-                && _info.rootAsset != _info;
         }
 
         /// <summary>

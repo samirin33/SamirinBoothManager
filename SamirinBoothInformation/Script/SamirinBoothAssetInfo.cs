@@ -53,7 +53,6 @@ public class Variation
     public string variationName;
     public string variationDescription;
     public string prefabPath;
-    public bool rootAssetReplace = false;
     public int id;
 }
 

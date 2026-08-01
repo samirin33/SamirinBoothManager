@@ -17,7 +17,7 @@ MonoBehaviour:
   images: []
   category: 1
   majorVertion: 0
-  minorVertion: 3
+  minorVertion: 2
   patchVertion: 0
   releaseDate:
     year: 2026
@@ -25,18 +25,13 @@ MonoBehaviour:
     day: 16
   updateDate:
     year: 2026
-    month: 8
-    day: 2
+    month: 7
+    day: 30
   updateRemind: 1
   updateInfos: []
   url: 
   price: 0
   youtubeUrl: 
-  platformInfo:
-    forPCVR: 1
-    forPCDesktop: 1
-    forQuest: 1
-    forAndroid_iOS: 1
   additionalInfos: []
   howToSetupInfos: []
   variations: []

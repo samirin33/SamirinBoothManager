@@ -423,14 +423,7 @@ public class SamirinBoothAssetInfoEditor : Editor
     {
         var list = new ReorderableList(serializedObject, property, true, true, true, true);
         list.drawHeaderCallback = rect => EditorGUI.LabelField(rect, "バリエーション一覧");
-        list.elementHeightCallback = index =>
-        {
-            float line = EditorGUIUtility.singleLineHeight;
-            float height = line * 4 + 14;
-            if (HasRootAssetAssigned())
-                height += line + 2;
-            return height;
-        };
+        list.elementHeight = EditorGUIUtility.singleLineHeight * 4 + 14;
         list.drawElementCallback = (rect, index, isActive, isFocused) =>
         {
             var element = property.GetArrayElementAtIndex(index);
@@ -473,22 +466,8 @@ public class SamirinBoothAssetInfoEditor : Editor
             EditorGUI.BeginDisabledGroup(true);
             EditorGUI.TextField(new Rect(rect.x, y, width, line), "パス", pathProp.stringValue);
             EditorGUI.EndDisabledGroup();
-
-            if (HasRootAssetAssigned())
-            {
-                y += line + 2;
-                EditorGUI.PropertyField(
-                    new Rect(rect.x, y, width, line),
-                    element.FindPropertyRelative("rootAssetReplace"),
-                    new GUIContent("Root Asset Replace", "有効時、Root を併置せず自身の Prefab のみ配置する"));
-            }
         };
         return list;
-    }
-
-    bool HasRootAssetAssigned()
-    {
-        return _rootAsset != null && _rootAsset.objectReferenceValue != null;
     }
 
     ReorderableList CreateRelatedAssetsList(SerializedProperty property)
