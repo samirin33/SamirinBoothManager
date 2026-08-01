@@ -106,7 +106,8 @@
       <article class="license-doc">
         <header class="doc-header">
           <p class="eyebrow">VN3 License based terms</p>
-          <h1>${productName}<span class="doc-sub">利用規約による許諾範囲の簡易一覧</span></h1>
+          <h1>${productName}</h1>
+          <p class="doc-sub">利用規約による許諾範囲の簡易一覧</p>
           <p class="doc-note">必ず利用規約本文を併せてご確認ください。本ページは
             <a href="${escapeHtml(config.documentReferenceUrl)}" target="_blank" rel="noopener noreferrer">VN3ライセンス公開書式</a>
             を参考にした表示です。
@@ -114,26 +115,17 @@
         </header>
 
         <section class="md-section">
-          <h2 class="md-section__title">
-            <span class="material-symbols-outlined" aria-hidden="true">checklist</span>
-            許諾範囲の簡易一覧
-          </h2>
+          <h2 class="md-section__title">許諾範囲の簡易一覧</h2>
           ${renderSummaryTable(license)}
         </section>
 
         <section class="md-section">
-          <h2 class="md-section__title">
-            <span class="material-symbols-outlined" aria-hidden="true">badge</span>
-            権利者情報・表記
-          </h2>
+          <h2 class="md-section__title">権利者情報・表記</h2>
           ${renderMetaPanel(license)}
         </section>
 
         <section class="md-section">
-          <h2 class="md-section__title">
-            <span class="material-symbols-outlined" aria-hidden="true">description</span>
-            利用規約本文（収録テキスト）
-          </h2>
+          <h2 class="md-section__title">利用規約本文（収録テキスト）</h2>
           <p class="doc-note">
             本データは VN3ライセンス（Ver.${escapeHtml(license.version || "1.10")}）に準拠します。
             基本条項（語の定義、免責、禁止行為、準拠法等）の詳細は
