@@ -126,11 +126,11 @@
   async function showIndex(manifest) {
     setBreadcrumb([{ label: "Licenses", href: "./" }]);
     els.app.innerHTML = renderer.renderIndex(manifest);
-    setStatus(
-      manifest.length
-        ? `${manifest.length} 件のライセンスを検出`
-        : "ライセンスなし"
-    );
+    // setStatus(
+    //   manifest.length
+    //     ? `${manifest.length} 件のライセンスを検出`
+    //     : "ライセンスなし"
+    // );
     document.title = "ライセンス一覧 | Samirin Booth";
   }
 
@@ -179,7 +179,7 @@
     if (params.product || params.file || params.url) {
       await showLicense(manifest, params);
     } else {
-      await showIndex(manifest);
+      await showNotFound(manifest);
     }
   }
 

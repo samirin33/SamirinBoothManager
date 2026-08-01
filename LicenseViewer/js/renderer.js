@@ -144,7 +144,7 @@
       return `<div class="md-empty empty-state">
         <p class="eyebrow">License Viewer</p>
         <h1>ライセンス一覧</h1>
-        <p>表示できるライセンスファイルがありません。<code>sync-licenses.ps1</code> を実行するか、SamirinBoothInformation 配下にライセンステキストを配置してください。</p>
+        <p>表示できるライセンスファイルがありません！</p>
       </div>`;
     }
 
@@ -165,7 +165,6 @@
         <header class="index-header">
           <p class="eyebrow">Samirin Booth License Viewer</p>
           <h1>ライセンス一覧</h1>
-          <p class="md-body-md">SamirinBoothInformation 内のライセンスファイルを自動取得して表示します。各カード、または <code>?product=製品名</code> のリンクから個別ページを開けます。</p>
         </header>
         <div class="license-grid">${cards}</div>
       </section>`;
