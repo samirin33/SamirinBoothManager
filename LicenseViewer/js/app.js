@@ -7,7 +7,35 @@
     app: document.getElementById("app"),
     crumb: document.getElementById("breadcrumb"),
     status: document.getElementById("load-status"),
+    updated: document.getElementById("last-updated"),
   };
+
+  function formatUpdatedAt(value) {
+    if (!value) return "";
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    try {
+      return new Intl.DateTimeFormat("ja-JP", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Tokyo",
+      }).format(date);
+    } catch (_error) {
+      return date.toLocaleString("ja-JP");
+    }
+  }
+
+  function setLastUpdated(value) {
+    if (!els.updated) return;
+    const formatted = formatUpdatedAt(value);
+    els.updated.textContent = formatted
+      ? `最終更新日: ${formatted}`
+      : "最終更新日: —";
+  }
 
   function setStatus(text, isError = false) {
     if (!els.status) return;
@@ -57,11 +85,38 @@
     try {
       const text = await fetchText(config.manifestUrl);
       const data = JSON.parse(text);
-      return Array.isArray(data.licenses) ? data.licenses : [];
+      return {
+        generatedAt: data.generatedAt || "",
+        licenses: Array.isArray(data.licenses) ? data.licenses : [],
+      };
     } catch (error) {
       console.warn("manifest load failed", error);
-      return [];
+      return { generatedAt: "", licenses: [] };
     }
+  }
+
+  function resolveUpdatedAt(manifest, entry) {
+    const candidates = [
+      entry?.updatedAt,
+      manifest.generatedAt,
+    ].filter(Boolean);
+    if (!candidates.length) return "";
+    return candidates
+      .map((value) => new Date(value))
+      .filter((date) => !Number.isNaN(date.getTime()))
+      .sort((a, b) => b - a)[0];
+  }
+
+  function resolveIndexUpdatedAt(manifest) {
+    const dates = [
+      manifest.generatedAt,
+      ...manifest.licenses.map((item) => item.updatedAt),
+    ]
+      .filter(Boolean)
+      .map((value) => new Date(value))
+      .filter((date) => !Number.isNaN(date.getTime()));
+    if (!dates.length) return "";
+    return dates.sort((a, b) => b - a)[0];
   }
 
   function findEntry(manifest, params) {
@@ -125,17 +180,13 @@
 
   async function showIndex(manifest) {
     setBreadcrumb([{ label: "Licenses", href: "./" }]);
-    els.app.innerHTML = renderer.renderIndex(manifest);
-    // setStatus(
-    //   manifest.length
-    //     ? `${manifest.length} 件のライセンスを検出`
-    //     : "ライセンスなし"
-    // );
+    els.app.innerHTML = renderer.renderIndex(manifest.licenses);
+    setLastUpdated(resolveIndexUpdatedAt(manifest));
     document.title = "ライセンス一覧 | Samirin Booth";
   }
 
   async function showLicense(manifest, params) {
-    const entry = findEntry(manifest, params);
+    const entry = findEntry(manifest.licenses, params);
     const productName =
       entry?.title ||
       entry?.product ||
@@ -159,6 +210,7 @@
         String(error.message || error)
       );
       setStatus("読み込み失敗", true);
+      setLastUpdated(resolveUpdatedAt(manifest, entry));
       return;
     }
 
@@ -169,6 +221,7 @@
 
     els.app.innerHTML = renderer.renderDocument(license, config);
     setStatus(`取得元: ${loaded.url}`);
+    setLastUpdated(resolveUpdatedAt(manifest, entry));
     document.title = `${license.title} 利用規約 | Samirin Booth`;
   }
 

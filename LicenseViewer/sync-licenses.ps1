@@ -40,6 +40,7 @@ foreach ($file in $files) {
       localPath    = "licenses/$product/$($file.Name)"
       sourcePath   = "../SamirinBoothInformation/$relUnix"
       title        = $product
+      updatedAt    = $file.LastWriteTime.ToString("yyyy-MM-ddTHH:mm:ssK")
     })
 }
 
