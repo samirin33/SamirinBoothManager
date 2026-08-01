@@ -32,6 +32,11 @@ MonoBehaviour:
   url: 
   price: "850\u5186\uFF1F\uFF5E"
   youtubeUrl: 
+  platformInfo:
+    forPCVR: 1
+    forPCDesktop: 1
+    forQuest: 0
+    forAndroid_iOS: 0
   additionalInfos: []
   howToSetupInfos: []
   variations:

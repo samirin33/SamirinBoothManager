@@ -1,0 +1,17 @@
+﻿# Item Analysis
+Source: Assets/samirin33/DeskPen
+Output: Assets/samirin33/SamirinBoothInformation/DeskPen
+Generated: 2026-08-01 23:55:00
+
+DeskPen
+Assets/samirin33/DeskPen/DeskPen.prefab
+ポリゴン数: 80
+頂点数: 160
+マテリアル数: 11
+マテリアルスロット数: 16
+テクスチャサイズ: 7.45 MB
+PhysBone数: 3
+PhysBoneコライダー数: 2
+ライト数: 0
+カメラ数: 1
+同期パラメーター: 32 ビット

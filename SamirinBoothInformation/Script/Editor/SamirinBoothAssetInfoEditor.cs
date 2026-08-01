@@ -19,6 +19,7 @@ public class SamirinBoothAssetInfoEditor : Editor
     SerializedProperty _url;
     SerializedProperty _price;
     SerializedProperty _youtubeUrl;
+    SerializedProperty _platformInfo;
     SerializedProperty _additionalInfos;
     SerializedProperty _howToSetupInfos;
     SerializedProperty _variations;
@@ -37,6 +38,7 @@ public class SamirinBoothAssetInfoEditor : Editor
     bool _foldBasic = true;
     bool _foldVersion = true;
     bool _foldDates = true;
+    bool _foldPlatform = true;
     bool _foldImages = true;
     bool _foldUpdates = true;
     bool _foldAdditional = true;
@@ -60,6 +62,7 @@ public class SamirinBoothAssetInfoEditor : Editor
         _url = serializedObject.FindProperty("url");
         _price = serializedObject.FindProperty("price");
         _youtubeUrl = serializedObject.FindProperty("youtubeUrl");
+        _platformInfo = serializedObject.FindProperty("platformInfo");
         _additionalInfos = serializedObject.FindProperty("additionalInfos");
         _howToSetupInfos = serializedObject.FindProperty("howToSetupInfos");
         _variations = serializedObject.FindProperty("variations");
@@ -82,6 +85,7 @@ public class SamirinBoothAssetInfoEditor : Editor
         DrawBasicSection();
         DrawVersionSection();
         DrawDateSection();
+        DrawPlatformSection();
         DrawImagesSection();
         DrawUpdateInfosSection();
         DrawAdditionalInfosSection();
@@ -218,6 +222,28 @@ public class SamirinBoothAssetInfoEditor : Editor
         {
             DrawDateField(_releaseDate, "リリース日");
             DrawDateField(_updateDate, "更新日");
+        }
+        EditorGUILayout.EndFoldoutHeaderGroup();
+        EditorGUILayout.Space(4);
+    }
+
+    void DrawPlatformSection()
+    {
+        _foldPlatform = EditorGUILayout.BeginFoldoutHeaderGroup(_foldPlatform, "対応プラットフォーム");
+        if (_foldPlatform && _platformInfo != null)
+        {
+            EditorGUILayout.PropertyField(
+                _platformInfo.FindPropertyRelative("forPCVR"),
+                new GUIContent("PC VR"));
+            EditorGUILayout.PropertyField(
+                _platformInfo.FindPropertyRelative("forPCDesktop"),
+                new GUIContent("PC Desktop"));
+            EditorGUILayout.PropertyField(
+                _platformInfo.FindPropertyRelative("forQuest"),
+                new GUIContent("Quest"));
+            EditorGUILayout.PropertyField(
+                _platformInfo.FindPropertyRelative("forAndroid_iOS"),
+                new GUIContent("Android / iOS"));
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUILayout.Space(4);

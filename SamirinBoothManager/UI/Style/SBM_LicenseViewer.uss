@@ -1,0 +1,564 @@
+/* License Viewer — Material Design 3 inspired (参考: LicenseViewer/css/style.css) */
+
+.lv-root {
+    flex-grow: 1;
+    background-color: rgb(246, 251, 245);
+}
+
+.lv-top-bar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    min-height: 56px;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background-color: rgba(246, 251, 245, 0.92);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(192, 201, 193);
+    overflow: visible;
+}
+
+.lv-top-leading {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    flex-shrink: 1;
+    /* 参考: .md-top-app-bar__leading { min-width: 0 } — タイトル側を縮めて右側を残す */
+    min-width: 0;
+    margin-right: 16px;
+    overflow: hidden;
+}
+
+.lv-top-mark {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    flex-grow: 0;
+    flex-shrink: 0;
+    border-radius: 20px;
+    background-color: rgb(168, 242, 200);
+    margin-right: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.lv-top-mark-label {
+    color: rgb(0, 33, 19);
+    font-size: 11px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-top-titles {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.lv-top-title {
+    color: rgb(23, 29, 25);
+    font-size: 16px;
+    -unity-font-style: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-top-subtitle {
+    color: rgb(64, 73, 67);
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-top-actions {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.lv-btn {
+    height: 32px;
+    min-width: auto;
+    flex-grow: 0;
+    flex-shrink: 0;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-radius: 16px;
+    border-width: 0;
+    margin-left: 6px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    overflow: visible;
+}
+
+.lv-btn-text {
+    background-color: rgba(0, 0, 0, 0);
+    color: rgb(27, 107, 74);
+}
+
+.lv-btn-tonal {
+    background-color: rgb(207, 233, 216);
+    color: rgb(10, 31, 21);
+}
+
+.lv-shell {
+    flex-grow: 1;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-top: 10px;
+    padding-bottom: 16px;
+}
+
+.lv-meta-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.lv-breadcrumb {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    flex-grow: 1;
+}
+
+.lv-crumb {
+    color: rgb(64, 73, 67);
+    font-size: 12px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+}
+
+.lv-crumb-link {
+    color: rgb(27, 107, 74);
+}
+
+.lv-crumb-sep {
+    color: rgba(64, 73, 67, 0.55);
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.lv-status {
+    color: rgb(64, 73, 67);
+    font-size: 11px;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 8px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-status-error {
+    color: rgb(186, 26, 26);
+}
+
+.lv-surface {
+    flex-grow: 1;
+    background-color: rgb(255, 255, 255);
+    border-radius: 20px;
+    padding-top: 18px;
+    padding-right: 18px;
+    padding-bottom: 18px;
+    padding-left: 18px;
+}
+
+.lv-scroll {
+    flex-grow: 1;
+}
+
+.lv-eyebrow {
+    color: rgb(27, 107, 74);
+    font-size: 11px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 6px;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-headline {
+    color: rgb(23, 29, 25);
+    font-size: 26px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-section {
+    margin-top: 22px;
+    padding-top: 16px;
+    border-top-width: 1px;
+    border-top-color: rgb(192, 201, 193);
+}
+
+.lv-section-title {
+    color: rgb(23, 29, 25);
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 12px;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-body {
+    color: rgb(64, 73, 67);
+    font-size: 13px;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 10px;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-link {
+    color: rgb(27, 107, 74);
+}
+
+.lv-summary-group {
+    margin-bottom: 10px;
+    padding-top: 10px;
+    padding-right: 12px;
+    padding-bottom: 6px;
+    padding-left: 12px;
+    border-radius: 14px;
+    background-color: rgb(240, 245, 239);
+}
+
+.lv-group-title {
+    color: rgb(23, 29, 25);
+    font-size: 13px;
+    -unity-font-style: bold;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 6px;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-group-num {
+    color: rgb(27, 107, 74);
+}
+
+.lv-row {
+    flex-direction: row;
+    align-items: center;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-top-width: 1px;
+    border-top-color: rgb(192, 201, 193);
+}
+
+.lv-code {
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background-color: rgb(222, 228, 222);
+    color: rgb(64, 73, 67);
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-right: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-cond-label {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 45%;
+    color: rgb(23, 29, 25);
+    font-size: 12px;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 8px;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-cond-value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 40%;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.lv-status-chip {
+    border-radius: 8px;
+    padding-top: 4px;
+    padding-right: 10px;
+    padding-bottom: 4px;
+    padding-left: 10px;
+    font-size: 11px;
+    -unity-font-style: bold;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.lv-status-allow {
+    background-color: rgb(168, 242, 200);
+    color: rgb(0, 33, 19);
+}
+
+.lv-status-deny {
+    background-color: rgb(255, 218, 214);
+    color: rgb(65, 0, 2);
+}
+
+.lv-status-ask {
+    background-color: rgb(255, 224, 138);
+    color: rgb(38, 26, 0);
+}
+
+.lv-status-required {
+    background-color: rgb(191, 233, 248);
+    color: rgb(0, 31, 39);
+}
+
+.lv-status-optional,
+.lv-status-other,
+.lv-status-empty {
+    background-color: rgb(207, 233, 216);
+    color: rgb(10, 31, 21);
+}
+
+.lv-note-block {
+    background-color: rgb(255, 224, 138);
+    color: rgb(38, 26, 0);
+    border-radius: 10px;
+    padding-top: 10px;
+    padding-right: 12px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    font-size: 12px;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.lv-meta-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.lv-meta-item {
+    width: 48%;
+    margin-right: 2%;
+    margin-bottom: 10px;
+    padding-top: 12px;
+    padding-right: 12px;
+    padding-bottom: 12px;
+    padding-left: 12px;
+    border-radius: 12px;
+    background-color: rgb(240, 245, 239);
+}
+
+.lv-meta-item-wide {
+    width: 100%;
+    margin-right: 0;
+}
+
+.lv-meta-dt {
+    color: rgb(64, 73, 67);
+    font-size: 11px;
+    -unity-font-style: bold;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 4px;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-meta-dd {
+    color: rgb(23, 29, 25);
+    font-size: 13px;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-muted {
+    color: rgb(64, 73, 67);
+}
+
+.lv-raw {
+    background-color: rgb(44, 50, 46);
+    color: rgb(236, 242, 236);
+    border-radius: 14px;
+    padding-top: 12px;
+    padding-right: 14px;
+    padding-bottom: 12px;
+    padding-left: 14px;
+    font-size: 11px;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.lv-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+.lv-card {
+    width: 230px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    padding-top: 14px;
+    padding-right: 14px;
+    padding-bottom: 14px;
+    padding-left: 14px;
+    border-radius: 14px;
+    background-color: rgb(240, 245, 239);
+}
+
+.lv-card:hover {
+    background-color: rgb(228, 234, 228);
+}
+
+.lv-card-kicker {
+    align-self: flex-start;
+    background-color: rgb(168, 242, 200);
+    color: rgb(0, 33, 19);
+    border-radius: 8px;
+    padding-top: 2px;
+    padding-right: 8px;
+    padding-bottom: 2px;
+    padding-left: 8px;
+    font-size: 10px;
+    -unity-font-style: bold;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 8px;
+    margin-left: 0;
+}
+
+.lv-card-title {
+    color: rgb(23, 29, 25);
+    font-size: 16px;
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 6px;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-card-path {
+    color: rgb(64, 73, 67);
+    font-size: 11px;
+    white-space: normal;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.lv-empty {
+    padding-top: 24px;
+    padding-bottom: 24px;
+}

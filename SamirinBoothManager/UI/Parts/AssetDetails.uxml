@@ -15,13 +15,13 @@
                         <ui:Label tabindex="-1" text="説明欄" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Discription" style="margin-top: 12px; margin-right: 50px; margin-bottom: 12px; margin-left: 50px; font-size: 15px; flex-grow: 1; white-space: normal;" />
                         <ui:Label tabindex="-1" text="カテゴリ" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CategoryLabel" style="position: absolute; top: 5px; right: 5px; width: 100px; margin-top: 3px; margin-right: 3px; margin-bottom: 3px; margin-left: 3px; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; background-color: rgba(20, 23, 35, 0.4); height: 20px; font-size: 12px;" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
+                    <ui:VisualElement name="PRContents" class="DetailPanel" style="flex-grow: 1;">
                         <ui:ScrollView mode="Horizontal" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Auto" name="PRImages" style="height: 280px; background-color: rgba(26, 26, 30, 0.6);">
                             <ui:VisualElement name="ImageContents" style="flex-direction: row; flex-grow: 1; flex-wrap: nowrap;">
                                 <ui:VisualElement name="Image" class="DtailImages" style="background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/NoImage.png?fileID=2800000&amp;guid=37a679a53a99c9842a4510b6e49ceec5&amp;type=3#NoImage&quot;); width: 340px;" />
                             </ui:VisualElement>
                         </ui:ScrollView>
-                        <ui:VisualElement name="PRMovie" style="flex-grow: 1; height: 20px; flex-direction: row; overflow: hidden;">
+                        <ui:VisualElement name="PRMovie" style="flex-grow: 1; height: 35px; flex-direction: row; overflow: hidden; background-color: rgba(88, 31, 31, 0.33);">
                             <ui:Label tabindex="-1" text="紹介動画はこちら！" parse-escape-sequences="true" display-tooltip-when-elided="true" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; width: 160px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 14px;" />
                             <ui:Label tabindex="-1" text="https://www.youtube.com/" parse-escape-sequences="true" display-tooltip-when-elided="true" name="YoutubeLink" style="flex-grow: 1; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; -unity-text-align: middle-left; font-size: 14px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
                         </ui:VisualElement>
@@ -32,15 +32,15 @@
                             <ui:Label tabindex="-1" text="公開日 YYYY/MM/DD" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ReleaseDate" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 12px;" />
                         </ui:VisualElement>
                         <ui:VisualElement style="height: 74px; width: 100%; overflow: hidden; padding-top: 10px; padding-right: 10px; padding-bottom: 10px; padding-left: 10px; flex-direction: row;">
-                            <ui:VisualElement name="HasImopertedGroup" style="flex-grow: 1; flex-direction: row; background-color: rgb(61, 86, 104); width: 50%;">
+                            <ui:VisualElement name="HasImopertedGroup" style="flex-grow: 1; flex-direction: row; background-color: rgb(61, 86, 104); width: 50%; border-bottom-left-radius: 10px; border-top-left-radius: 10px;">
                                 <ui:Label tabindex="-1" text="インポート済み！" parse-escape-sequences="true" display-tooltip-when-elided="true" name="HasImported" class="VersionText" style="flex-grow: 1; font-size: 20px;" />
                             </ui:VisualElement>
                             <ui:VisualElement style="flex-grow: 1; width: 50%;">
-                                <ui:VisualElement name="CurrentVersionGroup" style="flex-grow: 1; flex-direction: row; background-color: rgb(42, 77, 52);">
+                                <ui:VisualElement name="CurrentVersionGroup" style="flex-grow: 1; flex-direction: row; background-color: rgb(42, 77, 52); border-top-right-radius: 10px;">
                                     <ui:Label tabindex="-1" text="使用バージョン" parse-escape-sequences="true" display-tooltip-when-elided="true" class="VersionText" style="width: 150px;" />
                                     <ui:Label tabindex="-1" text="verX.X.X" parse-escape-sequences="true" display-tooltip-when-elided="true" name="LatestVertion" class="VersionText" style="flex-grow: 1;" />
                                 </ui:VisualElement>
-                                <ui:VisualElement name="LatestVersionGroup" style="flex-grow: 1; flex-direction: row; background-color: rgb(74, 42, 77);">
+                                <ui:VisualElement name="LatestVersionGroup" style="flex-grow: 1; flex-direction: row; background-color: rgb(74, 42, 77); border-bottom-right-radius: 10px;">
                                     <ui:Label tabindex="-1" text="最新バージョン" parse-escape-sequences="true" display-tooltip-when-elided="true" class="VersionText" style="width: 150px;" />
                                     <ui:Label tabindex="-1" text="verX.X.X" parse-escape-sequences="true" display-tooltip-when-elided="true" name="LatestVertion" class="VersionText" style="flex-grow: 1;" />
                                 </ui:VisualElement>
@@ -49,17 +49,38 @@
                         <ui:Label tabindex="-1" text="新しいバージョンが公開されています！サイトから最新版のダウンロード&amp;インポートをオススメします！" parse-escape-sequences="true" display-tooltip-when-elided="true" name="NewVertionRemind" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; color: rgb(220, 78, 112); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; font-size: 12px;" />
                     </ui:VisualElement>
                     <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
+                        <ui:Label tabindex="-1" text="対応プラットフォーム" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 18px;" />
+                        <ui:VisualElement name="PlatformInfo" style="flex-grow: 1; height: 45px; flex-direction: row;">
+                            <ui:VisualElement name="PC_VR" class="SupportBG" style="background-color: rgb(81, 42, 132);">
+                                <ui:Label tabindex="-1" text="PC VR" parse-escape-sequences="true" display-tooltip-when-elided="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 20px;" />
+                                <ui:VisualElement name="isSupport" class="SupportIcon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/Support_Yes.png?fileID=2800000&amp;guid=1547f2a2b2e48b44980e676c904e490c&amp;type=3#Support_Yes&quot;); -unity-background-scale-mode: scale-to-fit;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="PC_Desktop" class="SupportBG">
+                                <ui:Label tabindex="-1" text="PC Desktop" parse-escape-sequences="true" display-tooltip-when-elided="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 20px;" />
+                                <ui:VisualElement name="isSupport" class="SupportIcon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/Support_Yes.png?fileID=2800000&amp;guid=1547f2a2b2e48b44980e676c904e490c&amp;type=3#Support_Yes&quot;); -unity-background-scale-mode: scale-to-fit;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="Quest" class="SupportBG" style="background-color: rgb(53, 111, 63);">
+                                <ui:Label tabindex="-1" text="Quest" parse-escape-sequences="true" display-tooltip-when-elided="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 20px;" />
+                                <ui:VisualElement name="isSupport" class="SupportIcon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/Support_Yes.png?fileID=2800000&amp;guid=1547f2a2b2e48b44980e676c904e490c&amp;type=3#Support_Yes&quot;); -unity-background-scale-mode: scale-to-fit;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="Android_iOS" class="SupportBG" style="background-color: rgb(130, 65, 65);">
+                                <ui:Label tabindex="-1" text="Android iOS" parse-escape-sequences="true" display-tooltip-when-elided="true" style="flex-grow: 1; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 20px;" />
+                                <ui:VisualElement name="isSupport" class="SupportIcon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/samirin33/SamirinBoothManager/Image/Support_Yes.png?fileID=2800000&amp;guid=1547f2a2b2e48b44980e676c904e490c&amp;type=3#Support_Yes&quot;); -unity-background-scale-mode: scale-to-fit;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="AdditionalInfoGroup" class="DetailPanel" style="flex-grow: 1;">
                         <ui:VisualElement name="AdditionalInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
                             <samirin33.SamirinBoothManager.UI.Parts.AdditionalInfo />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
+                    <ui:VisualElement name="HowToGroup" class="DetailPanel" style="flex-grow: 1;">
                         <ui:Label tabindex="-1" text="セットアップ・改変" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 18px;" />
                         <ui:VisualElement name="HowToSetupInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
                             <samirin33.SamirinBoothManager.UI.Parts.AdditionalInfo />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="DetailPanel" style="flex-grow: 1;">
+                    <ui:VisualElement name="UpdateInfoGroup" class="DetailPanel" style="flex-grow: 1;">
                         <ui:Label tabindex="-1" text="アップデート履歴" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 18px;" />
                         <ui:Foldout text="過去のバージョン" value="false" name="PastVarsion" style="align-items: center; font-size: 12px;" />
                         <ui:VisualElement name="PastUpdateInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
@@ -68,6 +89,15 @@
                         <ui:VisualElement name="LatestUpdateInfomations" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
                             <samirin33.SamirinBoothManager.UI.Parts.UpdateInfo />
                         </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="AnalysisInfoGroup" class="DetailPanel" style="flex-grow: 1;">
+                        <ui:Label tabindex="-1" text="リソース" parse-escape-sequences="true" display-tooltip-when-elided="true" style="margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 18px;" />
+                        <ui:VisualElement name="AnalysisInfo" style="flex-grow: 1; padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px;">
+                            <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="AnalysisInfoText" style="white-space: normal; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; font-size: 13px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="LicenseGroup" class="DetailPanel" style="flex-grow: 1;">
+                        <samirin33.SamirinBoothManager.UI.Parts.SBM_Button name="ButtonLicense" background-color="#35357BFF" text="このアイテムのライセンスを表示する" text-scale="2" style="height: 29px;" />
                     </ui:VisualElement>
                     <ui:VisualElement name="RelatedItems" class="DetailPanel" style="flex-grow: 1; font-size: 20px;">
                         <ui:Label tabindex="-1" text="関連アイテム" parse-escape-sequences="true" display-tooltip-when-elided="true" />

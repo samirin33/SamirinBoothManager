@@ -18,7 +18,10 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         const string BackAreaDisable = "BackArea_Disable";
         const string DtailGroupEnable = "DtailGroup_Enable";
         const string DtailGroupDisable = "DtailGroup_Disable";
-        const string FallbackImageGuid = "37a679a53a99c9842a4510b6e49ceec5";
+        const string SupportYesGuid = "1547f2a2b2e48b44980e676c904e490c";
+        const string SupportNoGuid = "cdaf3579735123a4a94a6f7a35aa7931";
+        const string InformationFolder = "Assets/samirin33/SamirinBoothInformation";
+        const string ItemAnalysisFileName = "ItemAnalysis.txt";
         const long HideTransitionMs = 750;
 
         readonly VisualElement _backArea;
@@ -33,6 +36,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly Label _name;
         readonly Label _description;
         readonly Label _categoryLabel;
+        readonly VisualElement _prContents;
+        readonly VisualElement _prImages;
         readonly VisualElement _imageContents;
         readonly VisualElement _prMovie;
         readonly Label _youtubeLink;
@@ -47,19 +52,29 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly VisualElement _latestVersionGroup;
         readonly Label _latestVertionLabel;
         readonly Label _newVertionRemind;
+        readonly VisualElement _platformInfo;
+        readonly VisualElement _additionalInfoGroup;
         readonly VisualElement _additionalInfomations;
+        readonly VisualElement _howToGroup;
         readonly VisualElement _howToSetupInfomations;
         readonly Foldout _pastVersionFoldout;
         readonly VisualElement _pastVersionFoldoutParent;
         int _pastVersionFoldoutIndex = -1;
         readonly VisualElement _pastUpdateInfomations;
         readonly VisualElement _latestUpdateInfomations;
+        readonly VisualElement _updateInfoGroup;
+        readonly VisualElement _analysisInfoGroup;
+        readonly VisualElement _analysisInfo;
+        readonly Label _analysisInfoText;
+        readonly VisualElement _licenseGroup;
+        readonly SBM_Button _buttonLicense;
         readonly VisualElement _relatedItems;
         readonly VisualElement _relatedItemsContainer;
 
         IVisualElementScheduledItem _pending;
         string _boothUrl = string.Empty;
         string _youtubeUrl = string.Empty;
+        bool _hasPrImages;
 
         public SamirinBoothAssetInfo BoundInfo { get; private set; }
         public bool IsOpen { get; private set; }
@@ -88,6 +103,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _categoryLabel = this.Q<Label>("CategoryLabel");
             SamirinBoothCategoryUtil.SetupLabel(_categoryLabel);
             _imageContents = this.Q<VisualElement>("ImageContents");
+            _prImages = this.Q<VisualElement>("PRImages");
+            _prContents = this.Q<VisualElement>("PRContents")
+                ?? _prImages?.parent;
             _prMovie = this.Q<VisualElement>("PRMovie");
             _youtubeLink = this.Q<Label>("YoutubeLink");
             _updateDate = this.Q<Label>("UpdateDate");
@@ -101,8 +119,13 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _latestVersionGroup = this.Q<VisualElement>("LatestVersionGroup");
             _latestVertionLabel = _latestVersionGroup?.Q<Label>("LatestVertion");
             _newVertionRemind = this.Q<Label>("NewVertionRemind");
+            _platformInfo = this.Q<VisualElement>("PlatformInfo");
             _additionalInfomations = this.Q<VisualElement>("AdditionalInfomations");
+            _additionalInfoGroup = this.Q<VisualElement>("AdditionalInfoGroup")
+                ?? _additionalInfomations?.parent;
             _howToSetupInfomations = this.Q<VisualElement>("HowToSetupInfomations");
+            _howToGroup = this.Q<VisualElement>("HowToGroup")
+                ?? _howToSetupInfomations?.parent;
             _pastVersionFoldout = this.Q<Foldout>("PastVarsion");
             _pastVersionFoldoutParent = _pastVersionFoldout?.parent;
             _pastVersionFoldoutIndex = _pastVersionFoldoutParent != null && _pastVersionFoldout != null
@@ -110,6 +133,15 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 : -1;
             _pastUpdateInfomations = this.Q<VisualElement>("PastUpdateInfomations");
             _latestUpdateInfomations = this.Q<VisualElement>("LatestUpdateInfomations");
+            _updateInfoGroup = this.Q<VisualElement>("UpdateInfoGroup")
+                ?? _latestUpdateInfomations?.parent;
+            _analysisInfoGroup = this.Q<VisualElement>("AnalysisInfoGroup");
+            _analysisInfo = this.Q<VisualElement>("AnalysisInfo");
+            _analysisInfoText = this.Q<Label>("AnalysisInfoText")
+                ?? _analysisInfo?.Q<Label>("AnalysisInfoText");
+            _licenseGroup = this.Q<VisualElement>("LicenseGroup");
+            _buttonLicense = this.Q<SBM_Button>("ButtonLicense")
+                ?? _licenseGroup?.Q<SBM_Button>("ButtonLicense");
             _relatedItems = this.Q<VisualElement>("RelatedItems");
             _relatedItemsContainer = this.Q<VisualElement>("Items");
 
@@ -127,6 +159,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             if (_buttonBooth != null)
                 _buttonBooth.clicked += OnBoothClicked;
+
+            if (_buttonLicense != null)
+                _buttonLicense.clicked += OnLicenseClicked;
 
             if (_backArea != null)
                 _backArea.RegisterCallback<ClickEvent>(OnBackAreaClicked);
@@ -210,9 +245,12 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             SetDisplay(_versionInfo, showVersionInfo);
 
             var isImported = BindVersionState(info);
+            BindPlatformInfo(info.platformInfo);
             BindAdditionalInfos(info.additionalInfos);
             BindHowToSetupInfos(info.howToSetupInfos);
             BindUpdateInfos(info.updateInfos);
+            BindAnalysisInfo(info);
+            BindLicenseGroup(info);
             BindRelatedAssets(info.relatedAssets);
 
             _attachPanel?.Bind(info, isImported);
@@ -222,14 +260,14 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         void BindImages(Sprite[] images)
         {
-            if (_imageContents == null)
+            if (_imageContents == null && _prContents == null && _prImages == null)
                 return;
 
-            _imageContents.Clear();
+            _imageContents?.Clear();
             _imagePreview?.Hide();
 
             var backgrounds = new List<Background>();
-            if (images != null)
+            if (images != null && _imageContents != null)
             {
                 for (int i = 0; i < images.Length; i++)
                 {
@@ -243,15 +281,16 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 }
             }
 
-            if (backgrounds.Count == 0)
-            {
-                var fallback = LoadFallbackTexture();
-                var background = Background.FromTexture2D(fallback);
-                backgrounds.Add(background);
-                _imageContents.Add(CreateDetailImage(background, GetTextureAspectRatio(fallback), 0));
-            }
+            _hasPrImages = backgrounds.Count > 0;
 
-            _imagePreview?.SetImages(backgrounds);
+            // 実画像がなければフォールバックのみの表示はせず、PRImages を隠す
+            SetDisplay(_prImages, _hasPrImages);
+            if (_hasPrImages)
+                _imagePreview?.SetImages(backgrounds);
+            else
+                _imagePreview?.SetImages(null);
+
+            UpdatePrContentsVisibility();
         }
 
         VisualElement CreateDetailImage(Background background, float aspectRatio, int index)
@@ -280,19 +319,54 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             return sprite.rect.width / sprite.rect.height;
         }
 
-        static float GetTextureAspectRatio(Texture2D texture)
-        {
-            if (texture == null || texture.height <= 0)
-                return 1f;
-            return (float)texture.width / texture.height;
-        }
-
         void BindYoutube(string url)
         {
             var hasUrl = !string.IsNullOrWhiteSpace(url);
             SetDisplay(_prMovie, hasUrl);
             if (_youtubeLink != null)
                 _youtubeLink.text = hasUrl ? url : string.Empty;
+
+            UpdatePrContentsVisibility();
+        }
+
+        void UpdatePrContentsVisibility()
+        {
+            var hasMovie = !string.IsNullOrWhiteSpace(_youtubeUrl);
+            // フォールバック画像のみ（実画像なし）かつ動画もなければ PRContents ごと非表示
+            SetDisplay(_prContents, _hasPrImages || hasMovie);
+        }
+
+        void BindPlatformInfo(PlatformInfo platformInfo)
+        {
+            if (_platformInfo == null)
+                return;
+
+            var info = platformInfo ?? new PlatformInfo();
+            SetPlatformSupport(_platformInfo.Q("PC_VR"), info.forPCVR);
+            SetPlatformSupport(_platformInfo.Q("PC_Desktop"), info.forPCDesktop);
+            SetPlatformSupport(_platformInfo.Q("Quest"), info.forQuest);
+            SetPlatformSupport(_platformInfo.Q("Android_iOS"), info.forAndroid_iOS);
+        }
+
+        static void SetPlatformSupport(VisualElement platformRoot, bool isSupport)
+        {
+            if (platformRoot == null)
+                return;
+
+            var icon = platformRoot.Q("isSupport");
+            if (icon == null)
+                return;
+
+            var texture = LoadSupportTexture(isSupport);
+            if (texture != null)
+                icon.style.backgroundImage = Background.FromTexture2D(texture);
+        }
+
+        static Texture2D LoadSupportTexture(bool isSupport)
+        {
+            var guid = isSupport ? SupportYesGuid : SupportNoGuid;
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
         static readonly Color HasImportedColor = new Color(61f / 255f, 86f / 255f, 104f / 255f, 1f);
@@ -364,59 +438,70 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         void BindAdditionalInfos(global::AdditionalInfo[] infos)
         {
-            if (_additionalInfomations == null)
+            if (_additionalInfomations == null && _additionalInfoGroup == null)
                 return;
 
-            _additionalInfomations.Clear();
+            _additionalInfomations?.Clear();
 
-            if (infos == null || infos.Length == 0)
-            {
-                SetDisplay(_additionalInfomations, false);
-                return;
-            }
-
-            SetDisplay(_additionalInfomations, true);
-            for (int i = 0; i < infos.Length; i++)
-            {
-                if (infos[i] == null)
-                    continue;
-
-                _additionalInfomations.Add(CreateAdditionalInfoElement(infos[i]));
-            }
+            var added = BindAdditionalInfoElements(_additionalInfomations, infos);
+            SetDisplay(_additionalInfoGroup, added > 0);
+            if (_additionalInfomations != null && _additionalInfoGroup != null)
+                SetDisplay(_additionalInfomations, added > 0);
         }
 
         void BindHowToSetupInfos(global::AdditionalInfo[] infos)
         {
-            if (_howToSetupInfomations == null)
+            if (_howToSetupInfomations == null && _howToGroup == null)
                 return;
 
-            _howToSetupInfomations.Clear();
-            var panel = _howToSetupInfomations.parent;
+            _howToSetupInfomations?.Clear();
 
-            if (infos == null || infos.Length == 0)
-            {
-                SetDisplay(panel, false);
-                return;
-            }
+            var added = BindAdditionalInfoElements(_howToSetupInfomations, infos);
+            SetDisplay(_howToGroup, added > 0);
+            if (_howToSetupInfomations != null && _howToGroup != null)
+                SetDisplay(_howToSetupInfomations, added > 0);
+        }
+
+        int BindAdditionalInfoElements(VisualElement container, global::AdditionalInfo[] infos)
+        {
+            if (container == null || infos == null || infos.Length == 0)
+                return 0;
 
             var added = 0;
             for (int i = 0; i < infos.Length; i++)
             {
-                if (infos[i] == null)
+                if (!HasAdditionalContent(infos[i]))
                     continue;
 
-                _howToSetupInfomations.Add(CreateAdditionalInfoElement(infos[i]));
+                container.Add(CreateAdditionalInfoElement(infos[i]));
                 added++;
             }
 
-            if (added == 0)
+            return added;
+        }
+
+        static bool HasAdditionalContent(global::AdditionalInfo info)
+        {
+            if (info == null)
+                return false;
+
+            if (!string.IsNullOrWhiteSpace(info.title))
+                return true;
+            if (!string.IsNullOrWhiteSpace(info.description))
+                return true;
+            if (info.image != null)
+                return true;
+
+            if (info.paths == null || info.paths.Length == 0)
+                return false;
+
+            for (int i = 0; i < info.paths.Length; i++)
             {
-                SetDisplay(panel, false);
-                return;
+                if (!string.IsNullOrWhiteSpace(info.paths[i]))
+                    return true;
             }
 
-            SetDisplay(panel, true);
-            SetDisplay(_howToSetupInfomations, true);
+            return false;
         }
 
         AdditionalInfo CreateAdditionalInfoElement(global::AdditionalInfo info)
@@ -434,22 +519,22 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
         void BindUpdateInfos(global::UpdateInfo[] infos)
         {
-            if (_latestUpdateInfomations == null)
+            if (_latestUpdateInfomations == null && _updateInfoGroup == null)
                 return;
 
-            _latestUpdateInfomations.Clear();
+            _latestUpdateInfomations?.Clear();
             _pastUpdateInfomations?.Clear();
 
             var valid = CollectValidUpdateInfos(infos);
-            var historyPanel = _latestUpdateInfomations.parent;
-
             if (valid.Count == 0)
             {
-                SetDisplay(historyPanel, false);
+                SetPastVersionFoldoutVisible(false);
+                SetPastUpdateInfomationsVisible(false);
+                SetDisplay(_updateInfoGroup, false);
                 return;
             }
 
-            SetDisplay(historyPanel, true);
+            SetDisplay(_updateInfoGroup, true);
             AddUpdateInfoElement(_latestUpdateInfomations, valid[valid.Count - 1]);
 
             if (valid.Count <= 1)
@@ -506,11 +591,24 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             for (int i = 0; i < infos.Length; i++)
             {
-                if (infos[i] != null)
+                if (HasUpdateContent(infos[i]))
                     list.Add(infos[i]);
             }
 
             return list;
+        }
+
+        static bool HasUpdateContent(global::UpdateInfo info)
+        {
+            if (info == null)
+                return false;
+
+            if (!string.IsNullOrWhiteSpace(info.updateName))
+                return true;
+            if (!string.IsNullOrWhiteSpace(info.updateDescription))
+                return true;
+
+            return info.updateDate != null && info.updateDate.year > 0;
         }
 
         void AddUpdateInfoElement(VisualElement container, global::UpdateInfo info)
@@ -528,12 +626,112 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             SetPastUpdateInfomationsVisible(evt.newValue);
         }
 
-        void BindRelatedAssets(SamirinBoothAssetInfo[] related)
+        void BindAnalysisInfo(SamirinBoothAssetInfo info)
         {
-            if (_relatedItemsContainer == null)
+            if (_analysisInfoGroup == null && _analysisInfo == null)
                 return;
 
-            _relatedItemsContainer.Clear();
+            var text = LoadItemAnalysisText(info);
+            var displayText = ExtractMetricsSection(text);
+            var hasText = !string.IsNullOrWhiteSpace(displayText);
+
+            if (_analysisInfoText != null)
+                _analysisInfoText.text = hasText ? displayText : string.Empty;
+
+            SetDisplay(_analysisInfoGroup ?? _analysisInfo, hasText);
+            if (_analysisInfo != null && _analysisInfoGroup != null)
+                SetDisplay(_analysisInfo, hasText);
+        }
+
+        /// <summary>
+        /// 「ポリゴン数:」以降のメトリクス部分だけを抜き出します。
+        /// </summary>
+        static string ExtractMetricsSection(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+
+            const string marker = "ポリゴン数:";
+            var index = text.IndexOf(marker, StringComparison.Ordinal);
+            if (index < 0)
+                return null;
+
+            return text.Substring(index).Trim();
+        }
+
+        static string LoadItemAnalysisText(SamirinBoothAssetInfo info)
+        {
+            if (info == null)
+                return null;
+
+            foreach (var assetPath in EnumerateItemAnalysisAssetPaths(info))
+            {
+                if (string.IsNullOrEmpty(assetPath))
+                    continue;
+
+                var textAsset = AssetDatabase.LoadAssetAtPath<TextAsset>(assetPath);
+                if (textAsset != null && !string.IsNullOrWhiteSpace(textAsset.text))
+                    return textAsset.text;
+
+                // TextAsset として未インポートでもファイルがあれば読む
+                var absolute = System.IO.Path.GetFullPath(
+                    System.IO.Path.Combine(Application.dataPath, "..", assetPath));
+                if (System.IO.File.Exists(absolute))
+                {
+                    try
+                    {
+                        var fileText = System.IO.File.ReadAllText(absolute);
+                        if (!string.IsNullOrWhiteSpace(fileText))
+                            return fileText;
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        static IEnumerable<string> EnumerateItemAnalysisAssetPaths(SamirinBoothAssetInfo info)
+        {
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            string TryAdd(string folder)
+            {
+                if (string.IsNullOrWhiteSpace(folder))
+                    return null;
+                var normalized = folder.Replace("\\", "/").TrimEnd('/');
+                var path = normalized + "/" + ItemAnalysisFileName;
+                return seen.Add(path) ? path : null;
+            }
+
+            // Info アセットと同じフォルダ（例: .../SamirinBoothInformation/DeskPen/ItemAnalysis.txt）
+            var infoPath = AssetDatabase.GetAssetPath(info)?.Replace("\\", "/");
+            if (!string.IsNullOrEmpty(infoPath))
+            {
+                var parent = System.IO.Path.GetDirectoryName(infoPath)?.Replace("\\", "/");
+                var path = TryAdd(parent);
+                if (path != null)
+                    yield return path;
+            }
+
+            // folderName から Booth Information 配下を解決
+            if (!string.IsNullOrWhiteSpace(info.folderName))
+            {
+                var path = TryAdd(InformationFolder + "/" + info.folderName.Trim());
+                if (path != null)
+                    yield return path;
+            }
+        }
+
+        void BindRelatedAssets(SamirinBoothAssetInfo[] related)
+        {
+            if (_relatedItemsContainer == null && _relatedItems == null)
+                return;
+
+            _relatedItemsContainer?.Clear();
 
             if (related == null || related.Length == 0)
             {
@@ -541,8 +739,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 return;
             }
 
-            SetDisplay(_relatedItems, true);
             var avatar = SBM_Header.CurrentAvatarDescriptor;
+            var added = 0;
 
             for (int i = 0; i < related.Length; i++)
             {
@@ -554,8 +752,22 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 element.Bind(related[i]);
                 element.RefreshAttached(avatar);
                 element.clicked += OnRelatedAssetClicked;
-                _relatedItemsContainer.Add(element);
+                _relatedItemsContainer?.Add(element);
+                added++;
             }
+
+            SetDisplay(_relatedItems, added > 0);
+        }
+
+        void BindLicenseGroup(SamirinBoothAssetInfo info)
+        {
+            if (_licenseGroup == null && _buttonLicense == null)
+                return;
+
+            var hasLicense = SamirinBoothLicenseUtil.TryFindLicensePath(info, out _);
+            SetDisplay(_licenseGroup, hasLicense);
+            if (_buttonLicense != null)
+                SetDisplay(_buttonLicense, hasLicense);
         }
 
         void OnRelatedAssetClicked(SamirinBoothAssetInfo info)
@@ -569,6 +781,13 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         {
             if (!string.IsNullOrWhiteSpace(_boothUrl))
                 Application.OpenURL(_boothUrl);
+        }
+
+        void OnLicenseClicked()
+        {
+            if (BoundInfo == null)
+                return;
+            SBM_LicenseViewer.ShowForAsset(BoundInfo);
         }
 
         void OnYoutubeClicked(ClickEvent evt)
@@ -706,12 +925,6 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         static string FormatVersion(Version version)
         {
             return $"ver{version.Major}.{version.Minor}.{version.Build}";
-        }
-
-        static Texture2D LoadFallbackTexture()
-        {
-            var path = AssetDatabase.GUIDToAssetPath(FallbackImageGuid);
-            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
     }
 }

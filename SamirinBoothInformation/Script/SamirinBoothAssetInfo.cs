@@ -17,6 +17,7 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public string url;
     public string price;
     public string youtubeUrl;
+    public PlatformInfo platformInfo;
     public AdditionalInfo[] additionalInfos;
     public AdditionalInfo[] howToSetupInfos;
     public Variation[] variations;
@@ -35,6 +36,15 @@ public enum Category
     WorldGimmick,
     _3DModel,
     Other
+}
+
+[System.Serializable]
+public class PlatformInfo
+{
+    public bool forPCVR = true;
+    public bool forPCDesktop = true;
+    public bool forQuest = true;
+    public bool forAndroid_iOS = true;
 }
 
 [System.Serializable]
