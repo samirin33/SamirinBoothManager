@@ -133,8 +133,8 @@ public static class InformationChecker
                     return false;
                 }
 
-                CopyDirectoryContents(remoteInformation, ToAbsolutePath(InformationAssetPath));
-                AssetDatabase.Refresh();
+                if (CopyDirectoryContents(remoteInformation, ToAbsolutePath(InformationAssetPath)))
+                    AssetDatabase.Refresh();
 
                 EditorUtility.DisplayProgressBar("InformationChecker", "バージョンを確認中...", 0.7f);
 
@@ -148,8 +148,12 @@ public static class InformationChecker
                     }
 
                     EditorUtility.DisplayProgressBar("InformationChecker", "Manager を更新中...", 0.85f);
-                    CopyDirectoryContents(remoteManager, ToAbsolutePath(ManagerAssetPath));
-                    AssetDatabase.Refresh();
+
+                    // ここでコンパイルが走ると開いているウィンドウの中身が失われるため、
+                    // リロード後に SBM_UpdateRemind 側で作り直す（DidReloadScripts）
+                    if (CopyDirectoryContents(remoteManager, ToAbsolutePath(ManagerAssetPath)))
+                        AssetDatabase.Refresh();
+
                     Debug.Log("[InformationChecker] SamirinBoothManager を更新しました。");
                 }
                 else
@@ -336,10 +340,12 @@ public static class InformationChecker
         return null;
     }
 
-    static void CopyDirectoryContents(string sourceDir, string destinationDir)
+    /// <summary>実際に書き換えたファイルがあれば true。</summary>
+    static bool CopyDirectoryContents(string sourceDir, string destinationDir)
     {
         Directory.CreateDirectory(destinationDir);
 
+        bool changed = false;
         foreach (string file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
         {
             string relative = file.Substring(sourceDir.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -354,7 +360,10 @@ public static class InformationChecker
                 Directory.CreateDirectory(destFolder);
 
             File.Copy(file, destFile, true);
+            changed = true;
         }
+
+        return changed;
     }
 
     static bool HasSameContent(string sourceFile, string destinationFile)

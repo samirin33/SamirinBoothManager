@@ -36,8 +36,15 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         /// <summary>無視対象。開いた時点の更新アセット全体。</summary>
         public IReadOnlyList<SamirinBoothAssetInfo> BoundInfos => _sourceInfos;
 
-        public bool ShouldIgnoreCurrentVersions =>
-            _ignoreToggle != null && _ignoreToggle.value;
+        public bool ShouldIgnoreCurrentVersions
+        {
+            get => _ignoreToggle != null && _ignoreToggle.value;
+            set
+            {
+                if (_ignoreToggle != null)
+                    _ignoreToggle.value = value;
+            }
+        }
 
         public UpdateAssetList() : base(nameof(UpdateAssetList))
         {

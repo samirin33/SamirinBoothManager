@@ -18,7 +18,7 @@ MonoBehaviour:
   category: 6
   majorVertion: 1
   minorVertion: 0
-  patchVertion: 0
+  patchVertion: 1
   releaseDate:
     year: 2026
     month: 8
@@ -31,6 +31,12 @@ MonoBehaviour:
   updateInfos:
   - updateName: v1.0.0
     updateDescription: "\u516C\u958B"
+    updateDate:
+      year: 2026
+      month: 8
+      day: 5
+  - updateName: v1.0.1
+    updateDescription: "\u30A2\u30C3\u30D7\u30C7\u30FC\u30C8\u30EA\u30B9\u30C8\u306E\u66F4\u65B0\u51E6\u7406\u4FEE\u6B63"
     updateDate:
       year: 2026
       month: 8
