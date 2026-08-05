@@ -31,6 +31,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly List<SamirinBoothAssetInfo> _sourceInfos = new List<SamirinBoothAssetInfo>();
         readonly List<SamirinBoothAssetInfo> _displayedInfos = new List<SamirinBoothAssetInfo>();
 
+        bool _bound;
+
         /// <summary>無視対象。開いた時点の更新アセット全体。</summary>
         public IReadOnlyList<SamirinBoothAssetInfo> BoundInfos => _sourceInfos;
 
@@ -91,7 +93,40 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (_xButton != null)
                 _xButton.clicked += () => Application.OpenURL(XUrl);
 
+            RegisterCallback<AttachToPanelEvent>(_ => schedule.Execute(EnsureBound));
+
             ApplyEmptyState(hasItems: false);
+        }
+
+        /// <summary>
+        /// ドメインリロード後は Bind されないまま再生成されるため、自前で一覧を取り直す。
+        /// </summary>
+        void EnsureBound()
+        {
+            if (_bound && !HasDestroyedSource())
+                return;
+
+            RefreshFromProject();
+        }
+
+        public void RefreshFromProject()
+        {
+            Bind(SamirinBoothUpdateUtil.CollectOutdatedAssets()
+                ?? new List<SamirinBoothAssetInfo>());
+        }
+
+        /// <summary>
+        /// アセット再インポートで参照が破棄されていないか。
+        /// </summary>
+        bool HasDestroyedSource()
+        {
+            for (int i = 0; i < _sourceInfos.Count; i++)
+            {
+                if (_sourceInfos[i] == null)
+                    return true;
+            }
+
+            return false;
         }
 
         void OnUpdateCheckConfigClicked(ClickEvent evt)
@@ -112,6 +147,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 }
             }
 
+            _bound = true;
             RebuildElements();
         }
 
@@ -134,8 +170,11 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 Debug.LogError("[UpdateAssetList] Reload failed: " + e);
             }
 
-            Bind(SamirinBoothUpdateUtil.CollectOutdatedAssets()
-                ?? new List<SamirinBoothAssetInfo>());
+            // 更新処理中にドメインリロードが走るとこの要素は破棄されている
+            if (panel == null)
+                return;
+
+            RefreshFromProject();
         }
 
         void RebuildElements()

@@ -344,12 +344,73 @@ public static class InformationChecker
         {
             string relative = file.Substring(sourceDir.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             string destFile = Path.Combine(destinationDir, relative);
+
+            // 中身が同じファイルを上書きすると再インポート（.cs ならドメインリロード）が起きるため避ける
+            if (HasSameContent(file, destFile))
+                continue;
+
             string destFolder = Path.GetDirectoryName(destFile);
             if (!string.IsNullOrEmpty(destFolder))
                 Directory.CreateDirectory(destFolder);
 
             File.Copy(file, destFile, true);
         }
+    }
+
+    static bool HasSameContent(string sourceFile, string destinationFile)
+    {
+        try
+        {
+            if (!File.Exists(destinationFile))
+                return false;
+
+            var source = new FileInfo(sourceFile);
+            var destination = new FileInfo(destinationFile);
+            if (source.Length != destination.Length)
+                return false;
+
+            const int bufferSize = 64 * 1024;
+            using (var sourceStream = File.OpenRead(sourceFile))
+            using (var destinationStream = File.OpenRead(destinationFile))
+            {
+                var sourceBuffer = new byte[bufferSize];
+                var destinationBuffer = new byte[bufferSize];
+
+                while (true)
+                {
+                    int read = ReadBlock(sourceStream, sourceBuffer);
+                    ReadBlock(destinationStream, destinationBuffer);
+
+                    if (read == 0)
+                        return true;
+
+                    for (int i = 0; i < read; i++)
+                    {
+                        if (sourceBuffer[i] != destinationBuffer[i])
+                            return false;
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("[InformationChecker] ファイル比較に失敗したため上書きします: " + e.Message);
+            return false;
+        }
+    }
+
+    static int ReadBlock(FileStream stream, byte[] buffer)
+    {
+        int total = 0;
+        while (total < buffer.Length)
+        {
+            int read = stream.Read(buffer, total, buffer.Length - total);
+            if (read == 0)
+                break;
+            total += read;
+        }
+
+        return total;
     }
 
     static string ToAbsolutePath(string assetPath)

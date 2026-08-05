@@ -85,6 +85,10 @@ public class SBM_UpdateRemind : EditorWindow
         _gridScroll = SBM_GridScroll.Attach(rootVisualElement);
         _gridScroll?.Start();
 
+        // ドメインリロードを挟むと _pendingInfos は失われるため、その場合は取り直す
+        if (_pendingInfos == null)
+            _pendingInfos = SamirinBoothUpdateUtil.CollectOutdatedAssets() ?? new List<SamirinBoothAssetInfo>();
+
         ApplyPendingInfos();
     }
 
@@ -99,10 +103,14 @@ public class SBM_UpdateRemind : EditorWindow
 
     void OnDisable()
     {
-        if (_updateList != null && _updateList.ShouldIgnoreCurrentVersions)
-            SamirinBoothUpdateUtil.IgnoreLatest(_updateList.BoundInfos);
-
         _gridScroll?.Stop();
         _gridScroll = null;
+    }
+
+    // OnDisable はドメインリロードでも呼ばれるため、無視設定はウィンドウを閉じたときだけ確定させる
+    void OnDestroy()
+    {
+        if (_updateList != null && _updateList.ShouldIgnoreCurrentVersions)
+            SamirinBoothUpdateUtil.IgnoreLatest(_updateList.BoundInfos);
     }
 }
