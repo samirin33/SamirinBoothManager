@@ -33,6 +33,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly SBM_Button _buttonBooth;
 
         readonly Label _price;
+        readonly Label _salePrice;
+        readonly VisualElement _priceStrike;
         readonly Label _name;
         readonly Label _description;
         readonly Label _categoryLabel;
@@ -98,6 +100,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _buttonBooth = this.Q<SBM_Button>("ButtonBooth");
 
             _price = this.Q<Label>("Price");
+            _salePrice = this.Q<Label>("SalePrice");
+            _priceStrike = this.Q<VisualElement>("PriceStrike");
             _name = this.Q<Label>("Name");
             _description = this.Q<Label>("Discription");
             _categoryLabel = this.Q<Label>("CategoryLabel");
@@ -226,11 +230,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             SamirinBoothCategoryUtil.BindLabel(_categoryLabel, info.category);
 
-            if (_price != null)
-            {
-                var price = string.IsNullOrWhiteSpace(info.price) ? "-" : info.price;
-                _price.text = $"価格: {price}";
-            }
+            BindPrice(info);
 
             if (_releaseDate != null)
                 _releaseDate.text = $"公開日 {FormatDate(info.releaseDate)}";
@@ -254,6 +254,31 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             BindRelatedAssets(info.relatedAssets);
 
             _attachPanel?.Bind(info, isImported);
+        }
+
+        void BindPrice(SamirinBoothAssetInfo info)
+        {
+            var price = string.IsNullOrWhiteSpace(info.price) ? "-" : info.price;
+            var hasSale = !string.IsNullOrWhiteSpace(info.salePrice);
+
+            if (_price != null)
+                _price.text = $"価格: {price}";
+
+            SetDisplay(_priceStrike, hasSale);
+
+            if (_salePrice == null)
+                return;
+
+            if (hasSale)
+            {
+                _salePrice.text = info.salePrice.Trim();
+                SetDisplay(_salePrice, true);
+            }
+            else
+            {
+                _salePrice.text = string.Empty;
+                SetDisplay(_salePrice, false);
+            }
         }
 
         const float DetailImageHeight = 250f;

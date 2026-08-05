@@ -18,6 +18,8 @@ public class SamirinBoothAssetInfoEditor : Editor
     SerializedProperty _updateInfos;
     SerializedProperty _url;
     SerializedProperty _price;
+    SerializedProperty _salePrice;
+    SerializedProperty _newItemLabel;
     SerializedProperty _youtubeUrl;
     SerializedProperty _platformInfo;
     SerializedProperty _additionalInfos;
@@ -61,6 +63,8 @@ public class SamirinBoothAssetInfoEditor : Editor
         _updateInfos = serializedObject.FindProperty("updateInfos");
         _url = serializedObject.FindProperty("url");
         _price = serializedObject.FindProperty("price");
+        _salePrice = serializedObject.FindProperty("salePrice");
+        _newItemLabel = serializedObject.FindProperty("newItemLabel");
         _youtubeUrl = serializedObject.FindProperty("youtubeUrl");
         _platformInfo = serializedObject.FindProperty("platformInfo");
         _additionalInfos = serializedObject.FindProperty("additionalInfos");
@@ -131,6 +135,16 @@ public class SamirinBoothAssetInfoEditor : Editor
             EditorGUILayout.LabelField("説明");
             _description.stringValue = EditorGUILayout.TextArea(_description.stringValue, GUILayout.MinHeight(60));
             EditorGUILayout.PropertyField(_price, new GUIContent("価格"));
+            EditorGUILayout.PropertyField(
+                _salePrice,
+                new GUIContent(
+                    "セール価格",
+                    "空白でない場合、未インポート時に ON SALE ラベルを表示し、詳細では通常価格を取り消し線にして隣に表示します。"));
+            EditorGUILayout.PropertyField(
+                _newItemLabel,
+                new GUIContent(
+                    "NEW ラベル",
+                    "有効かつ未インポートのとき、一覧カードに NEW!!! ラベルを表示します。"));
             DrawUrlField(_url, "Booth URL");
             DrawUrlField(_youtubeUrl, "YouTube URL");
             EditorGUILayout.PropertyField(_visible, new GUIContent("一覧表示"));

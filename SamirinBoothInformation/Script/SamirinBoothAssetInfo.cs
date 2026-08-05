@@ -16,6 +16,8 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public UpdateInfo[] updateInfos;
     public string url;
     public string price;
+    public string salePrice;
+    public bool newItemLabel = false;
     public string youtubeUrl;
     public PlatformInfo platformInfo;
     public AdditionalInfo[] additionalInfos;

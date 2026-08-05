@@ -31,6 +31,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly Label _newVertionRemind;
         readonly Label _notImported;
         readonly VisualElement _attachedLabel;
+        readonly VisualElement _saleLabel;
+        readonly VisualElement _newItemLabel;
         readonly VisualElement _hoverTarget;
 
         int _imageCount;
@@ -58,9 +60,13 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _newVertionRemind = this.Q<Label>("NewVertionRemind");
             _notImported = this.Q<Label>("NotImported");
             _attachedLabel = this.Q<VisualElement>("AttachedLabel");
+            _saleLabel = this.Q<VisualElement>("SaleLabel");
+            _newItemLabel = this.Q<VisualElement>("NewItemLabel");
             _hoverTarget = this.Q<VisualElement>("AnimationParent") ?? this;
 
             SetAttached(false);
+            SetDisplay(_saleLabel, false);
+            SetDisplay(_newItemLabel, false);
 
             if (_categoryLabel != null)
             {
@@ -112,7 +118,17 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (showVersionBanner)
                 BindVersionState(info);
 
+            BindPromoLabels(info);
             RefreshAttached(SBM_Header.CurrentAvatarDescriptor);
+        }
+
+        void BindPromoLabels(SamirinBoothAssetInfo info)
+        {
+            var isImported = SamirinBoothImportUtil.IsImported(info);
+            var showSale = !isImported && !string.IsNullOrWhiteSpace(info.salePrice);
+            var showNewItem = !isImported && info.newItemLabel;
+            SetDisplay(_saleLabel, showSale);
+            SetDisplay(_newItemLabel, showNewItem);
         }
 
         void BindCategory(Category category)

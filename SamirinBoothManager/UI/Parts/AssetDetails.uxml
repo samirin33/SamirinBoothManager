@@ -7,7 +7,13 @@
                 <ui:VisualElement name="Background" class="SBM_ItemBackground" style="flex-grow: 1; padding-top: 25px; padding-right: 25px; padding-bottom: 25px; padding-left: 25px; overflow: hidden; margin-bottom: 220px;">
                     <ui:VisualElement style="height: 50px; flex-direction: row;">
                         <samirin33.SamirinBoothManager.UI.Parts.SBM_Button name="ButtonBooth" background-color="#DC4E70FF" text="この商品をサイトで開く" style="height: 50px; width: 200px; align-self: flex-start; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px; left: 0; position: relative;" />
-                        <ui:Label tabindex="-1" text="価格: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Price" style="-unity-text-align: upper-left; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 15px; margin-left: 5px;" />
+                        <ui:VisualElement name="PriceGroup" style="flex-direction: row; flex-grow: 1; align-items: center; margin-top: 15px; margin-left: 5px;">
+                            <ui:VisualElement name="PriceStrikeGroup" style="flex-direction: row; position: relative; align-items: center;">
+                                <ui:Label tabindex="-1" text="価格: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="Price" style="-unity-text-align: upper-left; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+                                <ui:VisualElement name="PriceStrike" picking-mode="Ignore" style="position: absolute; left: 0; right: 0; height: 1px; top: 50%; background-color: rgb(200, 200, 200); display: none;" />
+                            </ui:VisualElement>
+                            <ui:Label tabindex="-1" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SalePrice" style="-unity-text-align: upper-left; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 8px; color: rgb(241, 232, 146); display: none; font-size: 16px;" />
+                        </ui:VisualElement>
                         <samirin33.SamirinBoothManager.UI.Parts.SBM_Button background-color="#CC424BFF" text="とじる" name="ButtonClose" style="height: 50px; width: 75px; align-self: flex-end; padding-top: 6px; padding-right: 6px; padding-bottom: 6px; padding-left: 6px; right: 0; position: absolute;" />
                     </ui:VisualElement>
                     <ui:VisualElement name="Header" class="DetailPanel">
