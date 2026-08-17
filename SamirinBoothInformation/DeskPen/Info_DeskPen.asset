@@ -42,7 +42,7 @@ MonoBehaviour:
       day: 5
   url: https://samirin33-vrc.booth.pm/items/8677642
   price: "850\u5186"
-  salePrice: ""
+  salePrice: 
   newItemLabel: 1
   youtubeUrl: https://youtu.be/YPTcFyj2Jl8
   platformInfo:
