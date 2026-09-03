@@ -32,7 +32,7 @@ public static class SamirinBoothFontUtil
 
     static FontAsset _cached;
 
-    [MenuItem("samirin33/Rebuild UI Font Asset", false, 600)]
+    // [MenuItem("samirin33/Rebuild UI Font Asset", false, 600)]
     public static void RebuildFromMenu()
     {
         _cached = null;
