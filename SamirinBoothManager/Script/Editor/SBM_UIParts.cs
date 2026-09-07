@@ -104,6 +104,18 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             template?.CloneTree(this);
             SamirinBoothFontUtil.ApplySbmTextFonts(this);
         }
+
+        /// <summary>
+        /// 非推奨の unityBackgroundScaleMode の代替。
+        /// Cover = ScaleAndCrop、Contain = ScaleToFit。
+        /// </summary>
+        protected static void SetBackgroundScaleMode(IStyle style, BackgroundSizeType sizeType)
+        {
+            style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+            style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+            style.backgroundRepeat = new BackgroundRepeat(Repeat.NoRepeat, Repeat.NoRepeat);
+            style.backgroundSize = new BackgroundSize(sizeType);
+        }
     }
 
     class SBM_UIPartsAssetPostprocessor : AssetPostprocessor

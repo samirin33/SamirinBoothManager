@@ -241,7 +241,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 _buttonIcon.style.backgroundImage = Background.FromTexture2D(_icon);
                 _buttonIcon.style.display = DisplayStyle.Flex;
                 _buttonIcon.style.flexShrink = 0;
-                _buttonIcon.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                SetBackgroundScaleMode(_buttonIcon.style, BackgroundSizeType.Contain);
             }
             else
             {

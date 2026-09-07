@@ -325,7 +325,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             image.style.height = DetailImageHeight;
             image.style.width = DetailImageHeight * Mathf.Max(0.01f, aspectRatio);
             image.style.flexShrink = 0;
-            image.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+            SetBackgroundScaleMode(image.style, BackgroundSizeType.Contain);
             image.style.backgroundImage = background;
             image.RegisterCallback<ClickEvent>(evt => OnDetailImageClicked(index, evt));
             return image;

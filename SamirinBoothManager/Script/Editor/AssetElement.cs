@@ -220,7 +220,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             image.style.height = Length.Percent(100);
             image.style.flexGrow = 0;
             image.style.flexShrink = 0;
-            image.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
+            SetBackgroundScaleMode(image.style, BackgroundSizeType.Cover);
             image.style.backgroundImage = background;
             return image;
         }
