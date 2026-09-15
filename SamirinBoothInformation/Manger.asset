@@ -53,6 +53,12 @@ MonoBehaviour:
       year: 2026
       month: 9
       day: 8
+  - updateName: v1.0.5
+    updateDescription: "\u30A2\u30BB\u30C3\u30C8\u9078\u629E\u30DC\u30BF\u30F3\u306E\u66F4\u65B0"
+    updateDate:
+      year: 2026
+      month: 9
+      day: 15
   url: 
   price: 0
   salePrice: 
