@@ -9,8 +9,10 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 {
     /// <summary>
     /// AdditionalInfo.uxml を global::AdditionalInfo の内容で埋める。
-    /// ButtonObjectFocus はアバター上のセット済みプレハブ配下の paths を Hierarchy で選択する。
-    /// 未セット時は半透明かつ非反応。
+    /// ButtonObjectFocus は
+    /// - アセットパス: Project 上のアセットを選択
+    /// - ヒエラルキーパス: アバター上のセット済みプレハブ配下を Hierarchy で選択
+    /// 未セット時（ヒエラルキー）は半透明かつ非反応。
     /// </summary>
     public class AdditionalInfo : SBM_UxmlPartElement
     {
@@ -24,8 +26,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly VisualElement _image;
         readonly SBM_Button _focusButton;
         readonly VisualElement _focusButtonParent;
-        readonly List<string> _paths = new List<string>();
+        readonly List<AdditionalPathInfo> _paths = new List<AdditionalPathInfo>();
         readonly List<SBM_Button> _extraFocusButtons = new List<SBM_Button>();
+        readonly Dictionary<SBM_Button, Action> _focusClickHandlers = new Dictionary<SBM_Button, Action>();
 
         SamirinBoothAssetInfo _assetInfo;
         Background _imageBackground;
@@ -116,7 +119,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             evt.StopPropagation();
         }
 
-        void BindPaths(string[] paths)
+        void BindPaths(AdditionalPathInfo[] paths)
         {
             _paths.Clear();
             ClearExtraFocusButtons();
@@ -125,8 +128,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             {
                 for (int i = 0; i < paths.Length; i++)
                 {
-                    if (!string.IsNullOrWhiteSpace(paths[i]))
-                        _paths.Add(paths[i]);
+                    var pathInfo = paths[i];
+                    if (pathInfo != null && !string.IsNullOrWhiteSpace(pathInfo.path))
+                        _paths.Add(pathInfo);
                 }
             }
 
@@ -136,6 +140,9 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 if (_paths.Count > 0)
                     ConfigureFocusButton(_focusButton, _paths[0]);
             }
+
+            if (_focusButtonParent != null)
+                _focusButtonParent.style.overflow = Overflow.Visible;
 
             for (int i = 1; i < _paths.Count; i++)
             {
@@ -149,34 +156,59 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         void ClearExtraFocusButtons()
         {
             for (int i = 0; i < _extraFocusButtons.Count; i++)
-                _extraFocusButtons[i]?.RemoveFromHierarchy();
+            {
+                var button = _extraFocusButtons[i];
+                UnregisterFocusClick(button);
+                button?.RemoveFromHierarchy();
+            }
             _extraFocusButtons.Clear();
         }
 
         SBM_Button CreateFocusButton()
         {
-            var button = new SBM_Button
-            {
-                BackgroundColor = new Color(0x45 / 255f, 0x4c / 255f, 0x4f / 255f, 1f),
-                TextScale = 2f
-            };
-
-            button.style.height = 30;
-            button.style.width = Length.Percent(60);
-            button.style.unityTextAlign = TextAnchor.MiddleRight;
-            button.style.paddingRight = 20;
-            button.style.paddingLeft = 20;
-            button.style.marginTop = 4;
-            return button;
+            return new SBM_Button();
         }
 
-        void ConfigureFocusButton(SBM_Button button, string path)
+        static void ApplyFocusButtonStyle(SBM_Button button, Color backgroundColor)
         {
             if (button == null)
                 return;
 
-            button.Text = path;
-            button.clicked += () => OnFocusClicked(path);
+            button.BackgroundColor = backgroundColor;
+            button.TextScale = 2f;
+            button.style.height = 25;
+            button.style.width = StyleKeyword.Auto;
+            button.style.alignSelf = Align.Stretch;
+            button.style.unityTextAlign = TextAnchor.MiddleRight;
+            button.style.paddingRight = 10;
+            button.style.paddingLeft = 10;
+            button.style.marginTop = 4;
+            button.style.overflow = Overflow.Visible;
+        }
+
+        void ConfigureFocusButton(SBM_Button button, AdditionalPathInfo pathInfo)
+        {
+            if (button == null || pathInfo == null)
+                return;
+
+            ApplyFocusButtonStyle(button, pathInfo.ResolvedButtonColor);
+            button.Text = pathInfo.DisplayTitle;
+            UnregisterFocusClick(button);
+            Action handler = () => OnFocusClicked(pathInfo);
+            _focusClickHandlers[button] = handler;
+            button.clicked += handler;
+        }
+
+        void UnregisterFocusClick(SBM_Button button)
+        {
+            if (button == null)
+                return;
+
+            if (_focusClickHandlers.TryGetValue(button, out var handler))
+            {
+                button.clicked -= handler;
+                _focusClickHandlers.Remove(button);
+            }
         }
 
         void RefreshFocusButtonState()
@@ -192,25 +224,49 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             RefreshFocusButtonState();
         }
 
-        void RefreshFocusButton(SBM_Button button, string path)
+        void RefreshFocusButton(SBM_Button button, AdditionalPathInfo pathInfo)
         {
             if (button == null)
                 return;
 
-            var interactive = !string.IsNullOrWhiteSpace(path)
-                && ResolveTargetOnAvatar(SBM_Header.CurrentAvatarDescriptor, path) != null;
+            var interactive = CanFocus(pathInfo);
 
             button.style.opacity = interactive ? 1f : DisabledOpacity;
             button.pickingMode = interactive ? PickingMode.Position : PickingMode.Ignore;
             button.SetEnabled(interactive);
         }
 
-        void OnFocusClicked(string path)
+        bool CanFocus(AdditionalPathInfo pathInfo)
         {
-            if (string.IsNullOrWhiteSpace(path))
+            if (pathInfo == null || string.IsNullOrWhiteSpace(pathInfo.path))
+                return false;
+
+            if (pathInfo.IsAssetPath)
+                return AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(NormalizePath(pathInfo.path)) != null;
+
+            return ResolveTargetOnAvatar(SBM_Header.CurrentAvatarDescriptor, pathInfo.path) != null;
+        }
+
+        void OnFocusClicked(AdditionalPathInfo pathInfo)
+        {
+            if (pathInfo == null || string.IsNullOrWhiteSpace(pathInfo.path))
                 return;
 
-            var target = ResolveTargetOnAvatar(SBM_Header.CurrentAvatarDescriptor, path);
+            if (pathInfo.IsAssetPath)
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(NormalizePath(pathInfo.path));
+                if (asset == null)
+                {
+                    RefreshFocusButtonState();
+                    return;
+                }
+
+                Selection.activeObject = asset;
+                EditorGUIUtility.PingObject(asset);
+                return;
+            }
+
+            var target = ResolveTargetOnAvatar(SBM_Header.CurrentAvatarDescriptor, pathInfo.path);
             if (target == null)
             {
                 RefreshFocusButtonState();
@@ -220,6 +276,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             Selection.activeGameObject = target.gameObject;
             EditorGUIUtility.PingObject(target.gameObject);
         }
+
+        static string NormalizePath(string path) => path.Replace('\\', '/');
 
         /// <summary>
         /// アバター上のセット済みプレハブ配下から、AdditionalInfo.paths の Transform を探す。

@@ -247,7 +247,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             var isImported = BindVersionState(info);
             BindPlatformInfo(info.platformInfo);
             BindAdditionalInfos(info.additionalInfos);
-            BindHowToSetupInfos(info.howToSetupInfos);
+            BindHowToSetupInfos(info.howToSetupInfos, isImported);
             BindUpdateInfos(info.updateInfos);
             BindAnalysisInfo(info);
             BindLicenseGroup(info);
@@ -474,12 +474,20 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 SetDisplay(_additionalInfomations, added > 0);
         }
 
-        void BindHowToSetupInfos(global::AdditionalInfo[] infos)
+        void BindHowToSetupInfos(global::AdditionalInfo[] infos, bool isImported)
         {
             if (_howToSetupInfomations == null && _howToGroup == null)
                 return;
 
             _howToSetupInfomations?.Clear();
+
+            if (!isImported)
+            {
+                SetDisplay(_howToGroup, false);
+                if (_howToSetupInfomations != null && _howToGroup != null)
+                    SetDisplay(_howToSetupInfomations, false);
+                return;
+            }
 
             var added = BindAdditionalInfoElements(_howToSetupInfomations, infos);
             SetDisplay(_howToGroup, added > 0);
@@ -522,7 +530,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             for (int i = 0; i < info.paths.Length; i++)
             {
-                if (!string.IsNullOrWhiteSpace(info.paths[i]))
+                var pathInfo = info.paths[i];
+                if (pathInfo != null && !string.IsNullOrWhiteSpace(pathInfo.path))
                     return true;
             }
 

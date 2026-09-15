@@ -591,39 +591,49 @@ public class SamirinBoothAssetInfoEditor : Editor
         if (pathsProp == null)
             return line;
 
-        // ヘッダー行 + 各パス行 + 「追加」ボタン
+        // ヘッダー行 + 各パス（表示名 / Object / パス / 色） + 「追加」はヘッダー内
         int count = Mathf.Max(0, pathsProp.arraySize);
+        const float entrySpacing = 6f;
+        float entryHeight = line + spacing + line + spacing + line + spacing + line;
         return line + spacing
-            + count * (line + spacing)
-            + line;
+            + count * (entryHeight + entrySpacing);
     }
 
-    static float DrawPathsEditor(Rect rect, SerializedProperty pathsProp)
+    float DrawPathsEditor(Rect rect, SerializedProperty pathsProp)
     {
         float line = EditorGUIUtility.singleLineHeight;
         float spacing = 2f;
         float y = rect.y;
         float width = rect.width;
+        const float entrySpacing = 6f;
+        var defaultButtonColor = new Color(0x45 / 255f, 0x4c / 255f, 0x4f / 255f, 1f);
 
         EditorGUI.LabelField(
             new Rect(rect.x, y, width - 70f, line),
             $"パス ({pathsProp.arraySize})");
 
         if (GUI.Button(new Rect(rect.x + width - 66f, y, 66f, line), "追加"))
+        {
             pathsProp.arraySize++;
+            var added = pathsProp.GetArrayElementAtIndex(pathsProp.arraySize - 1);
+            added.FindPropertyRelative("title").stringValue = string.Empty;
+            added.FindPropertyRelative("path").stringValue = string.Empty;
+            added.FindPropertyRelative("buttonColor").colorValue = defaultButtonColor;
+        }
         y += line + spacing;
 
         for (int i = 0; i < pathsProp.arraySize; i++)
         {
             var pathElement = pathsProp.GetArrayElementAtIndex(i);
+            var titleProp = pathElement.FindPropertyRelative("title");
+            var pathProp = pathElement.FindPropertyRelative("path");
+            var colorProp = pathElement.FindPropertyRelative("buttonColor");
             float fieldWidth = width - 28f;
 
-            EditorGUI.BeginChangeCheck();
-            var next = EditorGUI.TextField(
+            EditorGUI.PropertyField(
                 new Rect(rect.x, y, fieldWidth, line),
-                pathElement.stringValue);
-            if (EditorGUI.EndChangeCheck())
-                pathElement.stringValue = next;
+                titleProp,
+                new GUIContent("表示名"));
 
             if (GUI.Button(new Rect(rect.x + fieldWidth + 4f, y, 24f, line), "−"))
             {
@@ -632,9 +642,183 @@ public class SamirinBoothAssetInfoEditor : Editor
             }
 
             y += line + spacing;
+
+            var currentObject = ResolveObjectFromPath(pathProp.stringValue);
+            EditorGUI.BeginChangeCheck();
+            var nextObject = EditorGUI.ObjectField(
+                new Rect(rect.x, y, width, line),
+                "Object",
+                currentObject,
+                typeof(UnityEngine.Object),
+                true);
+            if (EditorGUI.EndChangeCheck())
+                pathProp.stringValue = GetPathFromObject(nextObject);
+
+            y += line + spacing;
+
+            EditorGUI.BeginChangeCheck();
+            var nextPath = EditorGUI.DelayedTextField(
+                new Rect(rect.x, y, width, line),
+                "パス",
+                pathProp.stringValue);
+            if (EditorGUI.EndChangeCheck())
+                pathProp.stringValue = nextPath;
+
+            y += line + spacing;
+
+            if (colorProp != null)
+            {
+                if (colorProp.colorValue.a <= 0.001f)
+                    colorProp.colorValue = defaultButtonColor;
+
+                EditorGUI.PropertyField(
+                    new Rect(rect.x, y, width, line),
+                    colorProp,
+                    new GUIContent("ボタン色"));
+            }
+
+            y += line + entrySpacing;
         }
 
         return y;
+    }
+
+    static UnityEngine.Object ResolveObjectFromPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return null;
+
+        var normalized = path.Replace('\\', '/');
+        if (normalized.StartsWith("Assets/", System.StringComparison.OrdinalIgnoreCase)
+            || normalized.StartsWith("Packages/", System.StringComparison.OrdinalIgnoreCase))
+            return AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(normalized);
+
+        // ヒエラルキー相対パス: シーン上で名前一致を探す（編集用のプレビュー）
+        return FindHierarchyObjectByPath(normalized);
+    }
+
+    static UnityEngine.Object FindHierarchyObjectByPath(string relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath))
+            return null;
+
+        var roots = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            var found = FindChildByRelativePath(roots[i].transform, relativePath);
+            if (found != null)
+                return found.gameObject;
+        }
+
+        return null;
+    }
+
+    static Transform FindChildByRelativePath(Transform root, string relativePath)
+    {
+        if (root == null || string.IsNullOrWhiteSpace(relativePath))
+            return null;
+
+        var normalized = relativePath.Replace('\\', '/').Trim('/');
+        if (string.IsNullOrEmpty(normalized))
+            return null;
+
+        var found = root.Find(normalized);
+        if (found != null)
+            return found;
+
+        // ルート自身からの相対（先頭がルート名の場合）
+        if (normalized.StartsWith(root.name + "/", System.StringComparison.Ordinal))
+        {
+            found = root.Find(normalized.Substring(root.name.Length + 1));
+            if (found != null)
+                return found;
+        }
+
+        if (!normalized.Contains("/"))
+            return FindChildRecursiveByName(root, normalized);
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            var nested = FindChildByRelativePath(root.GetChild(i), normalized);
+            if (nested != null)
+                return nested;
+        }
+
+        return null;
+    }
+
+    static Transform FindChildRecursiveByName(Transform root, string name)
+    {
+        for (int i = 0; i < root.childCount; i++)
+        {
+            var child = root.GetChild(i);
+            if (child.name == name)
+                return child;
+
+            var nested = FindChildRecursiveByName(child, name);
+            if (nested != null)
+                return nested;
+        }
+
+        return null;
+    }
+
+    static string GetPathFromObject(UnityEngine.Object obj)
+    {
+        if (obj == null)
+            return string.Empty;
+
+        var assetPath = AssetDatabase.GetAssetPath(obj);
+        if (!string.IsNullOrEmpty(assetPath))
+            return assetPath.Replace('\\', '/');
+
+        Transform transform = null;
+        if (obj is GameObject go)
+            transform = go.transform;
+        else if (obj is Component component)
+            transform = component.transform;
+
+        if (transform == null)
+            return string.Empty;
+
+        return GetHierarchyRelativePath(transform);
+    }
+
+    static string GetHierarchyRelativePath(Transform target)
+    {
+        if (target == null)
+            return string.Empty;
+
+        // セット済みバリエーション Prefab 配下なら、そのルートからの相対パス
+        var prefabRoot = PrefabUtility.GetNearestPrefabInstanceRoot(target.gameObject);
+        if (prefabRoot != null)
+        {
+            if (prefabRoot.transform == target)
+                return string.Empty;
+
+            var relative = AnimationUtility.CalculateTransformPath(target, prefabRoot.transform);
+            if (!string.IsNullOrEmpty(relative))
+                return relative;
+        }
+
+        // Prefab Stage 内
+        var stage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
+        if (stage != null && stage.prefabContentsRoot != null)
+        {
+            var stageRoot = stage.prefabContentsRoot.transform;
+            if (target == stageRoot)
+                return string.Empty;
+
+            if (target.IsChildOf(stageRoot))
+            {
+                var relative = AnimationUtility.CalculateTransformPath(target, stageRoot);
+                if (!string.IsNullOrEmpty(relative))
+                    return relative;
+            }
+        }
+
+        // Prefab 外: 名前のみ（実行時は再帰検索）
+        return target.name;
     }
 
     void DrawInlineDate(Rect rect, SerializedProperty dateProp, string label)

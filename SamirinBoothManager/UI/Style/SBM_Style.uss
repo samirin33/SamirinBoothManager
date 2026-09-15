@@ -45,12 +45,18 @@
     transition-timing-function: ease-out-sine;
 }
 
+/* SBM_Button 本体は横長時に見切れないよう C# で scale を制御する */
 .SBM_Button:hover {
     scale: 1.1 1.1;
 }
 
 .SBM_Button:active {
     scale: 0.9 0.9;
+}
+
+.SBM_Button.SBM_ButtonManaged:hover,
+.SBM_Button.SBM_ButtonManaged:active {
+    scale: 1 1;
 }
 
 .SBM_ItemBackground {

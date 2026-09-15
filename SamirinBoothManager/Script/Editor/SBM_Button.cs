@@ -64,6 +64,11 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         const float BaseFontSizeRatio = 0.34f;
         const float DefaultTextScale = 1f;
         const float IconTextGapRatio = 0.08f;
+        const float MaxHoverScale = 1.1f;
+        const float MinActiveScale = 0.9f;
+        /// <summary>ホバー拡大ではみ出してよい最大ピクセル（片側）。</summary>
+        const float MaxOverflowPixels = 6f;
+        const string ManagedClass = "SBM_ButtonManaged";
 
         readonly VisualElement _animationParent;
         readonly VisualElement _background;
@@ -79,6 +84,8 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         float _lastLayoutWidth = -1f;
         float _lastLayoutHeight = -1f;
         bool _updatingSizes;
+        bool _pointerInside;
+        bool _pointerPressed;
 
         /// <summary>クリック時に呼ばれるイベント。</summary>
         public event Action clicked;
@@ -152,10 +159,21 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             {
                 buttonRoot.pickingMode = PickingMode.Ignore;
                 buttonRoot.style.flexGrow = 1;
+                buttonRoot.style.overflow = Overflow.Visible;
             }
 
             if (_animationParent != null)
+            {
                 _animationParent.pickingMode = PickingMode.Position;
+                _animationParent.style.overflow = Overflow.Visible;
+                // USS の固定 scale を止め、横長でも見切れない拡大率を C# で適用する
+                _animationParent.AddToClassList(ManagedClass);
+                _animationParent.RegisterCallback<PointerEnterEvent>(OnPointerEnter);
+                _animationParent.RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
+                _animationParent.RegisterCallback<PointerDownEvent>(OnPointerDown);
+                _animationParent.RegisterCallback<PointerUpEvent>(OnPointerUp);
+                _animationParent.RegisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
+            }
 
             if (_background != null)
                 _background.pickingMode = PickingMode.Ignore;
@@ -169,6 +187,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             ApplyText();
             ApplyIcon();
             ApplyBackgroundColor();
+            ApplyInteractiveScale();
 
             // Clickable は押下中に対象へ :active を付与する
             var clickTarget = _animationParent ?? this;
@@ -178,6 +197,94 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             RegisterCallback<KeyDownEvent>(OnKeyDown);
             RegisterCallback<GeometryChangedEvent>(OnGeometryChanged);
+        }
+
+        void OnPointerEnter(PointerEnterEvent evt)
+        {
+            _pointerInside = true;
+            ApplyInteractiveScale();
+        }
+
+        void OnPointerLeave(PointerLeaveEvent evt)
+        {
+            _pointerInside = false;
+            _pointerPressed = false;
+            ApplyInteractiveScale();
+        }
+
+        void OnPointerDown(PointerDownEvent evt)
+        {
+            if (evt.button != 0)
+                return;
+
+            _pointerPressed = true;
+            ApplyInteractiveScale();
+        }
+
+        void OnPointerUp(PointerUpEvent evt)
+        {
+            if (evt.button != 0)
+                return;
+
+            _pointerPressed = false;
+            ApplyInteractiveScale();
+        }
+
+        void OnPointerCaptureOut(PointerCaptureOutEvent evt)
+        {
+            _pointerPressed = false;
+            ApplyInteractiveScale();
+        }
+
+        void ApplyInteractiveScale()
+        {
+            if (_animationParent == null)
+                return;
+
+            if (!enabledSelf || !enabledInHierarchy)
+            {
+                _animationParent.style.scale = new Scale(Vector3.one);
+                return;
+            }
+
+            var width = _lastLayoutWidth > 0f ? _lastLayoutWidth : layout.width;
+            var height = _lastLayoutHeight > 0f ? _lastLayoutHeight : layout.height;
+            var hover = GetSafeScale(width, height, MaxHoverScale);
+            var active = GetSafeScale(width, height, MinActiveScale);
+
+            Vector3 scale;
+            if (_pointerPressed)
+                scale = new Vector3(active.x, active.y, 1f);
+            else if (_pointerInside)
+                scale = new Vector3(hover.x, hover.y, 1f);
+            else
+                scale = Vector3.one;
+
+            _animationParent.style.scale = new Scale(scale);
+        }
+
+        /// <summary>
+        /// 拡大・縮小ではみ出す量が MaxOverflowPixels を超えないよう軸ごとに制限する。
+        /// 横長ボタンは X 方向の拡大を抑え、見切れを防ぐ。
+        /// </summary>
+        static Vector2 GetSafeScale(float width, float height, float targetScale)
+        {
+            if (width <= 0f || height <= 0f || Mathf.Approximately(targetScale, 1f))
+                return Vector2.one * targetScale;
+
+            float Limit(float size, float desired)
+            {
+                if (size <= 0f)
+                    return desired;
+
+                var maxDelta = (2f * MaxOverflowPixels) / size;
+                if (desired >= 1f)
+                    return Mathf.Min(desired, 1f + maxDelta);
+
+                return Mathf.Max(desired, 1f - maxDelta);
+            }
+
+            return new Vector2(Limit(width, targetScale), Limit(height, targetScale));
         }
 
         void InvokeClicked()
@@ -215,6 +322,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             _lastLayoutWidth = width;
             _lastLayoutHeight = height;
             UpdateContentSizes(width, height);
+            ApplyInteractiveScale();
         }
 
         void ApplyText()

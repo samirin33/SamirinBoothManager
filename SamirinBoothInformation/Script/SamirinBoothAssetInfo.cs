@@ -75,10 +75,45 @@ public class UpdateInfo
 }
 
 [System.Serializable]
+public class AdditionalPathInfo
+{
+    static readonly Color DefaultButtonColor = new Color(0x45 / 255f, 0x4c / 255f, 0x4f / 255f, 1f);
+
+    /// <summary>フォーカスボタンなどに表示するタイトル。空なら path を表示。</summary>
+    public string title;
+    /// <summary>
+    /// アセットパス（Assets/... / Packages/...）または、
+    /// アバター上にセットされたプレハブ配下の相対ヒエラルキーパス。
+    /// </summary>
+    public string path;
+    /// <summary>フォーカスボタンの背景色。未設定（透明）のときはデフォルト色。</summary>
+    public Color buttonColor = new Color(0x45 / 255f, 0x4c / 255f, 0x4f / 255f, 1f);
+
+    public bool IsAssetPath
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
+
+            var normalized = path.Replace('\\', '/');
+            return normalized.StartsWith("Assets/", System.StringComparison.OrdinalIgnoreCase)
+                || normalized.StartsWith("Packages/", System.StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    public string DisplayTitle =>
+        !string.IsNullOrWhiteSpace(title) ? title : (path ?? string.Empty);
+
+    public Color ResolvedButtonColor =>
+        buttonColor.a > 0.001f ? buttonColor : DefaultButtonColor;
+}
+
+[System.Serializable]
 public class AdditionalInfo
 {
     public string title;
     public string description;
     public Sprite image;
-    public string[] paths;
+    public AdditionalPathInfo[] paths;
 }

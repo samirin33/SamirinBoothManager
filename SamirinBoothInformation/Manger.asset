@@ -18,7 +18,7 @@ MonoBehaviour:
   category: 6
   majorVertion: 1
   minorVertion: 0
-  patchVertion: 4
+  patchVertion: 5
   releaseDate:
     year: 2026
     month: 8
@@ -26,7 +26,7 @@ MonoBehaviour:
   updateDate:
     year: 2026
     month: 9
-    day: 8
+    day: 15
   updateRemind: 1
   updateInfos:
   - updateName: v1.0.0

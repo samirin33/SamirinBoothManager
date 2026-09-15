@@ -94,7 +94,9 @@ MonoBehaviour:
       month: 10
       day: 11
   url: https://samirin33-vrc.booth.pm/items/6552786
-  price: "\u7121\u6599\uFF01"
+  price: "650\u5186"
+  salePrice: 
+  newItemLabel: 0
   youtubeUrl: https://youtu.be/BrCINaswmdE?si=maVTHw2wVcxqNezD
   platformInfo:
     forPCVR: 1
