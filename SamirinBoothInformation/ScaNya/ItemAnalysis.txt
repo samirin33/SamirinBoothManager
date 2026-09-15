@@ -1,0 +1,17 @@
+﻿# Item Analysis
+Source: Assets/samirin33/ScaNya
+Output: Assets/samirin33/SamirinBoothInformation/ScaNya
+Generated: 2026-09-15 15:52:09
+
+ScaNya
+Assets/samirin33/ScaNya/Prefab/ScaNya.prefab
+ポリゴン数: 11318
+頂点数: 7332
+マテリアル数: 14
+マテリアルスロット数: 16
+テクスチャサイズ: 10.57 MB
+PhysBone数: 7
+PhysBoneコライダー数: 1
+ライト数: 1
+カメラ数: 2
+同期パラメーター: 15 ビット

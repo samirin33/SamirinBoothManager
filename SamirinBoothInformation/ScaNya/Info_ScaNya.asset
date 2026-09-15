@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc0c32a0775ca814e942d5f75ea84cf7, type: 3}
+  m_Name: Info_ScaNya
+  m_EditorClassIdentifier: 
+  name: "\u3059\u304D\u3083\u306B\u3083\uFF01"
+  description: "UFO\u3067VRChat\u306E\u4E16\u754C\u3092\u5438\u3044\u8FBC\u3093\u3058\u3083\u304A\u3046\uFF01"
+  images:
+  - {fileID: 21300000, guid: 6d80b128872fae6488894182fd4cbc72, type: 3}
+  - {fileID: 21300000, guid: 5799467bc7c51924c90b90ca43fd00ac, type: 3}
+  - {fileID: 21300000, guid: 17a6733f7180fdc4185d89029aa306fd, type: 3}
+  - {fileID: 21300000, guid: ea507f6ce76aaeb45b39e24eb10e38cf, type: 3}
+  category: 1
+  majorVertion: 1
+  minorVertion: 0
+  patchVertion: 0
+  releaseDate:
+    year: 2026
+    month: 9
+    day: 16
+  updateDate:
+    year: 2026
+    month: 9
+    day: 16
+  updateRemind: 1
+  updateInfos:
+  - updateName: ver1.0.0
+    updateDescription: "\u516C\u958B\uFF01"
+    updateDate:
+      year: 2026
+      month: 9
+      day: 16
+  url: https://samirin33-vrc.booth.pm/items/8851531
+  price: "650\u5186"
+  salePrice: 
+  newItemLabel: 1
+  youtubeUrl: https://www.youtube.com/watch?v=PqDlb1W3Tu0
+  platformInfo:
+    forPCVR: 1
+    forPCDesktop: 1
+    forQuest: 0
+    forAndroid_iOS: 0
+  additionalInfos:
+  - title: "\u9A5A\u304D\u306E\u5438\u5F15\u529B"
+    description: "UFO\u3092\u624B\u306B\u6301\u3063\u3066\u5438\u3044\u8FBC\u3080\u3068\u30013D\u30B9\u30AD\u30E3\u30F3\u306E\u3088\u3046\u306B\u30EF\u30FC\u30EB\u30C9\u3084\u30A2\u30D0\u30BF\u30FC\u3092\u70B9\u306E\u96C6\u5408\u4F53\u3068\u3057\u3066\u8A18\u9332\u3059\u308B\u3053\u3068\u304C\u3067\u304D\u307E\u3059\uFF01"
+    image: {fileID: 21300000, guid: 5799467bc7c51924c90b90ca43fd00ac, type: 3}
+    paths: []
+  - title: "\u304B\u308F\u3044\u3044UFO\u3061\u3083\u3093\uFF01"
+    description: "\u30DA\u30C3\u30C8\u3068\u3057\u3066\u982D\u306E\u4E0A\u3092\u3075\u308F\u3075\u308F\u98DB\u3093\u3060\u308A\u3001\u81EA\u5206\u306B\u3064\u3044\u3066\u304D\u3066\u304F\u308C\u307E\u3059\u3002\r\n\u6642\u3005\u3053\u3063\u3061\u3092\u307F\u3066\u7B11\u9854\u306B\u306A\u308B\u3088\uFF01"
+    image: {fileID: 21300000, guid: ea507f6ce76aaeb45b39e24eb10e38cf, type: 3}
+    paths: []
+  howToSetupInfos:
+  - title: "\u8272\u6539\u5909"
+    description: "\u8272\u6539\u5909\u306F\u3053\u308C\u3089\u306E\u30DE\u30C6\u30EA\u30A2\u30EB\u3092\u53C2\u8003\u306B\u3057\u3066\u304F\u3060\u3055\u3044\uFF01"
+    image: {fileID: 0}
+    paths:
+    - title: "\u82721"
+      path: Assets/samirin33/ScaNya/Material_Shader/Mat_ScaNya_Base Color 0.mat
+      buttonColor: {r: 0.84968567, g: 0.48243734, b: 0.8867924, a: 1}
+    - title: "\u82722"
+      path: Assets/samirin33/ScaNya/Material_Shader/Mat_ScaNya_Base Color 1.mat
+      buttonColor: {r: 0.41511402, g: 0.7364838, b: 0.8742138, a: 1}
+    - title: "\u82723"
+      path: Assets/samirin33/ScaNya/Material_Shader/Mat_ScaNya_Base Color 2.mat
+      buttonColor: {r: 0.23110238, g: 0.24983384, b: 0.2578616, a: 1}
+  - title: "\u30E2\u30C7\u30EB\u6539\u5909"
+    description: "3D\u30E2\u30C7\u30EB\u306E\u6539\u5909\u3084\u5DEE\u3057\u66FF\u3048\u306F\u3053\u3061\u3089\u304B\u3089\uFF01"
+    image: {fileID: 0}
+    paths:
+    - title: "UFO\u30E2\u30C7\u30EB"
+      path: World/Unscaled/UFOPosition/Scaled/Animation_00/Animation_01/ScaNyaUFO
+      buttonColor: {r: 0.8509804, g: 0.48235294, b: 0.8862745, a: 1}
+  variations:
+  - variationName: "\u3059\u304D\u3083\u306B\u3083\uFF01"
+    variationDescription: 
+    prefabPath: Assets/samirin33/ScaNya/Prefab/ScaNya.prefab
+    id: 0
+  relatedAssets: []
+  folderName: ScaNya
+  rootAsset: {fileID: 0}
+  visible: 1
