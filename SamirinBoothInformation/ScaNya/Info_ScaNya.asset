@@ -15,14 +15,15 @@ MonoBehaviour:
   name: "\u3059\u304D\u3083\u306B\u3083\uFF01"
   description: "UFO\u3067VRChat\u306E\u4E16\u754C\u3092\u5438\u3044\u8FBC\u3093\u3058\u3083\u304A\u3046\uFF01"
   images:
-  - {fileID: 21300000, guid: 6d80b128872fae6488894182fd4cbc72, type: 3}
+  - {fileID: 21300000, guid: 30750cfd2d5810c4fa5329abcb7324fd, type: 3}
+  - {fileID: 21300000, guid: 597646d101a96af4d9312c5b857cf2f0, type: 3}
   - {fileID: 21300000, guid: 5799467bc7c51924c90b90ca43fd00ac, type: 3}
   - {fileID: 21300000, guid: 17a6733f7180fdc4185d89029aa306fd, type: 3}
   - {fileID: 21300000, guid: ea507f6ce76aaeb45b39e24eb10e38cf, type: 3}
   category: 1
   majorVertion: 1
   minorVertion: 0
-  patchVertion: 1
+  patchVertion: 2
   releaseDate:
     year: 2026
     month: 9
@@ -30,8 +31,8 @@ MonoBehaviour:
   updateDate:
     year: 2026
     month: 9
-    day: 16
-  updateRemind: 0
+    day: 22
+  updateRemind: 1
   updateInfos:
   - updateName: ver1.0.0
     updateDescription: "\u516C\u958B\uFF01"
@@ -45,6 +46,12 @@ MonoBehaviour:
       year: 2026
       month: 9
       day: 16
+  - updateName: ver1.0.2
+    updateDescription: "WriteDefault\u30AA\u30F3\u306E\u74B0\u5883\u3067\u3082\u554F\u984C\u306A\u304F\u52D5\u4F5C\u3067\u304D\u308B\u3088\u3046\u306B"
+    updateDate:
+      year: 2026
+      month: 9
+      day: 22
   url: https://samirin33-vrc.booth.pm/items/8851531
   price: "650\u5186"
   salePrice: 
