@@ -14,7 +14,9 @@ public class SamirinBoothAssetInfoEditor : Editor
     SerializedProperty _patchVertion;
     SerializedProperty _releaseDate;
     SerializedProperty _updateDate;
-    SerializedProperty _updateRemind;
+    SerializedProperty _remindMajor;
+    SerializedProperty _remindMinor;
+    SerializedProperty _remindPatch;
     SerializedProperty _updateInfos;
     SerializedProperty _url;
     SerializedProperty _price;
@@ -59,7 +61,10 @@ public class SamirinBoothAssetInfoEditor : Editor
         _patchVertion = serializedObject.FindProperty("patchVertion");
         _releaseDate = serializedObject.FindProperty("releaseDate");
         _updateDate = serializedObject.FindProperty("updateDate");
-        _updateRemind = serializedObject.FindProperty("updateRemind");
+        var updateRemind = serializedObject.FindProperty("updateRemind");
+        _remindMajor = updateRemind.FindPropertyRelative("major");
+        _remindMinor = updateRemind.FindPropertyRelative("minor");
+        _remindPatch = updateRemind.FindPropertyRelative("patch");
         _updateInfos = serializedObject.FindProperty("updateInfos");
         _url = serializedObject.FindProperty("url");
         _price = serializedObject.FindProperty("price");
@@ -170,7 +175,7 @@ public class SamirinBoothAssetInfoEditor : Editor
                 "直接入力",
                 $"{_majorVertion.intValue}.{_minorVertion.intValue}.{_patchVertion.intValue}");
             if (EditorGUI.EndChangeCheck())
-                TryParseVersion(versionText);
+                TryParseVersion(versionText, _majorVertion, _minorVertion, _patchVertion);
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Major", GUILayout.Width(42));
@@ -180,12 +185,6 @@ public class SamirinBoothAssetInfoEditor : Editor
             EditorGUILayout.LabelField("Patch", GUILayout.Width(42));
             _patchVertion.intValue = Mathf.Max(0, EditorGUILayout.IntField(_patchVertion.intValue));
             EditorGUILayout.EndHorizontal();
-
-            EditorGUILayout.PropertyField(
-                _updateRemind,
-                new GUIContent(
-                    "更新通知",
-                    "オフにすると Items Center の更新リマインドと NewVertionRemind 表示を行いません。"));
 
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Major +1"))
@@ -207,12 +206,35 @@ public class SamirinBoothAssetInfoEditor : Editor
                 SetDateToToday(_updateDate);
             }
             EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.Space(6);
+            EditorGUI.BeginChangeCheck();
+            string remindText = EditorGUILayout.DelayedTextField(
+                new GUIContent(
+                    "推奨バージョン",
+                    "インポート済みバージョンがこの値より低い場合に更新通知します。0.0.0 のときは通知しません。"),
+                $"{_remindMajor.intValue}.{_remindMinor.intValue}.{_remindPatch.intValue}");
+            if (EditorGUI.EndChangeCheck())
+                TryParseVersion(remindText, _remindMajor, _remindMinor, _remindPatch);
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Major", GUILayout.Width(42));
+            _remindMajor.intValue = Mathf.Max(0, EditorGUILayout.IntField(_remindMajor.intValue));
+            EditorGUILayout.LabelField("Minor", GUILayout.Width(42));
+            _remindMinor.intValue = Mathf.Max(0, EditorGUILayout.IntField(_remindMinor.intValue));
+            EditorGUILayout.LabelField("Patch", GUILayout.Width(42));
+            _remindPatch.intValue = Mathf.Max(0, EditorGUILayout.IntField(_remindPatch.intValue));
+            EditorGUILayout.EndHorizontal();
         }
         EditorGUILayout.EndFoldoutHeaderGroup();
         EditorGUILayout.Space(4);
     }
 
-    void TryParseVersion(string versionText)
+    static void TryParseVersion(
+        string versionText,
+        SerializedProperty majorProp,
+        SerializedProperty minorProp,
+        SerializedProperty patchProp)
     {
         if (string.IsNullOrWhiteSpace(versionText))
             return;
@@ -222,11 +244,11 @@ public class SamirinBoothAssetInfoEditor : Editor
             return;
 
         if (parts.Length >= 1 && int.TryParse(parts[0], out int major))
-            _majorVertion.intValue = Mathf.Max(0, major);
+            majorProp.intValue = Mathf.Max(0, major);
         if (parts.Length >= 2 && int.TryParse(parts[1], out int minor))
-            _minorVertion.intValue = Mathf.Max(0, minor);
+            minorProp.intValue = Mathf.Max(0, minor);
         if (parts.Length >= 3 && int.TryParse(parts[2], out int patch))
-            _patchVertion.intValue = Mathf.Max(0, patch);
+            patchProp.intValue = Mathf.Max(0, patch);
     }
 
     void DrawDateSection()

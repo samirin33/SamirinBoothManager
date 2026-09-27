@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 [CreateAssetMenu(fileName = "New Samirin Booth Asset Info", menuName = "Samirin Booth Manager/Samirin Booth Asset Info")]
 public class SamirinBoothAssetInfo : ScriptableObject
@@ -12,7 +14,11 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public int patchVertion;
     public SamirinBoothDate releaseDate;
     public SamirinBoothDate updateDate;
-    public bool updateRemind = true;
+    /// <summary>
+    /// 推奨バージョン。インポート済みバージョンがこれより低いときに更新通知する。
+    /// 0.0.0 のときは通知しない。
+    /// </summary>
+    public SamirinBoothVersion updateRemind;
     public UpdateInfo[] updateInfos;
     public string url;
     public string price;
@@ -27,6 +33,22 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public string folderName;
     public SamirinBoothAssetInfo rootAsset;
     public bool visible = true;
+
+    /// <summary>
+    /// インポート済みバージョンが推奨バージョンより低いとき true。
+    /// 推奨バージョンが 0.0.0 のときは通知しない。
+    /// バージョン不明は推奨を満たしているか判断できないため、推奨バージョンが設定されていれば通知する。
+    /// </summary>
+    public bool ShouldShowUpdateRemind(Version installed)
+    {
+        if (!updateRemind.IsSet)
+            return false;
+
+        if (installed == null)
+            return true;
+
+        return installed < updateRemind.ToVersion();
+    }
 }
 
 public enum Category
@@ -56,6 +78,21 @@ public class Variation
     public string variationDescription;
     public string prefabPath;
     public int id;
+}
+
+[System.Serializable]
+public struct SamirinBoothVersion
+{
+    public int major;
+    public int minor;
+    public int patch;
+
+    public bool IsSet => major > 0 || minor > 0 || patch > 0;
+
+    public Version ToVersion()
+    {
+        return new Version(Math.Max(0, major), Math.Max(0, minor), Math.Max(0, patch));
+    }
 }
 
 [System.Serializable]

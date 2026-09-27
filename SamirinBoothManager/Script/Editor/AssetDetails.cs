@@ -433,9 +433,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             SetDisplay(_currentVertionLabel, false);
             SetDisplay(_currentVersionGroup, true);
             SetDisplay(_latestVersionGroup, true);
-            // 不明バージョンは比較不能のため更新あり扱い（updateRemind がオフなら非表示）
-            SetDisplay(_newVertionRemind,
-                info.updateRemind && (installed == null || installed < latest));
+            SetDisplay(_newVertionRemind, info.ShouldShowUpdateRemind(installed));
             return true;
         }
 

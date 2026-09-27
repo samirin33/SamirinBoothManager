@@ -6,7 +6,7 @@ using UnityEngine;
 namespace samirin33.SamirinBoothManager.UI.Parts
 {
     /// <summary>
-    /// インポート済みアセットのうち、新しいバージョンがあるものを収集する。
+    /// インポート済みアセットのうち、推奨バージョンより低いものを収集する。
     /// </summary>
     static class SamirinBoothUpdateUtil
     {
@@ -34,17 +34,14 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 if (!HasUpdatableCategory(info.category))
                     continue;
 
-                if (!info.updateRemind)
-                    continue;
-
-                if (!TryGetLatestVersion(info, out var latest))
-                    continue;
-
                 if (!SamirinBoothImportUtil.TryGetInstalledVersion(info, out var installed))
                     continue;
 
-                // バージョン不明、または最新より古いものだけ対象
-                if (installed != null && installed >= latest)
+                // 推奨バージョンより低い（不明バージョンを含む）ものだけ対象
+                if (!info.ShouldShowUpdateRemind(installed))
+                    continue;
+
+                if (!TryGetLatestVersion(info, out var latest))
                     continue;
 
                 if (!includeIgnored && IsIgnored(info, latest))

@@ -31,7 +31,10 @@ MonoBehaviour:
     year: 2025
     month: 10
     day: 11
-  updateRemind: 0
+  updateRemind:
+    major: 0
+    minor: 0
+    patch: 0
   updateInfos:
   - updateName: ver1.0.0
     updateDescription: "\u8CA9\u58F2\u958B\u59CB"

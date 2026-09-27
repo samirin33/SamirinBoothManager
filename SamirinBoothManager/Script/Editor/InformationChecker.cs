@@ -22,8 +22,8 @@ public static class InformationChecker
 
     const string InformationAssetPath = "Assets/samirin33/SamirinBoothInformation";
     const string ManagerAssetPath = "Assets/samirin33/SamirinBoothManager";
-    const string PackageAssetInfoPath = ManagerAssetPath + "/PackageAssetInfo.json";
-    const string ManagerAssetInfoPath = InformationAssetPath + "/Manger.asset";
+    const string ManagerAssetFileName = "Manger.asset";
+    const string ManagerAssetInfoPath = InformationAssetPath + "/" + ManagerAssetFileName;
 
     const string PrefsAutoCheckKey = "samirin33.InformationChecker.AutoCheckEnabled";
     public const string PrefsSessionCheckedKey = "samirin33.InformationChecker.SessionChecked";
@@ -133,12 +133,23 @@ public static class InformationChecker
                     return false;
                 }
 
-                if (CopyDirectoryContents(remoteInformation, ToAbsolutePath(InformationAssetPath)))
+                // 情報フォルダのコピーで Manger.asset を先に上書きすると、導入済みバージョンが消える。
+                // 比較はコピー前のローカルと、取得したリモートの Manger.asset だけで行う。
+                EditorUtility.DisplayProgressBar("InformationChecker", "バージョンを確認中...", 0.55f);
+
+                string localManagerAsset = ToAbsolutePath(ManagerAssetInfoPath);
+                string remoteManagerAsset = Path.Combine(remoteInformation, ManagerAssetFileName);
+                Version localVersion = File.Exists(localManagerAsset)
+                    ? ReadManagerAssetVersion(localManagerAsset)
+                    : null;
+                Version remoteVersion = ReadManagerAssetVersion(remoteManagerAsset);
+                bool shouldUpdateManager = forceManagerUpdate || ShouldUpdateManager(localVersion, remoteVersion);
+
+                EditorUtility.DisplayProgressBar("InformationChecker", "情報アセットを反映中...", 0.7f);
+
+                if (CopyDirectoryContents(remoteInformation, ToAbsolutePath(InformationAssetPath), ManagerAssetFileName))
                     AssetDatabase.Refresh();
 
-                EditorUtility.DisplayProgressBar("InformationChecker", "バージョンを確認中...", 0.7f);
-
-                bool shouldUpdateManager = forceManagerUpdate || ShouldUpdateManager();
                 if (shouldUpdateManager)
                 {
                     if (!Directory.Exists(remoteManager))
@@ -151,7 +162,11 @@ public static class InformationChecker
 
                     // ここでコンパイルが走ると開いているウィンドウの中身が失われるため、
                     // リロード後に SBM_UpdateRemind 側で作り直す（DidReloadScripts）
-                    if (CopyDirectoryContents(remoteManager, ToAbsolutePath(ManagerAssetPath)))
+                    bool managerChanged = CopyDirectoryContents(remoteManager, ToAbsolutePath(ManagerAssetPath));
+                    // Manager 更新後にだけ Manger.asset を合わせる。先に書くと次回以降の検知ができなくなる。
+                    if (CopyFileIfChanged(remoteManagerAsset, localManagerAsset))
+                        managerChanged = true;
+                    if (managerChanged)
                         AssetDatabase.Refresh();
 
                     Debug.Log("[InformationChecker] SamirinBoothManager を更新しました。");
@@ -159,6 +174,10 @@ public static class InformationChecker
                 else
                 {
                     Debug.Log("[InformationChecker] SamirinBoothManager は最新です。スキップしました。");
+                    // 同じバージョンのときだけ中身を同期する。新しい Manger.asset は Manager 更新時にだけ書く。
+                    if (localVersion != null && remoteVersion == localVersion &&
+                        CopyFileIfChanged(remoteManagerAsset, localManagerAsset))
+                        AssetDatabase.Refresh();
                 }
 
                 success = true;
@@ -199,52 +218,26 @@ public static class InformationChecker
         return success;
     }
 
-    static bool ShouldUpdateManager()
+    /// <summary>
+    /// ローカル Manger.asset よりリモート Manger.asset が新しいとき true。
+    /// </summary>
+    static bool ShouldUpdateManager(Version localVersion, Version remoteVersion)
     {
-        string packageInfoAbs = ToAbsolutePath(PackageAssetInfoPath);
-        if (!File.Exists(packageInfoAbs))
-        {
-            Debug.Log("[InformationChecker] PackageAssetInfo.json が存在しないため Manager を取得します。");
-            return true;
-        }
-
-        Version localVersion = ReadPackageJsonVersion(packageInfoAbs);
-        Version remoteVersion = ReadManagerAssetVersion(ToAbsolutePath(ManagerAssetInfoPath));
-
         if (remoteVersion == null)
         {
-            Debug.LogWarning("[InformationChecker] Manger.asset のバージョンを読み取れませんでした。Manager 更新をスキップします。");
+            Debug.LogWarning("[InformationChecker] リモートの Manger.asset のバージョンを読み取れませんでした。Manager 更新をスキップします。");
             return false;
         }
 
         if (localVersion == null)
         {
-            Debug.Log("[InformationChecker] PackageAssetInfo.json のバージョンを読み取れないため Manager を取得します。");
+            Debug.Log("[InformationChecker] ローカルの Manger.asset が無い、またはバージョンを読み取れないため Manager を取得します。");
             return true;
         }
 
-        // Manger.asset（取得した情報）が PackageAssetInfo より新しい場合に更新
         bool newer = remoteVersion > localVersion;
-        Debug.Log($"[InformationChecker] バージョン比較: PackageAssetInfo={localVersion}, Manger.asset={remoteVersion}, update={newer}");
+        Debug.Log($"[InformationChecker] バージョン比較: ローカル Manger.asset={localVersion}, リモート Manger.asset={remoteVersion}, update={newer}");
         return newer;
-    }
-
-    static Version ReadPackageJsonVersion(string absolutePath)
-    {
-        try
-        {
-            string json = File.ReadAllText(absolutePath, Encoding.UTF8);
-            Match match = Regex.Match(json, "\"version\"\\s*:\\s*\"([^\"]+)\"");
-            if (!match.Success)
-                return null;
-
-            return ParseVersion(match.Groups[1].Value);
-        }
-        catch (Exception e)
-        {
-            Debug.LogWarning("[InformationChecker] PackageAssetInfo.json の読み込みに失敗: " + e.Message);
-            return null;
-        }
     }
 
     static Version ReadManagerAssetVersion(string absolutePath)
@@ -276,19 +269,6 @@ public static class InformationChecker
         if (!match.Success)
             return 0;
         return int.Parse(match.Groups[1].Value);
-    }
-
-    static Version ParseVersion(string text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-            return null;
-
-        text = text.Trim();
-        string[] parts = text.Split('.');
-        int major = parts.Length > 0 && int.TryParse(parts[0], out int ma) ? ma : 0;
-        int minor = parts.Length > 1 && int.TryParse(parts[1], out int mi) ? mi : 0;
-        int patch = parts.Length > 2 && int.TryParse(parts[2], out int pa) ? pa : 0;
-        return new Version(major, minor, patch);
     }
 
     static async Task<bool> DownloadFileAsync(string url, string destinationPath)
@@ -341,14 +321,22 @@ public static class InformationChecker
     }
 
     /// <summary>実際に書き換えたファイルがあれば true。</summary>
-    static bool CopyDirectoryContents(string sourceDir, string destinationDir)
+    static bool CopyDirectoryContents(string sourceDir, string destinationDir, string excludeRelativePath = null)
     {
         Directory.CreateDirectory(destinationDir);
+
+        string exclude = string.IsNullOrEmpty(excludeRelativePath)
+            ? null
+            : excludeRelativePath.Replace('\\', '/');
 
         bool changed = false;
         foreach (string file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
         {
             string relative = file.Substring(sourceDir.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (exclude != null &&
+                string.Equals(relative.Replace('\\', '/'), exclude, StringComparison.OrdinalIgnoreCase))
+                continue;
+
             string destFile = Path.Combine(destinationDir, relative);
 
             // 中身が同じファイルを上書きすると再インポート（.cs ならドメインリロード）が起きるため避ける
@@ -364,6 +352,22 @@ public static class InformationChecker
         }
 
         return changed;
+    }
+
+    static bool CopyFileIfChanged(string sourceFile, string destinationFile)
+    {
+        if (string.IsNullOrEmpty(sourceFile) || !File.Exists(sourceFile))
+            return false;
+
+        if (HasSameContent(sourceFile, destinationFile))
+            return false;
+
+        string destFolder = Path.GetDirectoryName(destinationFile);
+        if (!string.IsNullOrEmpty(destFolder))
+            Directory.CreateDirectory(destFolder);
+
+        File.Copy(sourceFile, destinationFile, true);
+        return true;
     }
 
     static bool HasSameContent(string sourceFile, string destinationFile)
