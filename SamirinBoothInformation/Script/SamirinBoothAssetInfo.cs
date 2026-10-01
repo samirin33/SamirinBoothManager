@@ -1,11 +1,11 @@
 using System;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 [CreateAssetMenu(fileName = "New Samirin Booth Asset Info", menuName = "Samirin Booth Manager/Samirin Booth Asset Info")]
 public class SamirinBoothAssetInfo : ScriptableObject
 {
-    public string name;
+    /// <summary>Booth 上の表示名。Unity のアセット名（Object.name）とは別。</summary>
+    public new string name;
     public string description;
     public Sprite[] images;
     public Category category = Category.AvatarGimmick;
