@@ -27,15 +27,21 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         static readonly Color ChangeColor = Hex("#439753FF");
 
         readonly DropdownField _variationDropdown;
+        readonly VisualElement _variationCallout;
         readonly Label _variationDescription;
         readonly SBM_Button _buttonSetup;
 
         readonly List<Variation> _validVariations = new List<Variation>();
+        readonly HashSet<string> _presentPrefabPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         SamirinBoothAssetInfo _info;
         bool _isImported;
         SetupState _state = SetupState.Attach;
         bool _useAvatarAttach;
+        bool _suppressVariationCallback;
+        bool _calloutDismissed;
+        int _appliedDropdownIndex = -1;
+        int _dropdownBindGeneration;
 
         /// <summary>
         /// Bind 結果としてパネルを表示すべきか（display が Flex か）。
@@ -50,6 +56,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         public AttachPanel() : base(nameof(AttachPanel))
         {
             _variationDropdown = this.Q<DropdownField>("VariationDropDown");
+            _variationCallout = this.Q<VisualElement>("VariationAvailableCallout");
             _variationDescription = this.Q<Label>("VariationDiscription");
             _buttonSetup = this.Q<SBM_Button>("ButtonSetup");
 
@@ -59,6 +66,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (_buttonSetup != null)
                 _buttonSetup.clicked += OnSetupClicked;
 
+            SetDisplay(_variationCallout, false);
             RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
             RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
         }
@@ -95,7 +103,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 for (int i = 0; i < variations.Length; i++)
                 {
                     var variation = variations[i];
-                    if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
+                    if (!HasSufficientPrefabs(variation))
                         continue;
 
                     _validVariations.Add(variation);
@@ -105,21 +113,106 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 }
             }
 
+            var avatar = SBM_Header.CurrentAvatarDescriptor;
+            var useAvatar = ShouldUseAvatarAttach(_info, avatar);
+            _calloutDismissed = IsCalloutDismissed(_info);
             if (_variationDropdown != null)
+                ApplyDropdownIndexWithoutDismiss(choices, IndexOfInitialVariation(_validVariations, avatar, useAvatar));
+
+            UpdateVariationCallout();
+            ApplySelectedVariation();
+            RefreshAttachedState(SBM_Header.CurrentAvatarDescriptor);
+        }
+
+        /// <summary>
+        /// 優先度や設置済み判定による選択では、吹き出しの非表示フラグを立てない。
+        /// </summary>
+        void ApplyDropdownIndexWithoutDismiss(List<string> choices, int index)
+        {
+            if (_variationDropdown == null)
+                return;
+
+            _appliedDropdownIndex = index;
+            _suppressVariationCallback = true;
+            _variationDropdown.UnregisterValueChangedCallback(OnVariationChanged);
+            _variationDropdown.choices = choices;
+            _variationDropdown.index = index;
+            _variationDropdown.SetEnabled(choices != null && choices.Count > 0);
+            _variationDropdown.RegisterValueChangedCallback(OnVariationChanged);
+
+            int generation = ++_dropdownBindGeneration;
+            EditorApplication.delayCall += () =>
             {
-                _variationDropdown.choices = choices;
-                _variationDropdown.index = choices.Count > 0 ? 0 : -1;
-                _variationDropdown.SetEnabled(choices.Count > 0);
+                if (generation == _dropdownBindGeneration)
+                    _suppressVariationCallback = false;
+            };
+        }
+
+        void OnVariationChanged(ChangeEvent<string> evt)
+        {
+            int index = _variationDropdown != null ? _variationDropdown.index : -1;
+            bool programmatic = _suppressVariationCallback || index == _appliedDropdownIndex;
+            if (!programmatic)
+            {
+                _appliedDropdownIndex = index;
+                _calloutDismissed = true;
+                SetCalloutDismissed(_info, true);
+                UpdateVariationCallout();
             }
 
             ApplySelectedVariation();
             RefreshAttachedState(SBM_Header.CurrentAvatarDescriptor);
         }
 
-        void OnVariationChanged(ChangeEvent<string> evt)
+        void UpdateVariationCallout()
         {
-            ApplySelectedVariation();
-            RefreshAttachedState(SBM_Header.CurrentAvatarDescriptor);
+            SetDisplay(_variationCallout, !_calloutDismissed && _validVariations.Count > 1);
+        }
+
+        /// <summary>
+        /// バリエーション変更で隠した吹き出しを、再度表示できる状態に戻す。
+        /// </summary>
+        public void ResetCalloutForDebug()
+        {
+            _calloutDismissed = false;
+            _suppressVariationCallback = false;
+            SetCalloutDismissed(_info, false);
+            UpdateVariationCallout();
+        }
+
+        const string CalloutPrefPrefix = "samirin33.SBM.VariationCalloutDismissed.";
+
+        static string CalloutPrefKey(SamirinBoothAssetInfo info)
+        {
+            if (info == null)
+                return null;
+
+            string id = null;
+            var path = AssetDatabase.GetAssetPath(info);
+            if (!string.IsNullOrEmpty(path))
+                id = AssetDatabase.AssetPathToGUID(path);
+            if (string.IsNullOrEmpty(id))
+                id = (info.folderName ?? string.Empty) + "/" + (info.name ?? string.Empty);
+
+            return CalloutPrefPrefix + id;
+        }
+
+        static bool IsCalloutDismissed(SamirinBoothAssetInfo info)
+        {
+            var key = CalloutPrefKey(info);
+            return !string.IsNullOrEmpty(key) && EditorPrefs.GetBool(key, false);
+        }
+
+        static void SetCalloutDismissed(SamirinBoothAssetInfo info, bool dismissed)
+        {
+            var key = CalloutPrefKey(info);
+            if (string.IsNullOrEmpty(key))
+                return;
+
+            if (dismissed)
+                EditorPrefs.SetBool(key, true);
+            else
+                EditorPrefs.DeleteKey(key);
         }
 
         void ApplySelectedVariation()
@@ -162,31 +255,6 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             return IsAvatarBoundCategory(info.category);
         }
 
-        /// <summary>
-        /// 選択中と同じ ID で、選択中以外のバリエーションがアバターに付いているものを返す。
-        /// ID が違うバリエーションは共存対象なので無視する。
-        /// </summary>
-        Variation FindSameIdAttachedVariation(VRCAvatarDescriptor avatar, Variation selected)
-        {
-            if (avatar == null || selected == null)
-                return null;
-
-            for (int i = 0; i < _validVariations.Count; i++)
-            {
-                var variation = _validVariations[i];
-                if (variation == null || variation == selected)
-                    continue;
-                if (variation.id != selected.id)
-                    continue;
-                if (string.IsNullOrEmpty(variation.prefabPath))
-                    continue;
-                if (SBM_Header.AvatarContainsPrefab(avatar, variation.prefabPath))
-                    return variation;
-            }
-
-            return null;
-        }
-
         void RefreshAttachedState(VRCAvatarDescriptor avatar)
         {
             var category = _info != null ? _info.category : Category.Other;
@@ -209,17 +277,18 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             }
 
             var selected = GetSelectedVariation();
-            var selectedAttached = selected != null
-                && !string.IsNullOrEmpty(selected.prefabPath)
-                && SBM_Header.AvatarContainsPrefab(avatar, selected.prefabPath);
-            var sameIdAttached = FindSameIdAttachedVariation(avatar, selected);
+            int activeIndex = IndexOfPlacedVariation(_validVariations, avatar, _useAvatarAttach);
+            int selectedIndex = _variationDropdown != null ? _variationDropdown.index : -1;
+            var active = activeIndex >= 0 && activeIndex < _validVariations.Count
+                ? _validVariations[activeIndex]
+                : null;
 
-            // 選択中がセット済み → Detach
-            // 同じ ID の他バリエーションがセット済み → Change
-            // 未セット（異なる ID の共存は可）→ Attach
-            if (selectedAttached)
+            // 必要なプレファブが揃っているバリエーションが選択中 → Detach
+            // 同じ ID の別バリエーションが設置済み → Change（追加プレファブの付け外しを含む）
+            // 未設置 → Attach
+            if (activeIndex >= 0 && activeIndex == selectedIndex)
                 _state = SetupState.Detach;
-            else if (sameIdAttached != null)
+            else if (active != null && selected != null && active.id == selected.id)
                 _state = SetupState.Change;
             else
                 _state = SetupState.Attach;
@@ -280,25 +349,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
 
             var avatar = SBM_Header.CurrentAvatarDescriptor;
             var useAvatar = ShouldUseAvatarAttach(_info, avatar);
-
-            // rootAsset が未配置なら、その1つ目のバリエーションで自動配置
-            EnsureRootAssetPlaced(avatar, useAvatar);
-
-            GameObject instance;
-            if (useAvatar)
-            {
-                // 同じ ID が既にあれば置き換え、なければ追加（異なる ID は共存）
-                var sameId = FindSameIdAttachedVariation(avatar, selected);
-                instance = sameId != null
-                    ? SBM_Header.ReplacePrefabOnAvatar(avatar, sameId.prefabPath, selected.prefabPath)
-                    : SBM_Header.AttachPrefabToAvatar(avatar, selected.prefabPath);
-            }
-            else
-            {
-                // AvatarDescriptor None / 非アバター向けカテゴリ / SDK 未使用時はシーンへ
-                instance = SBM_Header.InstantiatePrefabInScene(selected.prefabPath);
-            }
-
+            var instance = PlaceVariation(avatar, selected, useAvatar);
             if (instance == null)
                 return;
 
@@ -313,22 +364,26 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 return;
 
             var useAvatar = ShouldUseAvatarAttach(_info, avatar);
+            if (useAvatar && avatar == null)
+                return;
+
+            Undo.IncrementCurrentGroup();
+            int undoGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Detach Booth Variation");
+
+            bool removed;
             if (useAvatar)
-            {
-                if (avatar == null)
-                    return;
-                if (!SBM_Header.DetachPrefabFromAvatar(avatar, selected.prefabPath))
-                    return;
-            }
+                removed = SBM_Header.DetachPrefabFromAvatar(avatar, selected.prefabPath);
             else
+                removed = SBM_Header.DetachPrefabFromScene(selected.prefabPath);
+
+            bool removedExtras = DetachSimultaneousPrefabs(avatar, selected, useAvatar, preservePath: null);
+            if (!removed && !removedExtras)
             {
-                if (!SBM_Header.DetachPrefabFromScene(selected.prefabPath))
-                    return;
+                Undo.CollapseUndoOperations(undoGroup);
+                return;
             }
-
-            // このアセットを rootAsset としている依存アセットも解除（自身の rootAsset は残す）
-            DetachAssetsThatReferenceAsRoot(_info, avatar, useAvatar);
-
+            Undo.CollapseUndoOperations(undoGroup);
             AfterHierarchyChanged(avatar, null);
         }
 
@@ -339,11 +394,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             if (avatar == null || selected == null || string.IsNullOrEmpty(selected.prefabPath))
                 return;
 
-            EnsureRootAssetPlaced(avatar, useAvatarAttach: true);
-
-            var sameId = FindSameIdAttachedVariation(avatar, selected);
-            var oldPath = sameId?.prefabPath;
-            var instance = SBM_Header.ReplacePrefabOnAvatar(avatar, oldPath, selected.prefabPath);
+            var instance = PlaceVariation(avatar, selected, useAvatar: true);
             if (instance == null)
                 return;
 
@@ -351,147 +402,469 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         }
 
         /// <summary>
-        /// rootAsset が未配置なら、1つ目の有効バリエーションで配置する。既にあれば何もしない。
+        /// 選択バリエーションの本体を配置し、同時配置プレハブも置く。
+        /// 同じ ID が既にある場合は本体を差し替え、切り替える前の同時配置プレハブを削除する。
         /// </summary>
-        void EnsureRootAssetPlaced(VRCAvatarDescriptor avatar, bool useAvatarAttach)
+        GameObject PlaceVariation(VRCAvatarDescriptor avatar, Variation selected, bool useAvatar)
         {
-            var root = _info?.rootAsset;
-            if (root == null || root == _info)
-                return;
+            if (selected == null || string.IsNullOrEmpty(selected.prefabPath))
+                return null;
 
-            if (IsAssetAnyVariationPlaced(root, avatar, useAvatarAttach))
-                return;
+            Undo.IncrementCurrentGroup();
+            int undoGroup = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Place Booth Variation");
 
-            var first = GetFirstValidVariation(root);
-            if (first == null || string.IsNullOrEmpty(first.prefabPath))
-                return;
+            Variation previous = FindPlacedSameIdVariation(selected, avatar, useAvatar);
 
-            GameObject rootInstance;
-            if (useAvatarAttach)
-                rootInstance = SBM_Header.AttachPrefabToAvatar(avatar, first.prefabPath);
-            else
-                rootInstance = SBM_Header.InstantiatePrefabInScene(first.prefabPath);
-
-            if (rootInstance != null)
+            GameObject instance;
+            if (useAvatar)
             {
-                PrefabInstancePlaced?.Invoke(rootInstance);
-                TryCheckPlacedHierarchy(rootInstance);
+                var sameMain = previous != null && PathsEqual(previous.prefabPath, selected.prefabPath);
+                if (sameMain || (previous == null && SBM_Header.AvatarContainsPrefab(avatar, selected.prefabPath)))
+                {
+                    // 本体が同じなら残し、追加プレファブだけ付け替える
+                    instance = SBM_Header.FindPrefabInstance(avatar, selected.prefabPath);
+                }
+                else if (previous != null)
+                {
+                    instance = SBM_Header.ReplacePrefabOnAvatar(avatar, previous.prefabPath, selected.prefabPath);
+                }
+                else
+                {
+                    instance = SBM_Header.AttachPrefabToAvatar(avatar, selected.prefabPath);
+                }
+            }
+            else
+            {
+                instance = SBM_Header.InstantiatePrefabInScene(selected.prefabPath);
+            }
+
+            if (instance == null)
+            {
+                Undo.CollapseUndoOperations(undoGroup);
+                return null;
+            }
+
+            // 選択中が使わない、別バリエーションの同時配置プレファブを削除してから足す
+            DetachForeignSimultaneousPrefabs(avatar, selected, useAvatar);
+            AttachSimultaneousPrefabs(avatar, selected, useAvatar);
+            Undo.CollapseUndoOperations(undoGroup);
+            return instance;
+        }
+
+        static void AttachSimultaneousPrefabs(
+            VRCAvatarDescriptor avatar,
+            Variation variation,
+            bool useAvatar)
+        {
+            var paths = variation?.simultaneousPrefabPaths;
+            if (paths == null)
+                return;
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                var path = paths[i];
+                if (string.IsNullOrEmpty(path) || PathsEqual(path, variation.prefabPath))
+                    continue;
+
+                if (useAvatar)
+                    SBM_Header.AttachPrefabToAvatar(avatar, path);
+                else
+                    SBM_Header.InstantiatePrefabInScene(path);
             }
         }
 
         /// <summary>
-        /// このアセットを rootAsset として参照しているアセットの、配置済みバリエーションをすべて解除する。
+        /// 同じ ID の別バリエーションが使っている同時配置プレファブのうち、
+        /// 選択中のバリエーションでは使わないものを削除する。
         /// </summary>
-        static void DetachAssetsThatReferenceAsRoot(
-            SamirinBoothAssetInfo rootInfo,
+        void DetachForeignSimultaneousPrefabs(
             VRCAvatarDescriptor avatar,
-            bool useAvatarAttach)
+            Variation selected,
+            bool useAvatar)
         {
-            if (rootInfo == null)
+            if (selected == null)
                 return;
 
-            var dependents = FindAssetsThatReferenceRoot(rootInfo);
-            for (int i = 0; i < dependents.Count; i++)
+            for (int i = 0; i < _validVariations.Count; i++)
             {
-                var dependent = dependents[i];
-                if (dependent == null || dependent == rootInfo)
+                var variation = _validVariations[i];
+                if (variation == null || variation == selected || variation.id != selected.id)
                     continue;
 
-                DetachAllPlacedVariations(dependent, avatar, useAvatarAttach);
-            }
-        }
-
-        static List<SamirinBoothAssetInfo> FindAssetsThatReferenceRoot(SamirinBoothAssetInfo rootInfo)
-        {
-            var results = new List<SamirinBoothAssetInfo>();
-            if (rootInfo == null)
-                return results;
-
-            var guids = AssetDatabase.FindAssets(
-                "t:SamirinBoothAssetInfo",
-                new[] { "Assets/samirin33/SamirinBoothInformation" });
-            for (int i = 0; i < guids.Length; i++)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guids[i]);
-                var info = AssetDatabase.LoadAssetAtPath<SamirinBoothAssetInfo>(path);
-                if (info == null || info.rootAsset != rootInfo)
-                    continue;
-                results.Add(info);
-            }
-
-            return results;
-        }
-
-        static void DetachAllPlacedVariations(
-            SamirinBoothAssetInfo info,
-            VRCAvatarDescriptor avatar,
-            bool useAvatarAttach)
-        {
-            var variations = info?.variations;
-            if (variations == null)
-                return;
-
-            for (int i = 0; i < variations.Length; i++)
-            {
-                var variation = variations[i];
-                if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
+                var paths = variation.simultaneousPrefabPaths;
+                if (paths == null)
                     continue;
 
-                if (useAvatarAttach)
+                for (int p = 0; p < paths.Length; p++)
                 {
-                    if (avatar != null && SBM_Header.AvatarContainsPrefab(avatar, variation.prefabPath))
-                        SBM_Header.DetachPrefabFromAvatar(avatar, variation.prefabPath);
-                }
-                else if (SBM_Header.SceneContainsPrefab(variation.prefabPath))
-                {
-                    SBM_Header.DetachPrefabFromScene(variation.prefabPath);
+                    var path = paths[p];
+                    if (string.IsNullOrEmpty(path) || VariationUsesPrefab(selected, path))
+                        continue;
+
+                    if (useAvatar)
+                    {
+                        if (avatar != null)
+                            SBM_Header.DetachPrefabFromAvatar(avatar, path);
+                    }
+                    else
+                    {
+                        SBM_Header.DetachPrefabFromScene(path);
+                    }
                 }
             }
         }
 
-        static bool IsAssetAnyVariationPlaced(
-            SamirinBoothAssetInfo info,
-            VRCAvatarDescriptor avatar,
-            bool useAvatarAttach)
+        Variation FindPlacedSameIdVariation(Variation selected, VRCAvatarDescriptor avatar, bool useAvatar)
         {
-            var variations = info?.variations;
-            if (variations == null)
+            if (selected == null)
+                return null;
+
+            int index = IndexOfPlacedVariation(_validVariations, avatar, useAvatar);
+            if (index < 0 || index >= _validVariations.Count)
+                return null;
+
+            var placed = _validVariations[index];
+            if (placed == null || placed == selected || placed.id != selected.id)
+                return null;
+
+            return placed;
+        }
+
+        static bool VariationUsesPrefab(Variation variation, string path)
+        {
+            if (variation == null || string.IsNullOrEmpty(path))
+                return false;
+            if (PathsEqual(variation.prefabPath, path))
+                return true;
+
+            var extras = variation.simultaneousPrefabPaths;
+            if (extras == null)
                 return false;
 
-            for (int i = 0; i < variations.Length; i++)
+            for (int i = 0; i < extras.Length; i++)
             {
-                var variation = variations[i];
-                if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
-                    continue;
-
-                if (useAvatarAttach)
-                {
-                    if (avatar != null && SBM_Header.AvatarContainsPrefab(avatar, variation.prefabPath))
-                        return true;
-                }
-                else if (SBM_Header.SceneContainsPrefab(variation.prefabPath))
-                {
+                if (PathsEqual(extras[i], path))
                     return true;
-                }
             }
 
             return false;
         }
 
-        static Variation GetFirstValidVariation(SamirinBoothAssetInfo info)
+        /// <summary>
+        /// 同時配置プレハブを削除する。preservePath と同じパスは、差し替え後の本体を消さないために残す。
+        /// </summary>
+        static bool DetachSimultaneousPrefabs(
+            VRCAvatarDescriptor avatar,
+            Variation variation,
+            bool useAvatar,
+            string preservePath)
         {
-            var variations = info?.variations;
-            if (variations == null)
-                return null;
+            var paths = variation?.simultaneousPrefabPaths;
+            if (paths == null)
+                return false;
 
-            for (int i = 0; i < variations.Length; i++)
+            bool removed = false;
+            for (int i = 0; i < paths.Length; i++)
             {
-                var variation = variations[i];
-                if (variation != null && !string.IsNullOrEmpty(variation.prefabPath))
-                    return variation;
+                var path = paths[i];
+                if (string.IsNullOrEmpty(path) || PathsEqual(path, preservePath))
+                    continue;
+
+                if (useAvatar)
+                {
+                    if (avatar != null && SBM_Header.DetachPrefabFromAvatar(avatar, path))
+                        removed = true;
+                }
+                else if (SBM_Header.DetachPrefabFromScene(path))
+                {
+                    removed = true;
+                }
             }
 
-            return null;
+            return removed;
+        }
+
+        /// <summary>
+        /// 本体と同時配置プレファブがすべてプロジェクト上に存在するときだけ選択候補にする。
+        /// </summary>
+        static bool HasSufficientPrefabs(Variation variation)
+        {
+            if (variation == null || !PrefabAssetExists(variation.prefabPath))
+                return false;
+
+            var extras = variation.simultaneousPrefabPaths;
+            if (extras == null || extras.Length == 0)
+                return true;
+
+            for (int i = 0; i < extras.Length; i++)
+            {
+                if (!PrefabAssetExists(extras[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        static bool PrefabAssetExists(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+
+            return AssetDatabase.LoadAssetAtPath<GameObject>(path) != null;
+        }
+
+        /// <summary>
+        /// 設置済みの組み合わせに一致するバリエーションを選ぶ。無いときだけ priority を使う。
+        /// </summary>
+        int IndexOfInitialVariation(List<Variation> variations, VRCAvatarDescriptor avatar, bool useAvatar)
+        {
+            int placed = IndexOfPlacedVariation(variations, avatar, useAvatar);
+            if (placed >= 0)
+                return placed;
+
+            return IndexOfHighestPriority(variations);
+        }
+
+        /// <summary>
+        /// 今置いてあるプレファブ実体から、対応するバリエーションを決める。
+        /// 本体と同時配置がすべてあり、同じ ID の他バリエーション専用プレファブが無いものを採用する。
+        /// 複数あるときは、必要なプレファブが多い方を選ぶ。priority は使わない。
+        /// </summary>
+        int IndexOfPlacedVariation(List<Variation> variations, VRCAvatarDescriptor avatar, bool useAvatar)
+        {
+            if (variations == null || variations.Count == 0)
+                return -1;
+
+            SBM_Header.CollectPrefabInstanceRootPaths(_presentPrefabPaths, avatar, useAvatar);
+            if (_presentPrefabPaths.Count == 0)
+                return -1;
+
+            int exactIndex = -1;
+            int exactSize = -1;
+            for (int i = 0; i < variations.Count; i++)
+            {
+                if (!IsExactPlacedVariation(variations, i))
+                    continue;
+
+                int size = CountRequiredPrefabs(variations[i]);
+                if (size <= exactSize)
+                    continue;
+
+                exactIndex = i;
+                exactSize = size;
+            }
+
+            if (exactIndex >= 0)
+                return exactIndex;
+
+            int bestIndex = -1;
+            int bestPresent = 0;
+            int bestMissing = int.MaxValue;
+            int bestForeign = int.MaxValue;
+            for (int i = 0; i < variations.Count; i++)
+            {
+                MeasurePlacedVariation(variations, i, out int present, out int missing, out int foreign);
+                if (present <= 0)
+                    continue;
+
+                bool better = bestIndex < 0
+                    || present > bestPresent
+                    || (present == bestPresent && missing < bestMissing)
+                    || (present == bestPresent && missing == bestMissing && foreign < bestForeign);
+                if (!better)
+                    continue;
+
+                bestIndex = i;
+                bestPresent = present;
+                bestMissing = missing;
+                bestForeign = foreign;
+            }
+
+            return bestIndex;
+        }
+
+        bool IsExactPlacedVariation(List<Variation> variations, int index)
+        {
+            var variation = variations[index];
+            if (!AllRequiredPrefabsPresent(variation))
+                return false;
+
+            for (int i = 0; i < variations.Count; i++)
+            {
+                var other = variations[i];
+                if (other == null || other == variation || other.id != variation.id)
+                    continue;
+                if (HasPresentPrefabUnusedBy(variation, other))
+                    return false;
+            }
+
+            return true;
+        }
+
+        bool AllRequiredPrefabsPresent(Variation variation)
+        {
+            if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
+                return false;
+            if (!IsPresentPrefab(variation.prefabPath))
+                return false;
+
+            var extras = variation.simultaneousPrefabPaths;
+            if (extras == null)
+                return true;
+
+            for (int i = 0; i < extras.Length; i++)
+            {
+                if (string.IsNullOrEmpty(extras[i]) || PathsEqual(extras[i], variation.prefabPath))
+                    continue;
+                if (!IsPresentPrefab(extras[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        bool HasPresentPrefabUnusedBy(Variation variation, Variation other)
+        {
+            if (other == null)
+                return false;
+
+            if (!string.IsNullOrEmpty(other.prefabPath)
+                && !VariationUsesPrefab(variation, other.prefabPath)
+                && IsPresentPrefab(other.prefabPath))
+                return true;
+
+            var extras = other.simultaneousPrefabPaths;
+            if (extras == null)
+                return false;
+
+            for (int i = 0; i < extras.Length; i++)
+            {
+                if (string.IsNullOrEmpty(extras[i]) || VariationUsesPrefab(variation, extras[i]))
+                    continue;
+                if (IsPresentPrefab(extras[i]))
+                    return true;
+            }
+
+            return false;
+        }
+
+        void MeasurePlacedVariation(
+            List<Variation> variations,
+            int index,
+            out int present,
+            out int missing,
+            out int foreign)
+        {
+            present = 0;
+            missing = 0;
+            foreign = 0;
+
+            var variation = variations[index];
+            if (variation == null)
+            {
+                missing = 1;
+                return;
+            }
+
+            CountRequiredPresence(variation.prefabPath, ref present, ref missing);
+            var extras = variation.simultaneousPrefabPaths;
+            if (extras != null)
+            {
+                for (int i = 0; i < extras.Length; i++)
+                {
+                    if (PathsEqual(extras[i], variation.prefabPath))
+                        continue;
+                    CountRequiredPresence(extras[i], ref present, ref missing);
+                }
+            }
+
+            for (int i = 0; i < variations.Count; i++)
+            {
+                var other = variations[i];
+                if (other == null || other == variation || other.id != variation.id)
+                    continue;
+                if (HasPresentPrefabUnusedBy(variation, other))
+                    foreign++;
+            }
+        }
+
+        void CountRequiredPresence(string path, ref int present, ref int missing)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                missing++;
+                return;
+            }
+
+            if (IsPresentPrefab(path))
+                present++;
+            else
+                missing++;
+        }
+
+        static int CountRequiredPrefabs(Variation variation)
+        {
+            if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
+                return 0;
+
+            int count = 1;
+            var extras = variation.simultaneousPrefabPaths;
+            if (extras == null)
+                return count;
+
+            for (int i = 0; i < extras.Length; i++)
+            {
+                if (string.IsNullOrEmpty(extras[i]) || PathsEqual(extras[i], variation.prefabPath))
+                    continue;
+                count++;
+            }
+
+            return count;
+        }
+
+        bool IsPresentPrefab(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return false;
+
+            return _presentPrefabPaths.Contains(path.Replace('\\', '/'));
+        }
+
+        /// <summary>
+        /// 初回表示で選ぶインデックス。priority が大きいものを優先し、同値なら一覧の先を選ぶ。
+        /// </summary>
+        static int IndexOfHighestPriority(List<Variation> variations)
+        {
+            if (variations == null || variations.Count == 0)
+                return -1;
+
+            int bestIndex = 0;
+            int bestPriority = variations[0] != null ? variations[0].priority : int.MinValue;
+            for (int i = 1; i < variations.Count; i++)
+            {
+                var variation = variations[i];
+                if (variation == null)
+                    continue;
+                if (variation.priority > bestPriority)
+                {
+                    bestIndex = i;
+                    bestPriority = variation.priority;
+                }
+            }
+
+            return bestIndex;
+        }
+
+        static bool PathsEqual(string a, string b)
+        {
+            if (string.IsNullOrEmpty(a) || string.IsNullOrEmpty(b))
+                return false;
+
+            return string.Equals(
+                a.Replace('\\', '/'),
+                b.Replace('\\', '/'),
+                StringComparison.OrdinalIgnoreCase);
         }
 
         void AfterHierarchyChanged(VRCAvatarDescriptor avatar, GameObject instance)

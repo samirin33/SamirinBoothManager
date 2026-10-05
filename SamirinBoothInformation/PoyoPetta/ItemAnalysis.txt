@@ -1,0 +1,17 @@
+﻿# Item Analysis
+Source: Assets/samirin33/PoypPetta
+Output: Assets/samirin33/SamirinBoothInformation/PoyoPetta
+Generated: 2026-10-06 02:48:09
+
+PoyoPetta
+Assets/samirin33/PoypPetta/Prefab/PoyoPetta.prefab
+ポリゴン数: 2640
+頂点数: 2546
+マテリアル数: 1
+マテリアルスロット数: 1
+テクスチャサイズ: 4.75 MB
+PhysBone数: 1
+PhysBoneコライダー数: 0
+ライト数: 0
+カメラ数: 0
+同期パラメーター: 19 ビット

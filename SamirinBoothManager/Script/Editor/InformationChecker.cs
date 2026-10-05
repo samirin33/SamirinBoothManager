@@ -46,6 +46,25 @@ public static class InformationChecker
         SessionState.SetBool(PrefsSessionCheckedKey, true);
     }
 
+    public static bool IsSessionChecked =>
+        SessionState.GetBool(PrefsSessionCheckedKey, false);
+
+    /// <summary>
+    /// 起動時チェック済みフラグを消す。Unity を再起動せずに自動チェックをやり直すとき用。
+    /// </summary>
+    public static void ResetSessionCache()
+    {
+        SessionState.EraseBool(PrefsSessionCheckedKey);
+    }
+
+    public static void ResetSessionCacheFromMenu()
+    {
+        ResetSessionCache();
+        Debug.Log("[InformationChecker] セッションのチェック済みキャッシュをリセットしました。");
+        if (AutoCheckEnabled)
+            ScheduleAutoCheckIfNeeded();
+    }
+
     static InformationChecker()
     {
         EditorApplication.delayCall += OnEditorReady;
@@ -509,6 +528,25 @@ static class InformationCheckerPreferences
                 {
                     if (GUILayout.Button("今すぐチェックを実行", GUILayout.Height(28)))
                         InformationChecker.RunManually();
+                }
+
+                EditorGUILayout.Space(12);
+                EditorGUILayout.LabelField("デバッグ", EditorStyles.boldLabel);
+                EditorGUILayout.HelpBox(
+                    "この Unity セッションで情報チェックを一度済ませた記録です。リセットすると、自動チェックが有効な場合はすぐに再取得します。",
+                    MessageType.None);
+                EditorGUILayout.LabelField(
+                    "チェック済みキャッシュ",
+                    InformationChecker.IsSessionChecked ? "あり" : "なし");
+                if (GUILayout.Button("情報チェックのキャッシュをリセット", GUILayout.Height(28)))
+                {
+                    InformationChecker.ResetSessionCacheFromMenu();
+                    EditorUtility.DisplayDialog(
+                        "InformationChecker",
+                        InformationChecker.AutoCheckEnabled
+                            ? "チェック済みキャッシュをリセットし、再チェックを開始しました。"
+                            : "チェック済みキャッシュをリセットしました。自動チェックはオフです。",
+                        "OK");
                 }
 
                 EditorGUILayout.Space(12);

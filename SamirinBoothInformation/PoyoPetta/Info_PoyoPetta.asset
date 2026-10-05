@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc0c32a0775ca814e942d5f75ea84cf7, type: 3}
+  m_Name: Info_PoyoPetta
+  m_EditorClassIdentifier: 
+  name: "\u307D\u3088\u307A\u3063\u305F"
+  description: "\u307D\u3088\u307D\u3088\u3084\u308F\u3089\u304B\uFF01\u307A\u305F\u307A\u305F\u30B3\u30DF\u30AB\u30EB\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\uFF01"
+  images: []
+  category: 1
+  majorVertion: 1
+  minorVertion: 0
+  patchVertion: 0
+  releaseDate:
+    year: 2026
+    month: 10
+    day: 6
+  updateDate:
+    year: 2026
+    month: 10
+    day: 6
+  updateRemind:
+    major: 1
+    minor: 0
+    patch: 0
+  updateInfos:
+  - updateName: ver1.0.0
+    updateDescription: "\u516C\u958B\uFF01"
+    updateDate:
+      year: 2026
+      month: 10
+      day: 6
+  url: https://samirin33-vrc.booth.pm/items/
+  price: "650\u5186"
+  salePrice: 
+  newItemLabel: 1
+  youtubeUrl: 
+  platformInfo:
+    forPCVR: 1
+    forPCDesktop: 1
+    forQuest: 1
+    forAndroid_iOS: 1
+  additionalInfos: []
+  howToSetupInfos: []
+  variations:
+  - variationName: "\u307D\u3088\u307A\u3063\u305F \u901A\u5E38\u7248"
+    variationDescription: "\u307D\u3088\u307A\u3063\u305FPC\u7248\u3067\u3059\uFF01"
+    prefabPath: Assets/samirin33/PoypPetta/Prefab/PoyoPetta.prefab
+    id: 0
+    simultaneousPrefabPaths: []
+    priority: 0
+  - variationName: "\u307D\u3088\u307A\u3063\u305F_\u30E2\u30D0\u30A4\u30EB\u5BFE\u5FDC"
+    variationDescription: "\u30E2\u30D0\u30A4\u30EB\u5BFE\u5FDC\u7248\u3067\u3059\uFF01\u30A8\u30D5\u30A7\u30AF\u30C8\u3068\u52B9\u679C\u97F3\u306F\u3042\u308A\u307E\u305B\u3093\u3002"
+    prefabPath: Assets/samirin33/PoypPetta/Prefab/PoyoPetta_Mobile.prefab
+    id: 0
+    simultaneousPrefabPaths: []
+    priority: 0
+  - variationName: "\u307D\u3088\u307A\u3063\u305F \u30D7\u30E9\u30B9\uFF01"
+    variationDescription: "\u652F\u63F4\u7248 \u307D\u3088\u307A\u3063\u305FPC\u7248\u306B\u30A8\u30D5\u30A7\u30AF\u30C8\u304C\u8FFD\u52A0\u3055\u308C\u307E\u3059\uFF01"
+    prefabPath: Assets/samirin33/PoypPetta/Prefab/PoyoPetta.prefab
+    id: 0
+    simultaneousPrefabPaths:
+    - Assets/samirin33/PoyoPetta_Plus/Prefab/PoyoPetta_Plus.prefab
+    priority: 1
+  relatedAssets: []
+  folderName: PoypPetta
+  visible: 0

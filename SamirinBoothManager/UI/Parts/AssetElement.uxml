@@ -4,7 +4,7 @@
         <ui:VisualElement name="Background" class="SBM_ItemBackground" style="overflow: hidden;">
             <ui:VisualElement name="Images" style="width: 100%; flex-grow: 1; overflow: hidden;">
                 <ui:VisualElement name="Scroll" style="width: 100%; height: 100%; flex-grow: 1; position: relative; flex-shrink: 0; translate: 0 0;" />
-                <ui:VisualElement name="NewItemLabel" style="position: absolute; width: 100%; height: 12px; background-color: rgb(91, 202, 92); bottom: 0; justify-content: center;">
+                <ui:VisualElement name="NewItemLabel" style="position: absolute; width: 100%; height: 16px; background-color: rgb(91, 202, 92); bottom: 0; justify-content: center;">
                     <ui:Label tabindex="-1" text="NEW!!!" parse-escape-sequences="true" display-tooltip-when-elided="true" style="font-size: 12px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
                 </ui:VisualElement>
             </ui:VisualElement>

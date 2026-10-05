@@ -31,7 +31,6 @@ public class SamirinBoothAssetInfo : ScriptableObject
     public Variation[] variations;
     public SamirinBoothAssetInfo[] relatedAssets;
     public string folderName;
-    public SamirinBoothAssetInfo rootAsset;
     public bool visible = true;
 
     /// <summary>
@@ -78,6 +77,16 @@ public class Variation
     public string variationDescription;
     public string prefabPath;
     public int id;
+    /// <summary>
+    /// このバリエーションを配置するとき、一緒に置くプレハブのパス。
+    /// 同じ ID の別バリエーションへ切り替えたとき、切り替える前の同時配置プレハブは削除する。
+    /// </summary>
+    public string[] simultaneousPrefabPaths;
+    /// <summary>
+    /// 詳細を開いた直後にドロップダウンで選ぶ優先度。大きいほど優先。
+    /// 一覧の並び順とは無関係。同じ値のときは一覧で先にあるものを選ぶ。
+    /// </summary>
+    public int priority;
 }
 
 [System.Serializable]

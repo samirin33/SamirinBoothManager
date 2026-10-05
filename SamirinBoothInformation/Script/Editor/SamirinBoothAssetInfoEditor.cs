@@ -29,7 +29,6 @@ public class SamirinBoothAssetInfoEditor : Editor
     SerializedProperty _variations;
     SerializedProperty _relatedAssets;
     SerializedProperty _folderName;
-    SerializedProperty _rootAsset;
     SerializedProperty _visible;
 
     ReorderableList _imagesList;
@@ -77,7 +76,6 @@ public class SamirinBoothAssetInfoEditor : Editor
         _variations = serializedObject.FindProperty("variations");
         _relatedAssets = serializedObject.FindProperty("relatedAssets");
         _folderName = serializedObject.FindProperty("folderName");
-        _rootAsset = serializedObject.FindProperty("rootAsset");
         _visible = serializedObject.FindProperty("visible");
         _imagesList = CreateSpriteList(_images, "画像一覧");
         _updateInfosList = CreateUpdateInfoList(_updateInfos);
@@ -123,11 +121,6 @@ public class SamirinBoothAssetInfoEditor : Editor
         {
             EditorGUILayout.PropertyField(_name, new GUIContent("アセット名"));
             EditorGUILayout.PropertyField(_folderName, new GUIContent("フォルダ名"));
-            EditorGUILayout.PropertyField(
-                _rootAsset,
-                new GUIContent(
-                    "ルートアセット",
-                    "配置時に自動で一緒に置くアセット。解除時は残し、ルート側を解除すると依存アセットも解除します。"));
 
             if (_category != null)
             {
@@ -455,15 +448,29 @@ public class SamirinBoothAssetInfoEditor : Editor
         return list;
     }
 
+    const float VariationRowSpacing = 2f;
+
+    static float VariationRowHeight => EditorGUIUtility.singleLineHeight + VariationRowSpacing;
+
+    static float GetVariationElementHeight(SerializedProperty element)
+    {
+        var simultaneous = element.FindPropertyRelative("simultaneousPrefabPaths");
+        int extraCount = simultaneous != null ? simultaneous.arraySize : 0;
+        // 名前 / 説明 / 優先度 / Prefab / パス / 同時配置ヘッダー + 各プレハブ（Object / パス）
+        int rows = 6 + extraCount * 2;
+        return 4f + rows * VariationRowHeight + 6f;
+    }
+
     ReorderableList CreateVariationList(SerializedProperty property)
     {
         var list = new ReorderableList(serializedObject, property, true, true, true, true);
         list.drawHeaderCallback = rect => EditorGUI.LabelField(rect, "バリエーション一覧");
-        list.elementHeight = EditorGUIUtility.singleLineHeight * 4 + 14;
+        list.elementHeightCallback = index =>
+            GetVariationElementHeight(property.GetArrayElementAtIndex(index));
         list.drawElementCallback = (rect, index, isActive, isFocused) =>
         {
             var element = property.GetArrayElementAtIndex(index);
-            float y = rect.y + 2;
+            float y = rect.y + 2f;
             float line = EditorGUIUtility.singleLineHeight;
             float width = rect.width;
 
@@ -471,23 +478,101 @@ public class SamirinBoothAssetInfoEditor : Editor
                 new Rect(rect.x, y, width, line),
                 element.FindPropertyRelative("variationName"),
                 new GUIContent("名前"));
-            y += line + 2;
+            y += VariationRowHeight;
 
             EditorGUI.PropertyField(
                 new Rect(rect.x, y, width, line),
                 element.FindPropertyRelative("variationDescription"),
                 new GUIContent("説明"));
-            y += line + 2;
+            y += VariationRowHeight;
 
-            var pathProp = element.FindPropertyRelative("prefabPath");
+            EditorGUI.PropertyField(
+                new Rect(rect.x, y, width, line),
+                element.FindPropertyRelative("priority"),
+                new GUIContent(
+                    "初期選択の優先度",
+                    "詳細を開いたとき、この値が最も大きいバリエーションを選択します。一覧の並び順とは別です。同じ値のときは一覧で先にあるものを選びます。"));
+            y += VariationRowHeight;
+
+            y = DrawPrefabPathFields(
+                new Rect(rect.x, y, width, VariationRowHeight * 2f),
+                element.FindPropertyRelative("prefabPath"),
+                "Prefab");
+
+            y = DrawSimultaneousPrefabs(
+                new Rect(rect.x, y, width, rect.yMax - y),
+                element.FindPropertyRelative("simultaneousPrefabPaths"));
+        };
+        return list;
+    }
+
+    static float DrawPrefabPathFields(Rect rect, SerializedProperty pathProp, string objectLabel)
+    {
+        float line = EditorGUIUtility.singleLineHeight;
+        float y = rect.y;
+        float width = rect.width;
+
+        var currentPrefab = string.IsNullOrEmpty(pathProp.stringValue)
+            ? null
+            : AssetDatabase.LoadAssetAtPath<GameObject>(pathProp.stringValue);
+
+        EditorGUI.BeginChangeCheck();
+        var newPrefab = (GameObject)EditorGUI.ObjectField(
+            new Rect(rect.x, y, width, line),
+            objectLabel,
+            currentPrefab,
+            typeof(GameObject),
+            false);
+        if (EditorGUI.EndChangeCheck())
+        {
+            pathProp.stringValue = newPrefab != null
+                ? AssetDatabase.GetAssetPath(newPrefab)
+                : string.Empty;
+        }
+
+        y += VariationRowHeight;
+        EditorGUI.BeginDisabledGroup(true);
+        EditorGUI.TextField(new Rect(rect.x, y, width, line), "パス", pathProp.stringValue);
+        EditorGUI.EndDisabledGroup();
+        y += VariationRowHeight;
+        return y;
+    }
+
+    float DrawSimultaneousPrefabs(Rect rect, SerializedProperty pathsProp)
+    {
+        if (pathsProp == null)
+            return rect.y;
+
+        float line = EditorGUIUtility.singleLineHeight;
+        float y = rect.y;
+        float width = rect.width;
+
+        EditorGUI.LabelField(
+            new Rect(rect.x, y, width - 70f, line),
+            new GUIContent(
+                $"同時配置 ({pathsProp.arraySize})",
+                "このバリエーションを置くとき一緒に配置するプレハブ。別バリエーションへ切り替えたときは、切り替える前の同時配置プレハブを削除します。"));
+
+        if (GUI.Button(new Rect(rect.x + width - 66f, y, 66f, line), "追加"))
+        {
+            pathsProp.arraySize++;
+            pathsProp.GetArrayElementAtIndex(pathsProp.arraySize - 1).stringValue = string.Empty;
+        }
+
+        y += VariationRowHeight;
+
+        for (int i = 0; i < pathsProp.arraySize; i++)
+        {
+            var pathProp = pathsProp.GetArrayElementAtIndex(i);
+            float fieldWidth = width - 28f;
             var currentPrefab = string.IsNullOrEmpty(pathProp.stringValue)
                 ? null
                 : AssetDatabase.LoadAssetAtPath<GameObject>(pathProp.stringValue);
 
             EditorGUI.BeginChangeCheck();
             var newPrefab = (GameObject)EditorGUI.ObjectField(
-                new Rect(rect.x, y, width, line),
-                "Prefab",
+                new Rect(rect.x, y, fieldWidth, line),
+                $"Prefab {i + 1}",
                 currentPrefab,
                 typeof(GameObject),
                 false);
@@ -498,12 +583,20 @@ public class SamirinBoothAssetInfoEditor : Editor
                     : string.Empty;
             }
 
-            y += line + 2;
+            if (GUI.Button(new Rect(rect.x + fieldWidth + 4f, y, 24f, line), "−"))
+            {
+                pathsProp.DeleteArrayElementAtIndex(i);
+                break;
+            }
+
+            y += VariationRowHeight;
             EditorGUI.BeginDisabledGroup(true);
             EditorGUI.TextField(new Rect(rect.x, y, width, line), "パス", pathProp.stringValue);
             EditorGUI.EndDisabledGroup();
-        };
-        return list;
+            y += VariationRowHeight;
+        }
+
+        return y;
     }
 
     ReorderableList CreateRelatedAssetsList(SerializedProperty property)

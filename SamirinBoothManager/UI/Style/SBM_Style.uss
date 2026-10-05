@@ -12,8 +12,6 @@
     white-space: nowrap;
     text-overflow: clip;
     overflow: hidden;
-    /* Font は SamirinBoothFontUtil が FontAsset として適用する（-unity-font 直指定は Dropdown で Atlas Missing の原因になる） */
-    /* 影を強くすると環境によって文字がボヤけて見えるため弱めにする */
     text-shadow: 0.5px 0.5px 1px rgba(20, 19, 37, 0.55);
 }
 
@@ -45,7 +43,6 @@
     transition-timing-function: ease-out-sine;
 }
 
-/* SBM_Button 本体は横長時に見切れないよう C# で scale を制御する */
 .SBM_Button:hover {
     scale: 1.1 1.1;
 }
@@ -54,7 +51,10 @@
     scale: 0.9 0.9;
 }
 
-.SBM_Button.SBM_ButtonManaged:hover,
+.SBM_Button.SBM_ButtonManaged:hover {
+    scale: 1 1;
+}
+
 .SBM_Button.SBM_ButtonManaged:active {
     scale: 1 1;
 }

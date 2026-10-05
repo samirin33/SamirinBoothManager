@@ -23,15 +23,15 @@ MonoBehaviour:
   category: 1
   majorVertion: 1
   minorVertion: 0
-  patchVertion: 0
+  patchVertion: 2
   releaseDate:
     year: 2026
     month: 9
     day: 16
   updateDate:
     year: 2026
-    month: 9
-    day: 26
+    month: 10
+    day: 6
   updateRemind:
     major: 1
     minor: 0
@@ -58,7 +58,7 @@ MonoBehaviour:
   url: https://samirin33-vrc.booth.pm/items/8851531
   price: "650\u5186"
   salePrice: 
-  newItemLabel: 1
+  newItemLabel: 0
   youtubeUrl: https://www.youtube.com/watch?v=PqDlb1W3Tu0
   platformInfo:
     forPCVR: 1

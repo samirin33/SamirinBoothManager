@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -207,6 +208,71 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                 instance.transform.SetSiblingIndex(siblingIndex);
 
             return instance;
+        }
+
+        /// <summary>
+        /// プレファブインスタンスのルートだけを集め、アセットパスを results に入れる。
+        /// avatarOnly のときは指定アバターの子だけを見る。
+        /// </summary>
+        public static void CollectPrefabInstanceRootPaths(
+            ISet<string> results,
+            VRCAvatarDescriptor avatar,
+            bool avatarOnly)
+        {
+            if (results == null)
+                return;
+
+            results.Clear();
+            if (avatarOnly)
+            {
+                if (avatar != null)
+                    CollectPrefabInstanceRootPaths(avatar.transform, results, skipRoot: true);
+                return;
+            }
+
+            var scene = SceneManager.GetActiveScene();
+            if (!scene.IsValid() || !scene.isLoaded)
+                return;
+
+            var roots = scene.GetRootGameObjects();
+            for (int i = 0; i < roots.Length; i++)
+            {
+                if (roots[i] != null)
+                    CollectPrefabInstanceRootPaths(roots[i].transform, results, skipRoot: false);
+            }
+        }
+
+        static void CollectPrefabInstanceRootPaths(Transform scope, ISet<string> results, bool skipRoot)
+        {
+            if (scope == null)
+                return;
+
+            var transforms = scope.GetComponentsInChildren<Transform>(true);
+            for (int i = 0; i < transforms.Length; i++)
+            {
+                var current = transforms[i];
+                if (current == null)
+                    continue;
+                if (skipRoot && current == scope)
+                    continue;
+
+                var go = current.gameObject;
+                if (PrefabUtility.GetNearestPrefabInstanceRoot(go) != go)
+                    continue;
+
+                var path = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(go);
+                if (string.IsNullOrEmpty(path))
+                {
+                    var source = PrefabUtility.GetCorrespondingObjectFromSource(go);
+                    if (source != null)
+                        path = AssetDatabase.GetAssetPath(source);
+                }
+
+                if (string.IsNullOrEmpty(path))
+                    continue;
+
+                results.Add(path.Replace('\\', '/'));
+            }
         }
 
         /// <summary>

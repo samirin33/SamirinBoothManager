@@ -47,6 +47,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         readonly VisualElement _otherContents;
 
         readonly List<SamirinBoothAssetInfo> _infos = new List<SamirinBoothAssetInfo>();
+        bool _includeHiddenItems;
 
         /// <summary>一覧の AssetElement がクリックされたとき。</summary>
         public event Action<SamirinBoothAssetInfo> AssetClicked;
@@ -147,6 +148,16 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             ReloadInfosAndRebuild();
         }
 
+        public void SetIncludeHiddenItems(bool include)
+        {
+            if (_includeHiddenItems == include)
+                return;
+
+            _includeHiddenItems = include;
+            if (panel != null)
+                ReloadInfosAndRebuild();
+        }
+
         public void ReloadInfosAndRebuild()
         {
             LoadInfos();
@@ -184,8 +195,12 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                     continue;
 
                 var info = AssetDatabase.LoadAssetAtPath<SamirinBoothAssetInfo>(path);
-                if (info != null && info.visible)
-                    _infos.Add(info);
+                if (info == null)
+                    continue;
+                if (!info.visible && !_includeHiddenItems)
+                    continue;
+
+                _infos.Add(info);
             }
         }
 

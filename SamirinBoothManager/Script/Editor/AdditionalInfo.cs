@@ -311,6 +311,23 @@ namespace samirin33.SamirinBoothManager.UI.Parts
                     return instance;
             }
 
+            for (int i = 0; i < variations.Length; i++)
+            {
+                var extras = variations[i]?.simultaneousPrefabPaths;
+                if (extras == null)
+                    continue;
+
+                for (int p = 0; p < extras.Length; p++)
+                {
+                    if (string.IsNullOrEmpty(extras[p]))
+                        continue;
+
+                    var instance = SBM_Header.FindPrefabInstance(avatar, extras[p]);
+                    if (instance != null)
+                        return instance;
+                }
+            }
+
             return null;
         }
 

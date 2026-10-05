@@ -158,11 +158,7 @@ namespace samirin33.SamirinBoothManager.UI.Parts
             {
                 for (int i = 0; i < variations.Length; i++)
                 {
-                    var variation = variations[i];
-                    if (variation == null || string.IsNullOrEmpty(variation.prefabPath))
-                        continue;
-
-                    if (SBM_Header.AvatarContainsPrefab(avatar, variation.prefabPath))
+                    if (VariationIsOnAvatar(avatar, variations[i]))
                     {
                         attached = true;
                         break;
@@ -176,6 +172,29 @@ namespace samirin33.SamirinBoothManager.UI.Parts
         public void SetAttached(bool attached)
         {
             SetDisplay(_attachedLabel, attached);
+        }
+
+        static bool VariationIsOnAvatar(VRCAvatarDescriptor avatar, Variation variation)
+        {
+            if (avatar == null || variation == null)
+                return false;
+
+            if (!string.IsNullOrEmpty(variation.prefabPath)
+                && SBM_Header.AvatarContainsPrefab(avatar, variation.prefabPath))
+                return true;
+
+            var extras = variation.simultaneousPrefabPaths;
+            if (extras == null)
+                return false;
+
+            for (int i = 0; i < extras.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(extras[i])
+                    && SBM_Header.AvatarContainsPrefab(avatar, extras[i]))
+                    return true;
+            }
+
+            return false;
         }
 
         void BindImages(Sprite[] images)

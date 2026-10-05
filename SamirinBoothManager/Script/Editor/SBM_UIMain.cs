@@ -3,14 +3,22 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using samirin33.SamirinBoothManager.UI.Parts;
 
-public class SBM_UIMain : EditorWindow
+public class SBM_UIMain : EditorWindow, IHasCustomMenu
 {
     const string MainUxmlPath = "Assets/samirin33/SamirinBoothManager/UI/SBM_Main.uxml";
     /// <summary>SamirinBoothManagerInstaller がインストール完了後にウィンドウを開くためのフラグ。</summary>
     public const string PrefsOpenAfterInstallKey = "samirin33.SamirinBoothManagerInstaller.OpenWindow";
 
+    const string ShowHiddenItemsKey = "samirin33.SBM.ShowHiddenItems";
+
     SBM_GridScroll _gridScroll;
     SamirinBoothAssetInfo _pendingFocus;
+
+    static bool ShowHiddenItems
+    {
+        get => SessionState.GetBool(ShowHiddenItemsKey, false);
+        set => SessionState.SetBool(ShowHiddenItemsKey, value);
+    }
 
     [InitializeOnLoadMethod]
     static void OpenAfterInstallIfRequested()
@@ -61,6 +69,7 @@ public class SBM_UIMain : EditorWindow
         visualTree.CloneTree(rootVisualElement);
         SamirinBoothFontUtil.ApplySbmTextFonts(rootVisualElement);
 
+        ApplyShowHiddenItems();
         _gridScroll = SBM_GridScroll.Attach(rootVisualElement);
         _gridScroll?.Start();
         ApplyPendingFocus();
@@ -84,5 +93,40 @@ public class SBM_UIMain : EditorWindow
     {
         _gridScroll?.Stop();
         _gridScroll = null;
+    }
+
+    public void AddItemsToMenu(GenericMenu menu)
+    {
+        menu.AddItem(new GUIContent("非表示のアイテムを表示する"), ShowHiddenItems, ToggleShowHiddenItems);
+        menu.AddItem(new GUIContent("イベントフラグをリセット"), false, ResetVariationCallouts);
+    }
+
+    void ToggleShowHiddenItems()
+    {
+        ShowHiddenItems = !ShowHiddenItems;
+        ApplyShowHiddenItems();
+    }
+
+    void ApplyShowHiddenItems()
+    {
+        if (rootVisualElement == null)
+            return;
+
+        bool showHidden = ShowHiddenItems;
+        rootVisualElement.Query<AssetList>().ForEach(list => list.SetIncludeHiddenItems(showHidden));
+    }
+
+    void ResetVariationCallouts()
+    {
+        if (rootVisualElement == null)
+            return;
+
+        int count = 0;
+        rootVisualElement.Query<AttachPanel>().ForEach(panel =>
+        {
+            panel.ResetCalloutForDebug();
+            count++;
+        });
+        Debug.Log($"[SBM] バリエーション吹き出しの表示フラグをリセットしました。対象パネル: {count}");
     }
 }
