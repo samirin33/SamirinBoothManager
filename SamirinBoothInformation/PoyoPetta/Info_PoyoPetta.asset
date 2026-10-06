@@ -14,7 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: "\u307D\u3088\u307A\u3063\u305F"
   description: "\u307D\u3088\u307D\u3088\u3084\u308F\u3089\u304B\uFF01\u307A\u305F\u307A\u305F\u30B3\u30DF\u30AB\u30EB\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\uFF01"
-  images: []
+  images:
+  - {fileID: 21300000, guid: 2c78a2f115439ba479d190573dc627f3, type: 3}
+  - {fileID: 21300000, guid: 3445be4af502f6645939d09f246f1d16, type: 3}
+  - {fileID: 21300000, guid: a266c7389b585c14985b0dc317906e50, type: 3}
+  - {fileID: 21300000, guid: d8399420eeadcdb4faa5b6669dfc315a, type: 3}
+  - {fileID: 21300000, guid: 7fb0564afd9be764ca0a4c0a52657204, type: 3}
   category: 1
   majorVertion: 1
   minorVertion: 0
@@ -38,18 +43,49 @@ MonoBehaviour:
       year: 2026
       month: 10
       day: 6
-  url: https://samirin33-vrc.booth.pm/items/
-  price: "650\u5186"
+  url: https://samirin33-vrc.booth.pm/items/8946932
+  price: "650\u5186~"
   salePrice: 
   newItemLabel: 1
-  youtubeUrl: 
+  youtubeUrl: https://youtu.be/8esMBD-1esk
   platformInfo:
     forPCVR: 1
     forPCDesktop: 1
     forQuest: 1
     forAndroid_iOS: 1
-  additionalInfos: []
-  howToSetupInfos: []
+  additionalInfos:
+  - title: "\u307D\u3088\u307D\u3088\u30B8\u30E3\u30F3\u30D7\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3"
+    description: "\u30B8\u30E3\u30F3\u30D7\u3057\u305F\u6642\u306E\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u3084\u52B9\u679C\u97F3\u304C\u8FFD\u52A0\u3055\u308C\u307E\u3059\uFF01"
+    image: {fileID: 21300000, guid: 3445be4af502f6645939d09f246f1d16, type: 3}
+    paths: []
+  - title: "\u307A\u3063\u305F\u3093\u3053\uFF01"
+    description: "\u30AB\u30D9\u3084\u30E6\u30AB\u3001\u306F\u305F\u307E\u305F\u30D2\u30C8\u306B\u52E2\u3044\u3088\u304F\u3076\u3064\u304B\u308B\u3068\u307A\u3063\u305F\u3093\u3053\u306B\u306A\u308A\u307E\u3059\uFF01"
+    image: {fileID: 21300000, guid: a266c7389b585c14985b0dc317906e50, type: 3}
+    paths: []
+  - title: "\u30D4\u30B3\u30CF\u30F3\uFF01"
+    description: "\u30D4\u30B3\u30D4\u30B3\u30CF\u30F3\u30DE\u30FC\u4ED8\u304D\uFF01\u3053\u308C\u3067\u53CB\u9054\u3092\u30D4\u30B3\u30D4\u30B3...\u3048\u3001\u81EA\u5206\u3082\uFF1F"
+    image: {fileID: 21300000, guid: d8399420eeadcdb4faa5b6669dfc315a, type: 3}
+    paths: []
+  - title: "\u697D\u3005\u30BB\u30C3\u30C8\u30A2\u30C3\u30D7\u3001\u5E45\u5E83\u3044\u5BFE\u5FDC\uFF01"
+    description: "MA&\u72EC\u81EA\u30C4\u30FC\u30EB\u3067\u30BB\u30C3\u30C8\u30A2\u30C3\u30D7\u3092\u5168\u529B\u30B5\u30DD\u30FC\u30C8\uFF01\nQuest,
+      Android, iOS\u3067\u3082\u4F7F\u7528\u3067\u304D\u307E\u3059\uFF01"
+    image: {fileID: 21300000, guid: 7fb0564afd9be764ca0a4c0a52657204, type: 3}
+    paths: []
+  howToSetupInfos:
+  - title: "\u30CF\u30F3\u30DE\u30FC\u306E\u4F4D\u7F6E\u8ABF\u6574"
+    description: "\u307D\u3088\u3074\u3053\u30CF\u30F3\u30DE\u30FC\u306E\u4F4D\u7F6E\u8ABF\u6574\u306F\u3053\u3053\u304B\u3089\uFF01\n\u307E\u305F\u5229\u304D\u624B\u3092\u5207\u308A\u66FF\u3048\u3089\u308C\u307E\u3059\uFF01"
+    image: {fileID: 0}
+    paths:
+    - title: 
+      path: "\u307D\u3088\u3074\u3053\u30CF\u30F3\u30DE\u30FC\u306E\u4F4D\u7F6E"
+      buttonColor: {r: 1, g: 0.3036384, b: 0.2924527, a: 1}
+  - title: "\u30A2\u30BF\u30DE\u306E\u8ABF\u6574"
+    description: "\u30A2\u30BF\u30DE\u3092\u30DD\u30E8\u3089\u308C\u308B\u5224\u5B9A\u306E\u4F4D\u7F6E\u3068\u5927\u304D\u3055\u306F\u3053\u3053\u304B\u3089\u8ABF\u6574\u3057\u3066\u304F\u3060\u3055\u3044\uFF01"
+    image: {fileID: 0}
+    paths:
+    - title: 
+      path: "\u30A2\u30BF\u30DE\u304C\u53E9\u304B\u308C\u308B\u5224\u5B9A"
+      buttonColor: {r: 1, g: 0.76708525, b: 0.2941177, a: 1}
   variations:
   - variationName: "\u307D\u3088\u307A\u3063\u305F \u901A\u5E38\u7248"
     variationDescription: "\u307D\u3088\u307A\u3063\u305FPC\u7248\u3067\u3059\uFF01"
@@ -72,4 +108,4 @@ MonoBehaviour:
     priority: 1
   relatedAssets: []
   folderName: PoypPetta
-  visible: 0
+  visible: 1
