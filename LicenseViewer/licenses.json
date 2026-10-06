@@ -1,5 +1,5 @@
 {
-    "generatedAt":  "2026-08-02T05:24:07+09:00",
+    "generatedAt":  "2026-10-06T15:01:09+09:00",
     "sourceRoot":  "../SamirinBoothInformation",
     "licenses":  [
                      {
@@ -10,7 +10,27 @@
                          "localPath":  "licenses/DeskPen/VN3License.txt",
                          "sourcePath":  "../SamirinBoothInformation/DeskPen/VN3License.txt",
                          "title":  "DeskPen",
-                         "updatedAt":  "2026-08-02T05:20:39+09:00"
+                         "updatedAt":  "2026-08-05T07:34:46+09:00"
+                     },
+                     {
+                         "id":  "PoyoPetta",
+                         "product":  "PoyoPetta",
+                         "fileName":  "VN3License.txt",
+                         "relativePath":  "PoyoPetta/VN3License.txt",
+                         "localPath":  "licenses/PoyoPetta/VN3License.txt",
+                         "sourcePath":  "../SamirinBoothInformation/PoyoPetta/VN3License.txt",
+                         "title":  "PoyoPetta",
+                         "updatedAt":  "2026-10-05T13:35:48+09:00"
+                     },
+                     {
+                         "id":  "ScaNya",
+                         "product":  "ScaNya",
+                         "fileName":  "VN3License.txt",
+                         "relativePath":  "ScaNya/VN3License.txt",
+                         "localPath":  "licenses/ScaNya/VN3License.txt",
+                         "sourcePath":  "../SamirinBoothInformation/ScaNya/VN3License.txt",
+                         "title":  "ScaNya",
+                         "updatedAt":  "2026-09-15T08:22:48+09:00"
                      }
                  ]
 }
