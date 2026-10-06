@@ -35,7 +35,7 @@ public class SBM_UIMain : EditorWindow, IHasCustomMenu
         };
     }
 
-    [MenuItem("samirin33/Samirin's Item Center", false, 500)]
+    [MenuItem("samirin33/samirin33's アイテムセンター", false, 500)]
     public static void ShowWindow()
     {
         ShowWindowAndFocus(null);
@@ -44,7 +44,7 @@ public class SBM_UIMain : EditorWindow, IHasCustomMenu
     public static void ShowWindowAndFocus(SamirinBoothAssetInfo info)
     {
         var window = GetWindow<SBM_UIMain>();
-        window.titleContent = new GUIContent("Samirin's Item Center");
+        window.titleContent = new GUIContent("samirin33's アイテムセンター");
         window.minSize = new Vector2(600, 800);
         window._pendingFocus = info;
         window.Show();

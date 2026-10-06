@@ -20,7 +20,7 @@ public class SBM_UpdateRemind : EditorWindow
     /// <summary>コンパイルを挟んでもトグル状態を保つ。</summary>
     [SerializeField] bool _ignoreCurrentVersions;
 
-    [MenuItem("samirin33/アップデートの確認", false, 501)]
+    [MenuItem("samirin33/アイテムのアップデートを確認", false, 521)]
     public static async void ShowFromMenu()
     {
         // まず現在の情報で開き、続けて最新情報を取得して一覧を更新する
