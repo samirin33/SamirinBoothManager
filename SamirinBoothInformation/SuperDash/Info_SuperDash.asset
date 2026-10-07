@@ -121,7 +121,7 @@ MonoBehaviour:
     image: {fileID: 0}
     paths: []
   variations: []
-  relatedAssets: []
+  relatedAssets:
+  - {fileID: 11400000, guid: 673f366910222ee4ea40a154c1d85d58, type: 2}
   folderName: SuperDash
-  rootAsset: {fileID: 0}
   visible: 1

@@ -23,7 +23,7 @@ MonoBehaviour:
   category: 1
   majorVertion: 1
   minorVertion: 1
-  patchVertion: 2
+  patchVertion: 3
   releaseDate:
     year: 2026
     month: 10
@@ -31,7 +31,7 @@ MonoBehaviour:
   updateDate:
     year: 2026
     month: 10
-    day: 7
+    day: 8
   updateRemind:
     major: 1
     minor: 1
@@ -67,6 +67,12 @@ MonoBehaviour:
       year: 2026
       month: 10
       day: 7
+  - updateName: v1.1.3
+    updateDescription: "FixDummyParameter\u3092\u8FFD\u52A0\n\u4E00\u90E8\u30A2\u30D0\u30BF\u30FC\u3067\u30AE\u30DF\u30C3\u30AF\u304C\u6B63\u3057\u304F\u52D5\u4F5C\u3057\u306A\u3044\u554F\u984C\u3092\u4FEE\u6B63"
+    updateDate:
+      year: 2026
+      month: 10
+      day: 8
   url: https://samirin33-vrc.booth.pm/items/8946932
   price: "650\u5186~"
   salePrice: 
@@ -141,6 +147,7 @@ MonoBehaviour:
     simultaneousPrefabPaths:
     - Assets/samirin33/PoyoPetta_Plus/Prefab/PoyoPetta_Plus.prefab
     priority: 1
-  relatedAssets: []
+  relatedAssets:
+  - {fileID: 11400000, guid: 0597f3c9de335d14e88a8b624495b6a6, type: 2}
   folderName: PoypPetta
   visible: 1
